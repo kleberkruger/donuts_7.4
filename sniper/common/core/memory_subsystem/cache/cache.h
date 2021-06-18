@@ -29,6 +29,9 @@ class Cache : public CacheBase
       CacheSet** m_sets;
       CacheSetInfo* m_set_info;
 
+      // Added by Kleber Kruger
+      CacheBase::ReplacementPolicy m_replacement_policy;
+
       FaultInjector *m_fault_injector;
 
       #ifdef ENABLE_SET_USAGE_HIST
@@ -49,6 +52,9 @@ class Cache : public CacheBase
             FaultInjector *fault_injector = NULL,
             AddressHomeLookup *ahl = NULL);
       ~Cache();
+
+      // Added by Kleber Kruger
+      CacheBase::ReplacementPolicy getReplacementPolicy() { return m_replacement_policy; }
 
       Lock& getSetLock(IntPtr addr);
 

@@ -280,10 +280,23 @@ CacheCntlr::CacheCntlr(MemComponent::component_t mem_component,
       registerStatsMetric(name, core_id, "uncore-totaltime", &m_shmem_perf_totaltime);
       registerStatsMetric(name, core_id, "uncore-requests", &m_shmem_perf_numrequests);
    }
+
+   // NVM Checkpoint Support (Added by Kleber Kruger)
+   if (m_master->m_cache->getReplacementPolicy() == CacheBase::ReplacementPolicy::LRUR)
+   {
+      String filePath = Sim()->getConfig()->getOutputDirectory() + "/checkpoints.csv";
+      if ((checkpoint_logfile = fopen(filePath.c_str(), "w")) == NULL) 
+         fprintf(stderr, "DRAM Log File Error.\n");
+   }
 }
 
 CacheCntlr::~CacheCntlr()
 {
+   // NVM Checkpoint Support (Added by Kleber Kruger)
+   if (m_master->m_cache->getReplacementPolicy() == CacheBase::ReplacementPolicy::LRUR)
+   {
+      fclose(checkpoint_logfile);
+   }
    if (isMasterCache())
    {
       delete m_master;
@@ -1763,6 +1776,66 @@ CacheCntlr::incrementQBSLookupCost()
    atomic_add_subsecondtime(stats.qbs_query_latency, latency);
 }
 
+void printCache(Cache *cache)
+{
+   printf("Cache %s\n--------------------------------------------------\n%5s", cache->getName().c_str(), "");
+   for (UInt32 j = 0; j < cache->getAssociativity(); j++) printf("%2d  ", j);
+   printf("\n--------------------------------------------------\n");
+   
+   for (UInt32 i = 0; i < cache->getNumSets(); i++)
+   {
+      printf("%4d ", i);
+      for (UInt32 j = 0; j < cache->getAssociativity(); j++)
+      {
+         auto cstate = cache->peekBlock(i, j)->getCState();
+         printf("[%c] ", cstate != CacheState::INVALID ? CStateString(cstate) : ' ');
+      }
+      printf("\n");
+   }
+   printf("\n\n");
+}
+
+/*****************************************************************************
+ * NVM Checkpoint Support
+ *****************************************************************************/
+void
+CacheCntlr::checkpoint()
+{
+   // static UInt64 eid = 0; // TODO: Implementar o incremento de épocas e o write buffer
+
+   SubsecondTime now = getShmemPerfModel()->getElapsedTime(ShmemPerfModel::_SIM_THREAD);
+   fprintf(checkpoint_logfile, "%lu\n", now.getNS());
+   
+   printCache(m_master->m_cache);
+
+   for (UInt32 i = 0; i < m_master->m_cache->getNumSets(); i++)
+   {
+      for (UInt32 j = 0; j < m_master->m_cache->getAssociativity(); j++)
+      {
+         CacheBlockInfo *block_info = m_master->m_cache->peekBlock(i, j);
+         if (block_info->getCState() == CacheState::MODIFIED)
+            flushCacheBlock(block_info);
+      }
+   }
+
+   printCache(m_master->m_cache);
+}
+
+void 
+CacheCntlr::flushCacheBlock(CacheBlockInfo *block_info)
+{
+   IntPtr address = m_master->m_cache->tagToAddress(block_info->getTag());
+   Byte data_buf[getCacheBlockSize()];
+
+   printf("flushing: [%lu] ...\n", address);
+
+   updateCacheBlock(address, CacheState::SHARED, Transition::COHERENCY, data_buf, ShmemPerfModel::_SIM_THREAD);
+   getMemoryManager()->sendMsg(PrL1PrL2DramDirectoryMSI::ShmemMsg::CHECKPOINT,
+                               MemComponent::LAST_LEVEL_CACHE, MemComponent::TAG_DIR,
+                               m_core_id_master, getHome(address), /* requester and receiver */
+                               address, data_buf, getCacheBlockSize(),
+                               HitWhere::UNKNOWN, &m_dummy_shmem_perf, ShmemPerfModel::_SIM_THREAD);
+}
 
 /*****************************************************************************
  * handle messages from directory (in network thread)

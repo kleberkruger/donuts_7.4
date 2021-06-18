@@ -170,6 +170,12 @@ DramDirectoryCntlr::handleMsgFromL2Cache(core_id_t sender, ShmemMsg* shmem_msg)
          processWbRepFromL2Cache(sender, shmem_msg);
          break;
 
+      // NVM Checkpoint Support (Added by Kleber Kruger)
+      case ShmemMsg::CHECKPOINT:
+         MYLOG("CHECKPOINT<%u @ %lx", sender, address);
+         processCkptFromLLC(sender, shmem_msg);
+         break;
+
       default:
          LOG_PRINT_ERROR("Unrecognized Shmem Msg Type: %u", shmem_msg_type);
          break;
@@ -1194,6 +1200,31 @@ DramDirectoryCntlr::processWbRepFromL2Cache(core_id_t sender, ShmemMsg* shmem_ms
       LOG_PRINT_ERROR("Should not reach here");
    }
    MYLOG("End @ %lx", address);
+}
+
+/**
+ * Process checkpoint message. Send data to DRAM and set blocks to SHARED.
+ * Added by Kleber Kruger
+ */
+void DramDirectoryCntlr::processCkptFromLLC(core_id_t sender, ShmemMsg *shmem_msg)
+{
+   IntPtr address = shmem_msg->getAddress();
+   SubsecondTime now = getShmemPerfModel()->getElapsedTime(ShmemPerfModel::_SIM_THREAD);
+
+   MYLOG("Start @ %lx", address);
+
+   DirectoryEntry *directory_entry = m_dram_directory_cache->getDirectoryEntry(address);
+   assert(directory_entry);
+
+   DirectoryBlockInfo *directory_block_info = directory_entry->getDirectoryBlockInfo();
+
+   // assert(directory_block_info->getDState() == DirectoryState::MODIFIED);
+   assert(directory_entry->hasSharer(sender));
+
+   directory_entry->setOwner(INVALID_CORE_ID);
+   directory_block_info->setDState(DirectoryState::SHARED);
+
+   sendDataToDram(address, shmem_msg->getRequester(), shmem_msg->getDataBuf(), now);
 }
 
 void

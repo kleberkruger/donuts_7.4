@@ -30,6 +30,7 @@ Cache::Cache(
    {
       m_sets[i] = CacheSet::createCacheSet(cfgname, core_id, replacement_policy, m_cache_type, m_associativity, m_blocksize, m_set_info);
    }
+   m_replacement_policy = CacheSet::parsePolicyType(replacement_policy); // Added by Kleber Kruger
 
    #ifdef ENABLE_SET_USAGE_HIST
    m_set_usage_hist = new UInt64[m_num_sets];
