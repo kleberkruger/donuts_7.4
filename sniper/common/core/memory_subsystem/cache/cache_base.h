@@ -60,6 +60,8 @@ class CacheBase
          SRRIP,
          SRRIP_QBS,
          RANDOM,
+         LRUR,          // (Least Recently Used Read) - Added by Kleber Kruger
+         // LRUR_QBS,   // (Least Recently Used Read) - Added by Kleber Kruger
          NUM_REPLACEMENT_POLICIES
       };
 

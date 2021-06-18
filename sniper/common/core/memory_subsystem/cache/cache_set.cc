@@ -7,6 +7,7 @@
 #include "cache_set_random.h"
 #include "cache_set_round_robin.h"
 #include "cache_set_srrip.h"
+#include "cache_set_lrur.h" // Added by Kleber Kruger
 #include "cache_base.h"
 #include "log.h"
 #include "simulator.h"
@@ -166,9 +167,16 @@ CacheSet::createCacheSet(String cfgname, core_id_t core_id,
       case CacheBase::RANDOM:
          return new CacheSetRandom(cache_type, associativity, blocksize);
 
+      case CacheBase::LRUR:         // Added by Kleber Kruger
+      // case CacheBase::LRUR_QBS:  // Added by Kleber Kruger
+      {
+         return new CacheSetLRUR(cache_type, associativity, blocksize, dynamic_cast<CacheSetInfoLRU *>(set_info),
+                                 getNumQBSAttempts(policy, cfgname, core_id),
+                                 getNumCkptThreshold(policy, cfgname, core_id));
+      }
+
       default:
-         LOG_PRINT_ERROR("Unrecognized Cache Replacement Policy: %i",
-               policy);
+         LOG_PRINT_ERROR("Unrecognized Cache Replacement Policy: %i", policy);
          break;
    }
 
@@ -185,6 +193,8 @@ CacheSet::createCacheSetInfo(String name, String cfgname, core_id_t core_id, Str
       case CacheBase::LRU_QBS:
       case CacheBase::SRRIP:
       case CacheBase::SRRIP_QBS:
+      case CacheBase::LRUR:         // Added by Kleber Kruger
+      // case CacheBase::LRUR_QBS:  // Added by Kleber Kruger
          return new CacheSetInfoLRU(name, cfgname, core_id, associativity, getNumQBSAttempts(policy, cfgname, core_id));
       default:
          return NULL;
@@ -198,10 +208,16 @@ CacheSet::getNumQBSAttempts(CacheBase::ReplacementPolicy policy, String cfgname,
    {
       case CacheBase::LRU_QBS:
       case CacheBase::SRRIP_QBS:
+      // case CacheBase::LRUR_QBS: // Added by Kleber Kruger
          return Sim()->getCfg()->getIntArray(cfgname + "/qbs/attempts", core_id);
       default:
          return 1;
    }
+}
+
+float CacheSet::getNumCkptThreshold(CacheBase::ReplacementPolicy policy, String cfgname, core_id_t core_id)
+{
+   return Sim()->getCfg()->getFloatArray(cfgname + "/checkpoint_threshold", core_id);
 }
 
 CacheBase::ReplacementPolicy
@@ -227,6 +243,10 @@ CacheSet::parsePolicyType(String policy)
       return CacheBase::SRRIP_QBS;
    if (policy == "random")
       return CacheBase::RANDOM;
+   if (policy == "lrur")         // Added by Kleber Kruger
+      return CacheBase::LRUR;
+   // if (policy == "lrur_qbs")  // Added by Kleber Kruger
+      // return CacheBase::LRUR_QBS;
 
    LOG_PRINT_ERROR("Unknown replacement policy %s", policy.c_str());
 }
