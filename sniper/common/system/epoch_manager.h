@@ -1,10 +1,11 @@
 #ifndef EPOCH_MANAGER_H
 #define EPOCH_MANAGER_H
 
-#include "cache_block_info.h"
 #include "subsecond_time.h"
 
 #include <queue>
+
+class CacheBlockInfo;
 
 class EpochManager
 {

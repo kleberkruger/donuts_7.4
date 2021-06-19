@@ -1776,12 +1776,13 @@ void printCache(Cache *cache)
       printf("%4d ", i);
       for (UInt32 j = 0; j < cache->getAssociativity(); j++)
       {
-         auto cstate = cache->peekBlock(i, j)->getCState();
-         printf("[%c] ", cstate != CacheState::INVALID ? CStateString(cstate) : ' ');
+         auto cache_block = cache->peekBlock(i, j);
+         auto cstate = cache_block->getCState();
+         printf("[%c %lu] ", cstate != CacheState::INVALID ? CStateString(cache_block->getCState()) : ' ', cache_block->getEpochID());
       }
       printf("\n");
    }
-   printf("\n\n");
+   printf("\n");
 }
 
 /*****************************************************************************
@@ -1790,6 +1791,8 @@ void printCache(Cache *cache)
 void
 CacheCntlr::checkpoint()
 {
+   printf("Epoch %lu | END\n", EpochManager::getGlobalSystemEID());
+   printCache(m_master->m_cache);
    std::queue<CacheBlockInfo *> dirty_blocks;
 
    for (UInt32 i = 0; i < m_master->m_cache->getNumSets(); i++)
@@ -1801,14 +1804,17 @@ CacheCntlr::checkpoint()
             dirty_blocks.push(block_info);
       }
    }
-   EpochManager::globalCheckpoint(getShmemPerfModel()->getElapsedTime(ShmemPerfModel::_SIM_THREAD), dirty_blocks);
-
    // TODO: Posteriormente, remova esta parte... Passar o CacheCntlr ao EpochManager::globalCheckpoint ???
    while (!dirty_blocks.empty())
    {
       flushCacheBlock(dirty_blocks.front());
       dirty_blocks.pop();
    }
+
+   EpochManager::globalCheckpoint(getShmemPerfModel()->getElapsedTime(ShmemPerfModel::_SIM_THREAD), dirty_blocks);
+   
+   printf("Epoch %lu | START\n", EpochManager::getGlobalSystemEID());
+   printCache(m_master->m_cache);
 }
 
 void 
