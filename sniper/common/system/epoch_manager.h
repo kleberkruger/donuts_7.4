@@ -16,7 +16,7 @@ public:
    UInt64 getSystemEID() const { return m_system_eid; }
    UInt64 getPersistedEID() const { return m_persisted_eid; }
 
-   static void globalCheckpoint(SubsecondTime now, std::queue<CacheBlockInfo *> dirty_blocks);
+   static void globalCheckpoint(std::queue<CacheBlockInfo *> dirty_blocks);
 
    static UInt64 getGlobalSystemEID();
 
@@ -42,7 +42,7 @@ private:
    }
    void timeout();
 
-   void checkpoint(SubsecondTime now, std::queue<CacheBlockInfo *> dirty_blocks);
+   void checkpoint(std::queue<CacheBlockInfo *> dirty_blocks);
 
    UInt64 m_system_eid;
    UInt64 m_persisted_eid;
@@ -51,4 +51,4 @@ private:
    FILE *m_log_file;
 };
 
-#endif
+#endif /* EPOCH_MANAGER_H */

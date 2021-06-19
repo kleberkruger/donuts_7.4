@@ -58,8 +58,7 @@ class CacheBlockInfo
       UInt64 getOwner() const { return m_owner; }
       void setOwner(UInt64 owner) { m_owner = owner; }
 
-      UInt64 getEpochID() const { return m_eid; }        // Added by Kleber Kruger
-      // void setEpochID(const UInt64 eid) { m_eid = eid; } // Added by Kleber Kruger
+      UInt64 getEpochID() const { return m_eid; } // Added by Kleber Kruger
 
       bool hasOption(option_t option) { return m_options & (1 << option); }
       void setOption(option_t option) { m_options |= (1 << option); }

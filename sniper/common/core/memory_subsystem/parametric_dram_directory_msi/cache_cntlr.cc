@@ -9,6 +9,7 @@
 #include "cache_atd.h"
 #include "shmem_perf.h"
 #include "epoch_manager.h" // Added by Kleber Kruger
+#include "donuts_utils.h"  // Added by Kleber Kruger
 
 #include <cstring>
 
@@ -1764,27 +1765,6 @@ CacheCntlr::incrementQBSLookupCost()
    atomic_add_subsecondtime(stats.qbs_query_latency, latency);
 }
 
-// TODO: Remove-me (only to debug)
-void printCache(Cache *cache)
-{
-   printf("Cache %s\n--------------------------------------------------\n%5s", cache->getName().c_str(), "");
-   for (UInt32 j = 0; j < cache->getAssociativity(); j++) printf("%2d  ", j);
-   printf("\n--------------------------------------------------\n");
-
-   for (UInt32 i = 0; i < cache->getNumSets(); i++)
-   {
-      printf("%4d ", i);
-      for (UInt32 j = 0; j < cache->getAssociativity(); j++)
-      {
-         auto cache_block = cache->peekBlock(i, j);
-         auto cstate = cache_block->getCState();
-         printf("[%c %lu] ", cstate != CacheState::INVALID ? CStateString(cache_block->getCState()) : ' ', cache_block->getEpochID());
-      }
-      printf("\n");
-   }
-   printf("\n");
-}
-
 /*****************************************************************************
  * NVM Checkpoint Support
  *****************************************************************************/
@@ -1792,7 +1772,7 @@ void
 CacheCntlr::checkpoint()
 {
    printf("Epoch %lu | END\n", EpochManager::getGlobalSystemEID());
-   printCache(m_master->m_cache);
+   DonutsUtils::printCache(m_master->m_cache);
    std::queue<CacheBlockInfo *> dirty_blocks;
 
    for (UInt32 i = 0; i < m_master->m_cache->getNumSets(); i++)
@@ -1811,10 +1791,10 @@ CacheCntlr::checkpoint()
       dirty_blocks.pop();
    }
 
-   EpochManager::globalCheckpoint(getShmemPerfModel()->getElapsedTime(ShmemPerfModel::_SIM_THREAD), dirty_blocks);
+   EpochManager::globalCheckpoint(dirty_blocks);
    
    printf("Epoch %lu | START\n", EpochManager::getGlobalSystemEID());
-   printCache(m_master->m_cache);
+   DonutsUtils::printCache(m_master->m_cache);
 }
 
 void 
