@@ -21,9 +21,9 @@ EpochManager::~EpochManager() {}
 
 void EpochManager::start()
 {
-   String path = Sim()->getConfig()->getOutputDirectory() + "/checkpoints.csv";
+   String path = Sim()->getConfig()->getOutputDirectory() + "/sim.ckpts.csv";
    if ((m_log_file = fopen(path.c_str(), "w")) == NULL)
-      fprintf(stderr, "Error on creating checkpoints.csv.\n");
+      fprintf(stderr, "Error on creating sim.ckpts.csv\n");
 
    m_system_eid++;
 }

@@ -23,6 +23,7 @@ sim.stats.base
 sim.stats.delta
 sim.stats.db
 sim.stats.sqlite3
+sim.ckpts.csv
 appdebug_port.out
 debug_offset.out
 graphite.out
