@@ -27,6 +27,7 @@
 #include "instruction_tracer.h"
 #include "memory_tracker.h"
 #include "circular_log.h"
+#include "epoch_manager.h" // Added by Kleber Kruger
 
 #include <sstream>
 
@@ -150,6 +151,7 @@ void Simulator::start()
    m_fastforward_performance_manager = FastForwardPerformanceManager::create();
    m_rtn_tracer = RoutineTracer::create();
    m_thread_manager = new ThreadManager();
+   m_epoch_manager = new EpochManager(); // Added by Kleber Kruger
 
    if (Sim()->getCfg()->getBool("traceinput/enabled"))
       m_trace_manager = new TraceManager();
@@ -259,6 +261,7 @@ Simulator::~Simulator()
    delete m_tags_manager;              m_tags_manager = NULL;
    delete m_transport;                 m_transport = NULL;
    delete m_stats_manager;             m_stats_manager = NULL;
+   delete m_epoch_manager;             m_epoch_manager = NULL; // Added by Kleber Kruger
 }
 
 void Simulator::enablePerformanceModels()

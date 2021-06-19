@@ -277,8 +277,6 @@ namespace ParametricDramDirectoryMSI
 
          ShmemPerfModel* m_shmem_perf_model;
 
-         FILE *checkpoint_logfile; // Added by Kleber Kruger
-
          // Core-interfacing stuff
          void accessCache(
                Core::mem_op_t mem_op_type,

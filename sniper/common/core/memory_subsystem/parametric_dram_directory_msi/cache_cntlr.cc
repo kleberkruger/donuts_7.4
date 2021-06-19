@@ -8,6 +8,7 @@
 #include "hooks_manager.h"
 #include "cache_atd.h"
 #include "shmem_perf.h"
+#include "epoch_manager.h" // Added by Kleber Kruger
 
 #include <cstring>
 
@@ -280,23 +281,10 @@ CacheCntlr::CacheCntlr(MemComponent::component_t mem_component,
       registerStatsMetric(name, core_id, "uncore-totaltime", &m_shmem_perf_totaltime);
       registerStatsMetric(name, core_id, "uncore-requests", &m_shmem_perf_numrequests);
    }
-
-   // NVM Checkpoint Support (Added by Kleber Kruger)
-   if (m_master->m_cache->getReplacementPolicy() == CacheBase::ReplacementPolicy::LRUR)
-   {
-      String filePath = Sim()->getConfig()->getOutputDirectory() + "/checkpoints.csv";
-      if ((checkpoint_logfile = fopen(filePath.c_str(), "w")) == NULL) 
-         fprintf(stderr, "DRAM Log File Error.\n");
-   }
 }
 
 CacheCntlr::~CacheCntlr()
 {
-   // NVM Checkpoint Support (Added by Kleber Kruger)
-   if (m_master->m_cache->getReplacementPolicy() == CacheBase::ReplacementPolicy::LRUR)
-   {
-      fclose(checkpoint_logfile);
-   }
    if (isMasterCache())
    {
       delete m_master;
@@ -1776,12 +1764,13 @@ CacheCntlr::incrementQBSLookupCost()
    atomic_add_subsecondtime(stats.qbs_query_latency, latency);
 }
 
+// TODO: Remove-me (only to debug)
 void printCache(Cache *cache)
 {
    printf("Cache %s\n--------------------------------------------------\n%5s", cache->getName().c_str(), "");
    for (UInt32 j = 0; j < cache->getAssociativity(); j++) printf("%2d  ", j);
    printf("\n--------------------------------------------------\n");
-   
+
    for (UInt32 i = 0; i < cache->getNumSets(); i++)
    {
       printf("%4d ", i);
@@ -1801,12 +1790,7 @@ void printCache(Cache *cache)
 void
 CacheCntlr::checkpoint()
 {
-   // static UInt64 eid = 0; // TODO: Implementar o incremento de épocas e o write buffer
-
-   SubsecondTime now = getShmemPerfModel()->getElapsedTime(ShmemPerfModel::_SIM_THREAD);
-   fprintf(checkpoint_logfile, "%lu\n", now.getNS());
-   
-   printCache(m_master->m_cache);
+   std::queue<CacheBlockInfo *> dirty_blocks;
 
    for (UInt32 i = 0; i < m_master->m_cache->getNumSets(); i++)
    {
@@ -1814,11 +1798,17 @@ CacheCntlr::checkpoint()
       {
          CacheBlockInfo *block_info = m_master->m_cache->peekBlock(i, j);
          if (block_info->getCState() == CacheState::MODIFIED)
-            flushCacheBlock(block_info);
+            dirty_blocks.push(block_info);
       }
    }
+   EpochManager::globalCheckpoint(getShmemPerfModel()->getElapsedTime(ShmemPerfModel::_SIM_THREAD), dirty_blocks);
 
-   printCache(m_master->m_cache);
+   // TODO: Posteriormente, remova esta parte... Passar o CacheCntlr ao EpochManager::globalCheckpoint ???
+   while (!dirty_blocks.empty())
+   {
+      flushCacheBlock(dirty_blocks.front());
+      dirty_blocks.pop();
+   }
 }
 
 void 
@@ -1826,8 +1816,6 @@ CacheCntlr::flushCacheBlock(CacheBlockInfo *block_info)
 {
    IntPtr address = m_master->m_cache->tagToAddress(block_info->getTag());
    Byte data_buf[getCacheBlockSize()];
-
-   printf("flushing: [%lu] ...\n", address);
 
    updateCacheBlock(address, CacheState::SHARED, Transition::COHERENCY, data_buf, ShmemPerfModel::_SIM_THREAD);
    getMemoryManager()->sendMsg(PrL1PrL2DramDirectoryMSI::ShmemMsg::CHECKPOINT,
