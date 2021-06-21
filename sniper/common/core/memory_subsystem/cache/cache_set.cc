@@ -172,7 +172,7 @@ CacheSet::createCacheSet(String cfgname, core_id_t core_id,
       {
          return new CacheSetLRUR(cache_type, associativity, blocksize, dynamic_cast<CacheSetInfoLRU *>(set_info),
                                  getNumQBSAttempts(policy, cfgname, core_id),
-                                 getNumCkptThreshold(policy, cfgname, core_id));
+                                 getNumCacheSetThreshold(policy, cfgname, core_id));
       }
 
       default:
@@ -215,9 +215,10 @@ CacheSet::getNumQBSAttempts(CacheBase::ReplacementPolicy policy, String cfgname,
    }
 }
 
-float CacheSet::getNumCkptThreshold(CacheBase::ReplacementPolicy policy, String cfgname, core_id_t core_id)
+float CacheSet::getNumCacheSetThreshold(CacheBase::ReplacementPolicy policy, String cfgname, core_id_t core_id)
 {
-   return Sim()->getCfg()->getFloatArray(cfgname + "/checkpoint_threshold", core_id);
+   const String key = cfgname + "/cache_set_threshold";
+   return Sim()->getCfg()->hasKey(key) ? Sim()->getCfg()->getFloat(key) : 1.0;
 }
 
 CacheBase::ReplacementPolicy

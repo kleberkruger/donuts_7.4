@@ -27,7 +27,7 @@ class CacheSet
       static CacheSetInfo* createCacheSetInfo(String name, String cfgname, core_id_t core_id, String replacement_policy, UInt32 associativity);
       static CacheBase::ReplacementPolicy parsePolicyType(String policy);
       static UInt8 getNumQBSAttempts(CacheBase::ReplacementPolicy, String cfgname, core_id_t core_id);
-      static float getNumCkptThreshold(CacheBase::ReplacementPolicy, String cfgname, core_id_t core_id); // Added by Kleber Kruger
+      static float getNumCacheSetThreshold(CacheBase::ReplacementPolicy, String cfgname, core_id_t core_id); // Added by Kleber Kruger
 
    protected:
       CacheBlockInfo** m_cache_block_info_array;

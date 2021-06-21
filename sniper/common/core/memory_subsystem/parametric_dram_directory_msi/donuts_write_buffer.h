@@ -10,6 +10,9 @@ public:
    DonutsWriteBuffer(UInt32 num_entries = 0);
    virtual ~DonutsWriteBuffer();
 
+   bool isFull();
+   void insertEntry(CacheBlockInfo *cache_block_info);
+
 private:
    const UInt32 m_num_entries; // Set 0 to an ilimited buffer
    std::vector<CacheBlockInfo *> m_buffer;

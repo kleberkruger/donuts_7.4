@@ -19,11 +19,11 @@ char CStateString(CacheState::cstate_t cstate) {
 
 void DonutsUtils::printCache(Cache *cache)
 {
-   printf("Cache %s\n--------------------------------------------------\n%5s", cache->getName().c_str(), "");
-   for (UInt32 j = 0; j < cache->getAssociativity(); j++)
-      printf("%2d  ", j);
-   printf("\n--------------------------------------------------\n");
-
+   printf("============================================================\n");
+   printf("Cache %s (%.2f%%)\n", cache->getName().c_str(), cache->getCapacityFilled() * 100);
+   printf("------------------------------------------------------------\n%5s", "");
+   for (UInt32 j = 0; j < cache->getAssociativity(); j++) printf("%2d  ", j);
+   printf("\n------------------------------------------------------------\n");
    for (UInt32 i = 0; i < cache->getNumSets(); i++)
    {
       printf("%4d ", i);
@@ -35,5 +35,5 @@ void DonutsUtils::printCache(Cache *cache)
       }
       printf("\n");
    }
-   printf("\n");
+   printf("============================================================\n");
 }

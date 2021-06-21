@@ -350,6 +350,10 @@ namespace ParametricDramDirectoryMSI
 
          CacheCntlr* lastLevelCache(void);
 
+         // NVM Checkpoint Support
+         std::queue<CacheBlockInfo *> selectDirtyBlocks(); // Added by Kleber Kruger
+         void flushCacheBlock(CacheBlockInfo *block_info); // Added by Kleber Kruger
+
       public:
 
          CacheCntlr(MemComponent::component_t mem_component,
@@ -404,8 +408,7 @@ namespace ParametricDramDirectoryMSI
          void incrementQBSLookupCost();
 
          // NVM Checkpoint Support
-         void checkpoint();                                 // Added by Kleber Kruger
-         void flushCacheBlock(CacheBlockInfo *block_info);  // Added by Kleber Kruger
+         void checkpoint(CheckpointEvent event_type); // Added by Kleber Kruger
 
          void enable() { m_master->m_cache->enable(); }
          void disable() { m_master->m_cache->disable(); }

@@ -1,28 +1,30 @@
 #include "simulator.h"
 #include "cache.h"
 #include "log.h"
+#include "config.hpp" // Added by Kleber Kruger
 
 // Cache class
 // constructors/destructors
 Cache::Cache(
-   String name,
-   String cfgname,
-   core_id_t core_id,
-   UInt32 num_sets,
-   UInt32 associativity,
-   UInt32 cache_block_size,
-   String replacement_policy,
-   cache_t cache_type,
-   hash_t hash,
-   FaultInjector *fault_injector,
-   AddressHomeLookup *ahl)
-:
-   CacheBase(name, num_sets, associativity, cache_block_size, hash, ahl),
-   m_enabled(false),
-   m_num_accesses(0),
-   m_num_hits(0),
-   m_cache_type(cache_type),
-   m_fault_injector(fault_injector)
+    String name,
+    String cfgname,
+    core_id_t core_id,
+    UInt32 num_sets,
+    UInt32 associativity,
+    UInt32 cache_block_size,
+    String replacement_policy,
+    cache_t cache_type,
+    hash_t hash,
+    FaultInjector *fault_injector,
+    AddressHomeLookup *ahl)
+    : CacheBase(name, num_sets, associativity, cache_block_size, hash, ahl),
+      m_enabled(false),
+      m_num_accesses(0),
+      m_num_hits(0),
+      m_cache_type(cache_type),
+      m_fault_injector(fault_injector),
+      m_replacement_policy(CacheSet::parsePolicyType(replacement_policy)),                   // Added by Kleber Kruger
+      m_cache_threshold(Cache::getNumCacheThreshold(m_replacement_policy, cfgname, core_id)) // Added by Kleber Kruger
 {
    m_set_info = CacheSet::createCacheSetInfo(name, cfgname, core_id, replacement_policy, m_associativity);
    m_sets = new CacheSet*[m_num_sets];
@@ -30,7 +32,6 @@ Cache::Cache(
    {
       m_sets[i] = CacheSet::createCacheSet(cfgname, core_id, replacement_policy, m_cache_type, m_associativity, m_blocksize, m_set_info);
    }
-   m_replacement_policy = CacheSet::parsePolicyType(replacement_policy); // Added by Kleber Kruger
 
    #ifdef ENABLE_SET_USAGE_HIST
    m_set_usage_hist = new UInt64[m_num_sets];
@@ -137,6 +138,10 @@ Cache::insertSingleLine(IntPtr addr, Byte* fill_buff,
          eviction, evict_block_info, evict_buff, cntlr);
    *evict_addr = tagToAddress(evict_block_info->getTag());
 
+   // NVM Checkpoint Support (Added by Kleber Kruger)
+   if (m_replacement_policy == CacheBase::LRUR && getCapacityFilled() > m_cache_threshold)
+      cntlr->checkpoint(CheckpointEvent::CACHE_THRESHOLD);
+
    if (m_fault_injector) {
       // NOTE: no callback is generated for read of evicted data
       UInt32 line_index = -1;
@@ -184,4 +189,29 @@ Cache::updateHits(Core::mem_op_t mem_op_type, UInt64 hits)
       m_num_accesses += hits;
       m_num_hits += hits;
    }
+}
+
+/**
+ * Get percentage (0..1) of modified blocks in cache.
+ * Added by Kleber Kruger
+ */
+float Cache::getCapacityFilled()
+{
+   UInt64 count = 0;
+   for (UInt32 i = 0; i < m_num_sets; i++)
+   {
+      for (UInt32 j = 0; j < m_associativity; j++)
+         if (peekBlock(i, j)->getCState() == CacheState::MODIFIED) count++;
+   }
+   return (float) count / (m_num_sets * m_associativity);
+}
+
+float Cache::getNumCacheThreshold(CacheBase::ReplacementPolicy policy, String cfgname, core_id_t core_id)
+{
+   if (policy == CacheBase::LRUR)
+   {
+      const String key = cfgname + "/cache_threshold";
+      return Sim()->getCfg()->hasKey(key) ? Sim()->getCfg()->getFloat(key) : 1.0;
+   }
+   return 0.0;
 }

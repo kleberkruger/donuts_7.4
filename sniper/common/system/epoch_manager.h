@@ -3,9 +3,25 @@
 
 #include "subsecond_time.h"
 
-#include <queue>
+// TODO: Move-me to a separated file???
+class CheckpointEvent
+{
+public:
+   enum checkpoint_event_t
+   {
+      CACHE_SET_THRESHOLD = 1,
+      CACHE_THRESHOLD,
+      TIMEOUT,
+      NUM_CHECKPOINT_EVENTS = TIMEOUT
+   };
 
-class CacheBlockInfo;
+   CheckpointEvent(checkpoint_event_t state) : state(state) {}
+   ~CheckpointEvent() {}
+
+private:
+   checkpoint_event_t state;
+   // SubsecondTime time;
+};
 
 class EpochManager
 {
@@ -16,7 +32,7 @@ public:
    UInt64 getSystemEID() const { return m_system_eid; }
    UInt64 getPersistedEID() const { return m_persisted_eid; }
 
-   static void globalCheckpoint(std::queue<CacheBlockInfo *> dirty_blocks);
+   static void globalCheckpoint(CheckpointEvent event);
 
    static UInt64 getGlobalSystemEID();
 
@@ -42,10 +58,13 @@ private:
    }
    void timeout();
 
-   void checkpoint(std::queue<CacheBlockInfo *> dirty_blocks);
+   void checkpoint(CheckpointEvent event);
+
+   static const UInt32 DEFAULT_TIMEOUT = 10000000;
 
    UInt64 m_system_eid;
    UInt64 m_persisted_eid;
+   SubsecondTime m_timeout;
    SubsecondTime m_last_commit;
 
    FILE *m_log_file;

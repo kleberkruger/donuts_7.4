@@ -1,4 +1,5 @@
 #include "cache_set_lrur.h"
+#include "epoch_manager.h"
 
 CacheSetLRUR::CacheSetLRUR(CacheBase::cache_t cache_type,
                            UInt32 associativity,
@@ -53,7 +54,7 @@ CacheSetLRUR::getReplacementIndex(CacheCntlr *cntlr)
       {
          if (m_lru_bits[i] == max_bits)
          {
-            cntlr->checkpoint();
+            cntlr->checkpoint(CheckpointEvent::CACHE_SET_THRESHOLD);
             return i;
          }
       }

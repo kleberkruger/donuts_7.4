@@ -1768,33 +1768,33 @@ CacheCntlr::incrementQBSLookupCost()
 /*****************************************************************************
  * NVM Checkpoint Support
  *****************************************************************************/
-void
-CacheCntlr::checkpoint()
-{
-   printf("Epoch %lu | END\n", EpochManager::getGlobalSystemEID());
-   DonutsUtils::printCache(m_master->m_cache);
-   std::queue<CacheBlockInfo *> dirty_blocks;
 
-   for (UInt32 i = 0; i < m_master->m_cache->getNumSets(); i++)
-   {
-      for (UInt32 j = 0; j < m_master->m_cache->getAssociativity(); j++)
-      {
-         CacheBlockInfo *block_info = m_master->m_cache->peekBlock(i, j);
-         if (block_info->getCState() == CacheState::MODIFIED)
-            dirty_blocks.push(block_info);
-      }
-   }
-   // TODO: Posteriormente, remova esta parte... Passar o CacheCntlr ao EpochManager::globalCheckpoint ???
+void CacheCntlr::checkpoint(CheckpointEvent event_type)
+{
+   // TODO: Instead of sending everything at once, dispatch blocks in burst according to the write buffer size
+   std::queue<CacheBlockInfo *> dirty_blocks = selectDirtyBlocks();
    while (!dirty_blocks.empty())
    {
       flushCacheBlock(dirty_blocks.front());
       dirty_blocks.pop();
    }
 
-   EpochManager::globalCheckpoint(dirty_blocks);
-   
-   printf("Epoch %lu | START\n", EpochManager::getGlobalSystemEID());
-   DonutsUtils::printCache(m_master->m_cache);
+   EpochManager::globalCheckpoint(event_type);
+}
+
+std::queue<CacheBlockInfo *> CacheCntlr::selectDirtyBlocks()
+{
+   std::queue<CacheBlockInfo *> dirty_blocks;
+   for (UInt32 index = 0; index < m_master->m_cache->getNumSets(); index++)
+   {
+      for (UInt32 offset = 0; offset < m_master->m_cache->getAssociativity(); offset++)
+      {
+         CacheBlockInfo *block_info = m_master->m_cache->peekBlock(index, offset);
+         if (block_info->getCState() == CacheState::MODIFIED)
+            dirty_blocks.push(block_info);
+      }
+   }
+   return dirty_blocks;
 }
 
 void 

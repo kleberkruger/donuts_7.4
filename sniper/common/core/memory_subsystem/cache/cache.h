@@ -29,10 +29,12 @@ class Cache : public CacheBase
       CacheSet** m_sets;
       CacheSetInfo* m_set_info;
 
-      // Added by Kleber Kruger
-      CacheBase::ReplacementPolicy m_replacement_policy;
-
       FaultInjector *m_fault_injector;
+
+      CacheBase::ReplacementPolicy m_replacement_policy; // Added by Kleber Kruger
+      float m_cache_threshold;                           // Added by Kleber Kruger
+      
+      static float getNumCacheThreshold(CacheBase::ReplacementPolicy, String cfgname, core_id_t core_id); // Added by Kleber Kruger
 
       #ifdef ENABLE_SET_USAGE_HIST
       UInt64* m_set_usage_hist;
@@ -53,8 +55,8 @@ class Cache : public CacheBase
             AddressHomeLookup *ahl = NULL);
       ~Cache();
 
-      // Added by Kleber Kruger
-      CacheBase::ReplacementPolicy getReplacementPolicy() { return m_replacement_policy; }
+      CacheBase::ReplacementPolicy getReplacementPolicy() { return m_replacement_policy; } // Added by Kleber Kruger
+      float getCapacityFilled();                                                           // Added by Kleber Kruger
 
       Lock& getSetLock(IntPtr addr);
 
