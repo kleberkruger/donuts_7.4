@@ -8,7 +8,7 @@
 #include "config.hpp"
 #include "stats.h"
 
-const char *CheckpointEventString(CheckpointEvent::checkpoint_event_t event)
+const char *CheckpointEventString(CheckpointEvent::type_t event)
 {
    switch (event)
    {
@@ -69,19 +69,19 @@ void EpochManager::timeout()
    // printf("TIMEOUT | [%lu]\n", time.getNS());
 }
 
-void EpochManager::checkpoint(CheckpointEvent event)
+void EpochManager::checkpoint(const CheckpointEvent &event)
 {
    SubsecondTime now = Sim()->getCoreManager()->getCurrentCore()->getShmemPerfModel()->getElapsedTime(ShmemPerfModel::_SIM_THREAD);
    fprintf(m_log_file, "%lu\n", now.getNS());
    m_last_commit = now;
 
-   // printf("Checkpoint by (%s) | Shmem [%lu] | Global [%lu]...\n", CheckpointEventString(event),
-   //        now.getNS(), Sim()->getClockSkewMinimizationServer()->getGlobalTime().getNS());
+   printf("Checkpoint by (%s) | Shmem [%lu] | Global [%lu]...\n", CheckpointEventString(event.getType()),
+          now.getNS(), Sim()->getClockSkewMinimizationServer()->getGlobalTime().getNS());
 
    m_system_eid++;
 }
 
-void EpochManager::globalCheckpoint(CheckpointEvent event)
+void EpochManager::registerCheckpoint(const CheckpointEvent &event)
 {
    return Sim()->getEpochManager()->checkpoint(event);
 }

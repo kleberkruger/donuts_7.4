@@ -1769,8 +1769,11 @@ CacheCntlr::incrementQBSLookupCost()
  * NVM Checkpoint Support
  *****************************************************************************/
 
-void CacheCntlr::checkpoint(CheckpointEvent event_type)
+void CacheCntlr::checkpoint(CheckpointEvent::type_t event_type)
 {
+   printf("FIM [%lu]\n", EpochManager::getGlobalSystemEID());
+   DonutsUtils::printCache(m_master->m_cache);
+
    // TODO: Instead of sending everything at once, dispatch blocks in burst according to the write buffer size
    std::queue<CacheBlockInfo *> dirty_blocks = selectDirtyBlocks();
    while (!dirty_blocks.empty())
@@ -1779,7 +1782,11 @@ void CacheCntlr::checkpoint(CheckpointEvent event_type)
       dirty_blocks.pop();
    }
 
-   EpochManager::globalCheckpoint(event_type);
+   CheckpointEvent event(event_type);
+   EpochManager::registerCheckpoint(event);
+
+   printf("INICIO [%lu]\n", EpochManager::getGlobalSystemEID());
+   DonutsUtils::printCache(m_master->m_cache);
 }
 
 std::queue<CacheBlockInfo *> CacheCntlr::selectDirtyBlocks()

@@ -408,7 +408,7 @@ namespace ParametricDramDirectoryMSI
          void incrementQBSLookupCost();
 
          // NVM Checkpoint Support
-         void checkpoint(CheckpointEvent event_type); // Added by Kleber Kruger
+         void checkpoint(CheckpointEvent::type_t event_type); // Added by Kleber Kruger
 
          void enable() { m_master->m_cache->enable(); }
          void disable() { m_master->m_cache->disable(); }

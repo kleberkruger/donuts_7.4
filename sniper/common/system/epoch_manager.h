@@ -1,27 +1,8 @@
 #ifndef EPOCH_MANAGER_H
 #define EPOCH_MANAGER_H
 
+#include "checkpoint_event.h"
 #include "subsecond_time.h"
-
-// TODO: Move-me to a separated file???
-class CheckpointEvent
-{
-public:
-   enum checkpoint_event_t
-   {
-      CACHE_SET_THRESHOLD = 1,
-      CACHE_THRESHOLD,
-      TIMEOUT,
-      NUM_CHECKPOINT_EVENTS = TIMEOUT
-   };
-
-   CheckpointEvent(checkpoint_event_t state) : state(state) {}
-   ~CheckpointEvent() {}
-
-private:
-   checkpoint_event_t state;
-   // SubsecondTime time;
-};
 
 class EpochManager
 {
@@ -32,7 +13,7 @@ public:
    UInt64 getSystemEID() const { return m_system_eid; }
    UInt64 getPersistedEID() const { return m_persisted_eid; }
 
-   static void globalCheckpoint(CheckpointEvent event);
+   static void registerCheckpoint(const CheckpointEvent &event);
 
    static UInt64 getGlobalSystemEID();
 
@@ -58,7 +39,7 @@ private:
    }
    void timeout();
 
-   void checkpoint(CheckpointEvent event);
+   void checkpoint(const CheckpointEvent &event);
 
    static const UInt32 DEFAULT_TIMEOUT = 10000000;
 

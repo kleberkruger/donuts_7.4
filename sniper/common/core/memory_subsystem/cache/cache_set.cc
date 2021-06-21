@@ -169,11 +169,9 @@ CacheSet::createCacheSet(String cfgname, core_id_t core_id,
 
       case CacheBase::LRUR:         // Added by Kleber Kruger
       // case CacheBase::LRUR_QBS:  // Added by Kleber Kruger
-      {
          return new CacheSetLRUR(cache_type, associativity, blocksize, dynamic_cast<CacheSetInfoLRU *>(set_info),
                                  getNumQBSAttempts(policy, cfgname, core_id),
                                  getNumCacheSetThreshold(policy, cfgname, core_id));
-      }
 
       default:
          LOG_PRINT_ERROR("Unrecognized Cache Replacement Policy: %i", policy);
