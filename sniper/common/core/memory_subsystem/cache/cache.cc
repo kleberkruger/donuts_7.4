@@ -1,7 +1,8 @@
 #include "simulator.h"
 #include "cache.h"
 #include "log.h"
-#include "config.hpp" // Added by Kleber Kruger
+#include "config.hpp"        // Added by Kleber Kruger
+#include "checkpoint_info.h" // Added by Kleber Kruger
 
 // Cache class
 // constructors/destructors
@@ -140,7 +141,7 @@ Cache::insertSingleLine(IntPtr addr, Byte* fill_buff,
 
    // NVM Checkpoint Support (Added by Kleber Kruger)
    if (m_replacement_policy == CacheBase::LRUR && getCapacityFilled() > m_cache_threshold)
-      cntlr->checkpoint(CheckpointEvent::CACHE_THRESHOLD);
+      cntlr->checkpoint(CheckpointInfo::CACHE_THRESHOLD);
 
    if (m_fault_injector) {
       // NOTE: no callback is generated for read of evicted data

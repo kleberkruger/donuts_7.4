@@ -17,6 +17,7 @@
 #include "stats.h"
 #include "subsecond_time.h"
 #include "shmem_perf.h"
+#include "checkpoint_info.h"
 
 #include "boost/tuple/tuple.hpp"
 
@@ -277,6 +278,10 @@ namespace ParametricDramDirectoryMSI
 
          ShmemPerfModel* m_shmem_perf_model;
 
+         // NVM Checkpoint Support (Added by Kleber Kruger)
+         SubsecondTime m_timeout;
+         static const UInt64 DEFAULT_TIMEOUT = 30000000;
+
          // Core-interfacing stuff
          void accessCache(
                Core::mem_op_t mem_op_type,
@@ -350,15 +355,13 @@ namespace ParametricDramDirectoryMSI
 
          CacheCntlr* lastLevelCache(void);
 
-         // NVM Checkpoint Support
-         std::queue<CacheBlockInfo *> selectDirtyBlocks(); // Added by Kleber Kruger
-         void flushCacheBlock(CacheBlockInfo *block_info); // Added by Kleber Kruger
+         // NVM Checkpoint Support (Added by Kleber Kruger)
+         std::queue<CacheBlockInfo *> selectDirtyBlocks();
+         void persistCheckpointData(std::queue<CacheBlockInfo *> &data);
+         void flushCacheBlock(CacheBlockInfo *block_info);
 
-         static SInt64 __timeout(UInt64 arg, UInt64 val)
-         {
-            ((CacheCntlr *)arg)->timeout();
-            return 0;
-         }
+         // NVM Checkpoint Support (Added by Kleber Kruger)
+         static SInt64 __timeout(UInt64 arg, UInt64 val) { ((CacheCntlr *)arg)->timeout(); return 0; }
          void timeout();
 
       public:
@@ -414,8 +417,8 @@ namespace ParametricDramDirectoryMSI
          bool isInLowerLevelCache(CacheBlockInfo *block_info);
          void incrementQBSLookupCost();
 
-         // NVM Checkpoint Support
-         void checkpoint(CheckpointEvent::type_t event_type); // Added by Kleber Kruger
+         // NVM Checkpoint Support (Added by Kleber Kruger)
+         void checkpoint(CheckpointInfo::EventType event_type);
 
          void enable() { m_master->m_cache->enable(); }
          void disable() { m_master->m_cache->disable(); }

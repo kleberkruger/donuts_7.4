@@ -8,8 +8,9 @@
 #include "hooks_manager.h"
 #include "cache_atd.h"
 #include "shmem_perf.h"
-#include "epoch_manager.h" // Added by Kleber Kruger
-#include "donuts_utils.h"  // Added by Kleber Kruger
+#include "checkpoint_info.h" // Added by Kleber Kruger
+#include "epoch_manager.h"   // Added by Kleber Kruger
+#include "donuts_utils.h"    // Added by Kleber Kruger
 
 #include <cstring>
 
@@ -154,7 +155,8 @@ CacheCntlr::CacheCntlr(MemComponent::component_t mem_component,
    m_last_remote_hit_where(HitWhere::UNKNOWN),
    m_shmem_perf(new ShmemPerf()),
    m_shmem_perf_global(NULL),
-   m_shmem_perf_model(shmem_perf_model)
+   m_shmem_perf_model(shmem_perf_model),
+   m_timeout(SubsecondTime::NS(0)) // Added by Kleber Kruger
 {
    m_core_id_master = m_core_id - m_core_id % m_shared_cores;
    Sim()->getStatsManager()->logTopology(name, core_id, m_core_id_master);
@@ -285,7 +287,12 @@ CacheCntlr::CacheCntlr(MemComponent::component_t mem_component,
 
    // Added by Kleber Kruger
    if (m_master->m_cache->getReplacementPolicy() == CacheBase::LRUR) 
+   {
+      const String key = "donuts/checkpoint_timeout";
+      m_timeout = SubsecondTime::NS(Sim()->getCfg()->hasKey(key) ? Sim()->getCfg()->getInt(key) : DEFAULT_TIMEOUT);
+
       Sim()->getHooksManager()->registerHook(HookType::HOOK_PERIODIC, __timeout, (UInt64)this);
+   }
 }
 
 CacheCntlr::~CacheCntlr()
@@ -1773,26 +1780,28 @@ CacheCntlr::incrementQBSLookupCost()
  * NVM Checkpoint Support
  *****************************************************************************/
 
-void CacheCntlr::checkpoint(CheckpointEvent::type_t event_type)
+void CacheCntlr::checkpoint(CheckpointInfo::EventType event_type)
 {
    // printf("FIM [%lu]\n", EpochManager::getGlobalSystemEID());
    // DonutsUtils::printCache(m_master->m_cache);
 
-   // TODO: Instead of sending everything at once, dispatch blocks in burst according to the write buffer size
    std::queue<CacheBlockInfo *> dirty_blocks = selectDirtyBlocks();
-   while (!dirty_blocks.empty())
-   {
-      flushCacheBlock(dirty_blocks.front());
-      dirty_blocks.pop();
-   }
-
-   CheckpointEvent event(event_type);
-   EpochManager::registerCheckpoint(event);
+   CheckpointInfo ckpt(event_type, dirty_blocks.size(), m_master->m_cache->getCapacityFilled() * 100,
+                       EpochManager::getGlobalSystemEID(), getShmemPerfModel()->getElapsedTime(ShmemPerfModel::_SIM_THREAD));
+                       
+   persistCheckpointData(dirty_blocks);
+   EpochManager::getInstance()->registerCheckpoint(ckpt);
 
    // printf("INICIO [%lu]\n", EpochManager::getGlobalSystemEID());
    // DonutsUtils::printCache(m_master->m_cache);
 }
 
+/**
+ * Select the dirty blocks from the cache.
+ * TODO: Instead of sending everything at once, dispatch blocks in burst according to the write buffer size.
+ * 
+ * @return std::queue<CacheBlockInfo *> 
+ */
 std::queue<CacheBlockInfo *> CacheCntlr::selectDirtyBlocks()
 {
    std::queue<CacheBlockInfo *> dirty_blocks;
@@ -1806,6 +1815,20 @@ std::queue<CacheBlockInfo *> CacheCntlr::selectDirtyBlocks()
       }
    }
    return dirty_blocks;
+}
+
+/** 
+ * Asynchronously persists checkpoint data.
+ * 
+ * @param dirty_blocks 
+ */
+void CacheCntlr::persistCheckpointData(std::queue<CacheBlockInfo *> &dirty_blocks)
+{
+   while (!dirty_blocks.empty())
+   {
+      flushCacheBlock(dirty_blocks.front());
+      dirty_blocks.pop();
+   }
 }
 
 void 
@@ -1828,12 +1851,12 @@ CacheCntlr::timeout()
    SubsecondTime now = Sim()->getClockSkewMinimizationServer()->getGlobalTime();
    getShmemPerfModel()->updateElapsedTime(now, ShmemPerfModel::_SIM_THREAD);
 
-   SubsecondTime last = EpochManager::getLastCommit();
+   SubsecondTime last = EpochManager::getInstance()->getPersistedTime();
    SubsecondTime gap = now >= last ? now - last : last - now;
 
-   // printf("time: %lu | gap: %lu\n", now.getNS(), gap.getNS());
-   if (gap >= SubsecondTime::NS(50000))
-      checkpoint(CheckpointEvent::TIMEOUT);
+   printf("time: %lu | gap: %lu\n", now.getNS(), gap.getNS());
+   if (gap >= m_timeout)
+      checkpoint(CheckpointInfo::TIMEOUT);
 }
 
 /*****************************************************************************
