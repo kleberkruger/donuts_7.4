@@ -12,10 +12,12 @@ public:
 
    UInt64 getSystemEID() const { return m_system_eid; }
    UInt64 getPersistedEID() const { return m_persisted_eid; }
+   SubsecondTime getLast() const { return m_last_commit; }
 
    static void registerCheckpoint(const CheckpointEvent &event);
 
    static UInt64 getGlobalSystemEID();
+   static SubsecondTime getLastCommit();
 
 private:
    static SInt64 __start(UInt64 arg, UInt64 val)
@@ -41,7 +43,7 @@ private:
 
    void checkpoint(const CheckpointEvent &event);
 
-   static const UInt32 DEFAULT_TIMEOUT = 10000000;
+   static const UInt32 DEFAULT_TIMEOUT = 25000;
 
    UInt64 m_system_eid;
    UInt64 m_persisted_eid;

@@ -354,6 +354,13 @@ namespace ParametricDramDirectoryMSI
          std::queue<CacheBlockInfo *> selectDirtyBlocks(); // Added by Kleber Kruger
          void flushCacheBlock(CacheBlockInfo *block_info); // Added by Kleber Kruger
 
+         static SInt64 __timeout(UInt64 arg, UInt64 val)
+         {
+            ((CacheCntlr *)arg)->timeout();
+            return 0;
+         }
+         void timeout();
+
       public:
 
          CacheCntlr(MemComponent::component_t mem_component,

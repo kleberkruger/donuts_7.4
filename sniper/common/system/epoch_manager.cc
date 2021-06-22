@@ -57,16 +57,15 @@ void EpochManager::exit()
 
 void EpochManager::timeout()
 {
-   SubsecondTime now = Sim()->getCoreManager()->getCurrentCore()->getShmemPerfModel()->getElapsedTime(ShmemPerfModel::_SIM_THREAD);
-   printf("TIMEOUT | Shmem [%lu] | Global [%lu]\n", now.getNS(), Sim()->getClockSkewMinimizationServer()->getGlobalTime().getNS());
+   SubsecondTime shmem = Sim()->getCoreManager()->getCurrentCore()->getShmemPerfModel()->getElapsedTime(ShmemPerfModel::_SIM_THREAD);
+   printf("TIMEOUT | Shmem [%lu] | Global [%lu]\n", shmem.getNS(), Sim()->getClockSkewMinimizationServer()->getGlobalTime().getNS());
 
-   // if ((now - m_last_commit) >= m_timeout)
-   // {
-   //    printf("TIMEOUT | now = %lu | last = %lu\n", now.getNS(), m_last_commit.getNS());
-   // }
+   // SubsecondTime now = Sim()->getClockSkewMinimizationServer()->getGlobalTime();
+   // SubsecondTime gap = now >= m_last_commit ? now - m_last_commit : m_last_commit - now;
 
-   // SubsecondTime time = Sim()->getClockSkewMinimizationServer()->getGlobalTime();
-   // printf("TIMEOUT | [%lu]\n", time.getNS());
+   // printf("gap: %lu\n", gap.getNS());
+   // if (gap >= m_timeout)
+   //    registerCheckpoint(CheckpointEvent(CheckpointEvent::TIMEOUT));
 }
 
 void EpochManager::checkpoint(const CheckpointEvent &event)
@@ -75,8 +74,7 @@ void EpochManager::checkpoint(const CheckpointEvent &event)
    fprintf(m_log_file, "%lu\n", now.getNS());
    m_last_commit = now;
 
-   printf("Checkpoint by (%s) | Shmem [%lu] | Global [%lu]...\n", CheckpointEventString(event.getType()),
-          now.getNS(), Sim()->getClockSkewMinimizationServer()->getGlobalTime().getNS());
+   printf("Checkpoint by (%s) | Time [%lu]\n", CheckpointEventString(event.getType()), now.getNS());
 
    m_system_eid++;
 }
@@ -89,4 +87,9 @@ void EpochManager::registerCheckpoint(const CheckpointEvent &event)
 UInt64 EpochManager::getGlobalSystemEID()
 {
    return Sim()->getEpochManager()->getSystemEID();
+}
+
+SubsecondTime EpochManager::getLastCommit()
+{
+   return Sim()->getEpochManager()->getLast();
 }

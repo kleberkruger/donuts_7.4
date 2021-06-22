@@ -282,6 +282,10 @@ CacheCntlr::CacheCntlr(MemComponent::component_t mem_component,
       registerStatsMetric(name, core_id, "uncore-totaltime", &m_shmem_perf_totaltime);
       registerStatsMetric(name, core_id, "uncore-requests", &m_shmem_perf_numrequests);
    }
+
+   // Added by Kleber Kruger
+   if (m_master->m_cache->getReplacementPolicy() == CacheBase::LRUR) 
+      Sim()->getHooksManager()->registerHook(HookType::HOOK_PERIODIC, __timeout, (UInt64)this);
 }
 
 CacheCntlr::~CacheCntlr()
@@ -1771,8 +1775,8 @@ CacheCntlr::incrementQBSLookupCost()
 
 void CacheCntlr::checkpoint(CheckpointEvent::type_t event_type)
 {
-   printf("FIM [%lu]\n", EpochManager::getGlobalSystemEID());
-   DonutsUtils::printCache(m_master->m_cache);
+   // printf("FIM [%lu]\n", EpochManager::getGlobalSystemEID());
+   // DonutsUtils::printCache(m_master->m_cache);
 
    // TODO: Instead of sending everything at once, dispatch blocks in burst according to the write buffer size
    std::queue<CacheBlockInfo *> dirty_blocks = selectDirtyBlocks();
@@ -1785,8 +1789,8 @@ void CacheCntlr::checkpoint(CheckpointEvent::type_t event_type)
    CheckpointEvent event(event_type);
    EpochManager::registerCheckpoint(event);
 
-   printf("INICIO [%lu]\n", EpochManager::getGlobalSystemEID());
-   DonutsUtils::printCache(m_master->m_cache);
+   // printf("INICIO [%lu]\n", EpochManager::getGlobalSystemEID());
+   // DonutsUtils::printCache(m_master->m_cache);
 }
 
 std::queue<CacheBlockInfo *> CacheCntlr::selectDirtyBlocks()
@@ -1816,6 +1820,20 @@ CacheCntlr::flushCacheBlock(CacheBlockInfo *block_info)
                                m_core_id_master, getHome(address), /* requester and receiver */
                                address, data_buf, getCacheBlockSize(),
                                HitWhere::UNKNOWN, &m_dummy_shmem_perf, ShmemPerfModel::_SIM_THREAD);
+}
+
+void
+CacheCntlr::timeout()
+{
+   SubsecondTime now = Sim()->getClockSkewMinimizationServer()->getGlobalTime();
+   getShmemPerfModel()->updateElapsedTime(now, ShmemPerfModel::_SIM_THREAD);
+
+   SubsecondTime last = EpochManager::getLastCommit();
+   SubsecondTime gap = now >= last ? now - last : last - now;
+
+   // printf("time: %lu | gap: %lu\n", now.getNS(), gap.getNS());
+   if (gap >= SubsecondTime::NS(50000))
+      checkpoint(CheckpointEvent::TIMEOUT);
 }
 
 /*****************************************************************************
