@@ -1,27 +1,72 @@
 #ifndef EPOCH_MANAGER_H
 #define EPOCH_MANAGER_H
 
-#include "checkpoint_info.h"
+#include "checkpoint_event.h"
 
 class EpochManager
 {
 public:
+
+   /**
+    * @brief Construct a new Epoch Manager object
+    */
    EpochManager();
+
+   /**
+    * @brief Destroy the Epoch Manager object
+    */
    ~EpochManager();
 
-   void registerCheckpoint(const CheckpointInfo &ckpt);
+   /**
+    * @brief Commit a checkpoint
+    * @param ckpt 
+    */
+   void commitCheckpoint(const CheckpointEvent &ckpt);
 
+   /**
+    * @brief Register an epoch ID with the last persisted data
+    * @param 
+    */
+   void registerPersistedEID(const UInt64 persisted_eid, const SubsecondTime &time);
+
+   /**
+    * @brief Get the System EpochID object
+    * @return UInt64 
+    */
    UInt64 getSystemEID() const { return m_system_eid; }
-   UInt64 getPersistedEID() const { return m_last_checkpoint.getEpochID(); }
-   SubsecondTime getPersistedTime() const { return m_last_checkpoint.getTime(); }
 
+   UInt64 getCommitedEID() const { return m_commited.eid; }
+   SubsecondTime getCommitedTime() const { return m_commited.time; }
+   UInt64 getPersistedEID() const { return m_persisted.eid; }
+   SubsecondTime getPersistedTime() const { return m_persisted.time; }
+
+   /**
+    * @brief Get the Instance object
+    * @return EpochManager* 
+    */
    static EpochManager *getInstance();
+
+   /**
+    * @brief Get the Global System E I D object
+    * @return UInt64 
+    */
    static UInt64 getGlobalSystemEID();
 
 private:
-   UInt64 m_system_eid;
-   CheckpointInfo m_last_checkpoint;
    FILE *m_log_file;
+   UInt64 m_system_eid;
+   
+   struct 
+   {
+      UInt64 eid;
+      SubsecondTime time;
+   } m_commited;
+
+   struct
+   {
+      UInt64 eid;
+      SubsecondTime time;
+   } m_persisted;
 
    void start();
    void exit();

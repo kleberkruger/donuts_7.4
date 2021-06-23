@@ -8,9 +8,8 @@
 #include "hooks_manager.h"
 #include "cache_atd.h"
 #include "shmem_perf.h"
-#include "checkpoint_info.h" // Added by Kleber Kruger
-#include "epoch_manager.h"   // Added by Kleber Kruger
-#include "donuts_utils.h"    // Added by Kleber Kruger
+#include "epoch_manager.h" // Added by Kleber Kruger
+#include "donuts_utils.h"  // Added by Kleber Kruger
 
 #include <cstring>
 
@@ -1780,19 +1779,23 @@ CacheCntlr::incrementQBSLookupCost()
  * NVM Checkpoint Support
  *****************************************************************************/
 
-void CacheCntlr::checkpoint(CheckpointInfo::EventType event_type)
+void CacheCntlr::checkpoint(CheckpointEvent::Type event_type)
 {
-   // printf("FIM [%lu]\n", EpochManager::getGlobalSystemEID());
+   // printf("ENDING [%lu]\n", EpochManager::getGlobalSystemEID());
    // DonutsUtils::printCache(m_master->m_cache);
 
    std::queue<CacheBlockInfo *> dirty_blocks = selectDirtyBlocks();
-   CheckpointInfo ckpt(event_type, dirty_blocks.size(), m_master->m_cache->getCapacityFilled() * 100,
-                       EpochManager::getGlobalSystemEID(), getShmemPerfModel()->getElapsedTime(ShmemPerfModel::_SIM_THREAD));
-                       
-   persistCheckpointData(dirty_blocks);
-   EpochManager::getInstance()->registerCheckpoint(ckpt);
+   // if (dirty_blocks.size() > 0)
+   // {
+      CheckpointEvent ckpt(event_type, EpochManager::getGlobalSystemEID(),
+                           getShmemPerfModel()->getElapsedTime(ShmemPerfModel::_SIM_THREAD),
+                           dirty_blocks.size(), m_master->m_cache->getCapacityFilled() * 100);
 
-   // printf("INICIO [%lu]\n", EpochManager::getGlobalSystemEID());
+      persistCheckpointData(EpochManager::getGlobalSystemEID(), dirty_blocks);
+      EpochManager::getInstance()->commitCheckpoint(ckpt);
+   // }
+
+   // printf("STARTING [%lu]\n", EpochManager::getGlobalSystemEID());
    // DonutsUtils::printCache(m_master->m_cache);
 }
 
@@ -1822,13 +1825,14 @@ std::queue<CacheBlockInfo *> CacheCntlr::selectDirtyBlocks()
  * 
  * @param dirty_blocks 
  */
-void CacheCntlr::persistCheckpointData(std::queue<CacheBlockInfo *> &dirty_blocks)
+void CacheCntlr::persistCheckpointData(UInt64 eid, std::queue<CacheBlockInfo *> &dirty_blocks)
 {
    while (!dirty_blocks.empty())
    {
       flushCacheBlock(dirty_blocks.front());
       dirty_blocks.pop();
    }
+   EpochManager::getInstance()->registerPersistedEID(eid, getShmemPerfModel()->getElapsedTime(ShmemPerfModel::_SIM_THREAD));
 }
 
 void 
@@ -1851,12 +1855,12 @@ CacheCntlr::timeout()
    SubsecondTime now = Sim()->getClockSkewMinimizationServer()->getGlobalTime();
    getShmemPerfModel()->updateElapsedTime(now, ShmemPerfModel::_SIM_THREAD);
 
-   SubsecondTime last = EpochManager::getInstance()->getPersistedTime();
+   SubsecondTime last = EpochManager::getInstance()->getCommitedTime();
    SubsecondTime gap = now >= last ? now - last : last - now;
 
-   printf("time: %lu | gap: %lu\n", now.getNS(), gap.getNS());
-   if (gap >= m_timeout)
-      checkpoint(CheckpointInfo::TIMEOUT);
+   printf("gap: %lu\n", gap.getNS());
+
+   if (gap >= m_timeout) checkpoint(CheckpointEvent::TIMEOUT);
 }
 
 /*****************************************************************************

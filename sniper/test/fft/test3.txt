@@ -1,0 +1,575 @@
+../../run-sniper -v -n 1 -c donuts-test --roi -- ./fft -p 1
+[SNIPER] Running ['/home/kleberkruger/donuts/sniper/record-trace', '-o', '/tmp/tmpFwtqsB/run_benchmarks', '-v', '--roi', '-e', '1', '-s', '0', '-r', '1', '--follow', '--routine-tracing', '--', './fft', '-p', '1']
+[SNIPER] Start
+[SNIPER] Running ['bash', '-c', '/home/kleberkruger/donuts/sniper/lib/sniper -c /home/kleberkruger/donuts/sniper/config/base.cfg --general/total_cores=1 --general/output_dir=/home/kleberkruger/donuts/sniper/test/fft --config=/home/kleberkruger/donuts/sniper/config/donuts-base.cfg --config=/home/kleberkruger/donuts/sniper/config/donuts.cfg --config=/home/kleberkruger/donuts/sniper/config/donuts-test.cfg -g --general/magic=true -g --traceinput/stop_with_first_app=true -g --traceinput/restart_apps=false -g --traceinput/stop_with_first_app=false -g --traceinput/enabled=true -g --traceinput/emulate_syscalls=true -g --traceinput/num_apps=1 -g --traceinput/trace_prefix=/tmp/tmpFwtqsB/run_benchmarks']
+[SNIPER] --------------------------------------------------------------------------------
+[SNIPER] Sniper using SIFT/trace-driven frontend
+[SNIPER] Running pre-ROI region in  CACHE_ONLY mode
+[SNIPER] Running application ROI in DETAILED mode
+[SNIPER] Running post-ROI region in FAST_FORWARD mode
+[SNIPER] --------------------------------------------------------------------------------
+[RECORD-TRACE] Using the Pin frontend (sift/recorder)
+[SIFT_RECORDER] Running /home/kleberkruger/donuts/sniper/pin_kit/pin -mt -injection child -xyzzy -ifeellucky -follow_execv 1  -t /home/kleberkruger/donuts/sniper/sift/recorder/obj-intel64/sift_recorder -verbose 1 -debug 0 -roi 1 -roi-mpi 0 -f 0 -d 0 -b 0 -o /tmp/tmpFwtqsB/run_benchmarks -e 1 -s 0 -r 1 -pa 0 -rtntrace 1 -stop 0    -- ./fft -p 1
+Checkpoint by CACHE_THRESHOLD for Epoch 1 at time 122959 | Logs: 97, Full: 75.78%
+gap: 64377
+Checkpoint by TIMEOUT for Epoch 2 at time 187337 | Logs: 84, Full: 65.62%
+Checkpoint by CACHE_THRESHOLD for Epoch 3 at time 270941 | Logs: 97, Full: 75.78%
+Checkpoint by CACHE_THRESHOLD for Epoch 4 at time 362996 | Logs: 97, Full: 75.78%
+[SNIPER] Enabling performance models
+[SNIPER] Setting instrumentation mode to DETAILED
+gap: 6894
+Checkpoint by TIMEOUT for Epoch 5 at time 369893 | Logs: 9, Full: 7.03%
+gap: 998
+gap: 1998
+gap: 2998
+gap: 3998
+gap: 4998
+gap: 5998
+Checkpoint by TIMEOUT for Epoch 6 at time 375891 | Logs: 0, Full: 0.00%
+gap: 1000
+gap: 2000
+gap: 3000
+gap: 4000
+gap: 5000
+Checkpoint by TIMEOUT for Epoch 7 at time 380891 | Logs: 0, Full: 0.00%
+gap: 1000
+gap: 2000
+gap: 3000
+gap: 4000
+gap: 5000
+Checkpoint by TIMEOUT for Epoch 8 at time 385891 | Logs: 0, Full: 0.00%
+gap: 1000
+gap: 2000
+gap: 3000
+gap: 4000
+gap: 5000
+Checkpoint by TIMEOUT for Epoch 9 at time 390891 | Logs: 0, Full: 0.00%
+gap: 1000
+gap: 2000
+gap: 3000
+gap: 4000
+gap: 5000
+Checkpoint by TIMEOUT for Epoch 10 at time 395891 | Logs: 0, Full: 0.00%
+gap: 1000
+gap: 2000
+gap: 3000
+gap: 4000
+gap: 5000
+Checkpoint by TIMEOUT for Epoch 11 at time 400891 | Logs: 0, Full: 0.00%
+gap: 1000
+gap: 2000
+gap: 3000
+gap: 4000
+gap: 5000
+Checkpoint by TIMEOUT for Epoch 12 at time 405971 | Logs: 24, Full: 18.75%
+gap: 920
+gap: 1920
+gap: 2920
+gap: 3920
+gap: 4920
+gap: 5920
+Checkpoint by TIMEOUT for Epoch 13 at time 411999 | Logs: 1, Full: 0.78%
+gap: 891
+gap: 1891
+gap: 2891
+gap: 3891
+gap: 4891
+gap: 5891
+Checkpoint by TIMEOUT for Epoch 14 at time 418058 | Logs: 1, Full: 0.78%
+gap: 833
+gap: 1833
+gap: 2833
+gap: 3833
+gap: 4833
+gap: 5833
+Checkpoint by TIMEOUT for Epoch 15 at time 423916 | Logs: 1, Full: 0.78%
+gap: 974
+gap: 1974
+gap: 2974
+gap: 3974
+gap: 4974
+gap: 5974
+Checkpoint by TIMEOUT for Epoch 16 at time 430064 | Logs: 1, Full: 0.78%
+gap: 827
+gap: 1827
+gap: 2827
+gap: 3827
+gap: 4827
+gap: 5827
+Checkpoint by TIMEOUT for Epoch 17 at time 436054 | Logs: 37, Full: 28.91%
+gap: 836
+gap: 1836
+gap: 2836
+gap: 3836
+gap: 4836
+gap: 5836
+Checkpoint by TIMEOUT for Epoch 18 at time 441971 | Logs: 66, Full: 51.56%
+gap: 920
+gap: 1920
+gap: 2920
+gap: 3920
+gap: 4920
+gap: 5920
+Checkpoint by TIMEOUT for Epoch 19 at time 448038 | Logs: 86, Full: 67.19%
+gap: 853
+gap: 1853
+gap: 2853
+gap: 3853
+gap: 4853
+gap: 5853
+Checkpoint by TIMEOUT for Epoch 20 at time 454053 | Logs: 66, Full: 51.56%
+gap: 837
+gap: 1837
+gap: 2837
+gap: 3837
+gap: 4837
+gap: 5837
+Checkpoint by TIMEOUT for Epoch 21 at time 459947 | Logs: 84, Full: 65.62%
+gap: 943
+gap: 1943
+gap: 2943
+gap: 3943
+gap: 4943
+gap: 5943
+Checkpoint by TIMEOUT for Epoch 22 at time 465891 | Logs: 72, Full: 56.25%
+gap: 1000
+gap: 2000
+gap: 3000
+gap: 4000
+gap: 5000
+Checkpoint by TIMEOUT for Epoch 23 at time 470998 | Logs: 12, Full: 9.38%
+gap: 892
+gap: 1892
+gap: 2892
+gap: 3892
+gap: 4892
+gap: 5892
+Checkpoint by TIMEOUT for Epoch 24 at time 476995 | Logs: 23, Full: 17.97%
+gap: 895
+gap: 1895
+gap: 2895
+gap: 3895
+gap: 4895
+gap: 5895
+Checkpoint by TIMEOUT for Epoch 25 at time 482926 | Logs: 25, Full: 19.53%
+gap: 964
+gap: 1964
+gap: 2964
+gap: 3964
+gap: 4964
+gap: 5964
+Checkpoint by TIMEOUT for Epoch 26 at time 488891 | Logs: 23, Full: 17.97%
+gap: 1000
+gap: 2000
+gap: 3000
+gap: 4000
+gap: 5000
+Checkpoint by TIMEOUT for Epoch 27 at time 493891 | Logs: 23, Full: 17.97%
+gap: 1000
+gap: 2000
+gap: 3000
+gap: 4000
+gap: 5000
+Checkpoint by TIMEOUT for Epoch 28 at time 498891 | Logs: 23, Full: 17.97%
+gap: 1000
+gap: 2000
+gap: 3000
+gap: 4000
+gap: 5000
+Checkpoint by TIMEOUT for Epoch 29 at time 503891 | Logs: 23, Full: 17.97%
+gap: 1000
+gap: 2000
+gap: 3000
+gap: 4000
+gap: 5000
+Checkpoint by TIMEOUT for Epoch 30 at time 508891 | Logs: 23, Full: 17.97%
+gap: 1000
+gap: 2000
+gap: 3000
+gap: 4000
+gap: 5000
+Checkpoint by TIMEOUT for Epoch 31 at time 513891 | Logs: 23, Full: 17.97%
+gap: 1000
+gap: 2000
+gap: 3000
+gap: 4000
+gap: 5000
+Checkpoint by TIMEOUT for Epoch 32 at time 518891 | Logs: 23, Full: 17.97%
+gap: 1000
+gap: 2000
+gap: 3000
+gap: 4000
+gap: 5000
+Checkpoint by TIMEOUT for Epoch 33 at time 523891 | Logs: 23, Full: 17.97%
+gap: 1000
+gap: 2000
+gap: 3000
+gap: 4000
+gap: 5000
+Checkpoint by TIMEOUT for Epoch 34 at time 528891 | Logs: 23, Full: 17.97%
+gap: 1000
+gap: 2000
+gap: 3000
+gap: 4000
+gap: 5000
+Checkpoint by TIMEOUT for Epoch 35 at time 533891 | Logs: 23, Full: 17.97%
+gap: 1000
+gap: 2000
+gap: 3000
+gap: 4000
+gap: 5000
+Checkpoint by TIMEOUT for Epoch 36 at time 538891 | Logs: 23, Full: 17.97%
+gap: 1000
+gap: 2000
+gap: 3000
+gap: 4000
+gap: 5000
+Checkpoint by TIMEOUT for Epoch 37 at time 543891 | Logs: 23, Full: 17.97%
+gap: 1000
+gap: 2000
+gap: 3000
+gap: 4000
+gap: 5000
+Checkpoint by TIMEOUT for Epoch 38 at time 548997 | Logs: 23, Full: 17.97%
+gap: 893
+gap: 1893
+gap: 2893
+gap: 3893
+gap: 4893
+gap: 5893
+Checkpoint by TIMEOUT for Epoch 39 at time 554998 | Logs: 25, Full: 19.53%
+gap: 892
+gap: 1892
+gap: 2892
+gap: 3892
+gap: 4892
+gap: 5892
+Checkpoint by TIMEOUT for Epoch 40 at time 560891 | Logs: 23, Full: 17.97%
+gap: 1000
+gap: 2000
+gap: 3000
+gap: 4000
+gap: 5000
+Checkpoint by TIMEOUT for Epoch 41 at time 565891 | Logs: 23, Full: 17.97%
+gap: 1000
+gap: 2000
+gap: 3000
+gap: 4000
+gap: 5000
+Checkpoint by TIMEOUT for Epoch 42 at time 570891 | Logs: 23, Full: 17.97%
+gap: 1000
+gap: 2000
+gap: 3000
+gap: 4000
+gap: 5000
+Checkpoint by TIMEOUT for Epoch 43 at time 575891 | Logs: 23, Full: 17.97%
+gap: 1000
+gap: 2000
+gap: 3000
+gap: 4000
+gap: 5000
+Checkpoint by TIMEOUT for Epoch 44 at time 580891 | Logs: 23, Full: 17.97%
+gap: 1000
+gap: 2000
+gap: 3000
+gap: 4000
+gap: 5000
+Checkpoint by TIMEOUT for Epoch 45 at time 585891 | Logs: 23, Full: 17.97%
+gap: 1000
+gap: 2000
+gap: 3000
+gap: 4000
+gap: 5000
+Checkpoint by TIMEOUT for Epoch 46 at time 590891 | Logs: 23, Full: 17.97%
+gap: 1000
+gap: 2000
+gap: 3000
+gap: 4000
+gap: 5000
+Checkpoint by TIMEOUT for Epoch 47 at time 595891 | Logs: 23, Full: 17.97%
+gap: 1000
+gap: 2000
+gap: 3000
+gap: 4000
+gap: 5000
+Checkpoint by TIMEOUT for Epoch 48 at time 600891 | Logs: 23, Full: 17.97%
+gap: 1000
+gap: 2000
+gap: 3000
+gap: 4000
+gap: 5000
+Checkpoint by TIMEOUT for Epoch 49 at time 605891 | Logs: 23, Full: 17.97%
+gap: 1000
+gap: 2000
+gap: 3000
+gap: 4000
+gap: 5000
+Checkpoint by TIMEOUT for Epoch 50 at time 610891 | Logs: 23, Full: 17.97%
+gap: 1000
+gap: 2000
+gap: 3000
+gap: 4000
+gap: 5000
+Checkpoint by TIMEOUT for Epoch 51 at time 615891 | Logs: 23, Full: 17.97%
+gap: 1000
+gap: 2000
+gap: 3000
+gap: 4000
+gap: 5000
+Checkpoint by TIMEOUT for Epoch 52 at time 620891 | Logs: 23, Full: 17.97%
+gap: 1000
+gap: 2000
+gap: 3000
+gap: 4000
+gap: 5000
+Checkpoint by TIMEOUT for Epoch 53 at time 625976 | Logs: 46, Full: 35.94%
+gap: 914
+gap: 1914
+gap: 2914
+gap: 3914
+gap: 4914
+gap: 5914
+Checkpoint by TIMEOUT for Epoch 54 at time 631975 | Logs: 83, Full: 64.84%
+gap: 915
+gap: 1915
+gap: 2915
+gap: 3915
+gap: 4915
+gap: 5915
+Checkpoint by TIMEOUT for Epoch 55 at time 638014 | Logs: 66, Full: 51.56%
+gap: 876
+gap: 1876
+gap: 2876
+gap: 3876
+gap: 4876
+gap: 5876
+Checkpoint by TIMEOUT for Epoch 56 at time 644054 | Logs: 72, Full: 56.25%
+gap: 837
+gap: 1837
+gap: 2837
+gap: 3837
+gap: 4837
+gap: 5837
+Checkpoint by TIMEOUT for Epoch 57 at time 650001 | Logs: 89, Full: 69.53%
+gap: 889
+gap: 1889
+gap: 2889
+gap: 3889
+gap: 4889
+gap: 5889
+Checkpoint by TIMEOUT for Epoch 58 at time 655948 | Logs: 45, Full: 35.16%
+gap: 942
+gap: 1942
+gap: 2942
+gap: 3942
+gap: 4942
+gap: 5942
+Checkpoint by TIMEOUT for Epoch 59 at time 661891 | Logs: 21, Full: 16.41%
+gap: 1000
+gap: 2000
+gap: 3000
+gap: 4000
+gap: 5000
+Checkpoint by TIMEOUT for Epoch 60 at time 666891 | Logs: 25, Full: 19.53%
+gap: 1000
+gap: 2000
+gap: 3000
+gap: 4000
+gap: 5000
+Checkpoint by TIMEOUT for Epoch 61 at time 671891 | Logs: 21, Full: 16.41%
+gap: 1000
+gap: 2000
+gap: 3000
+gap: 4000
+gap: 5000
+Checkpoint by TIMEOUT for Epoch 62 at time 677045 | Logs: 24, Full: 18.75%
+gap: 845
+gap: 1845
+gap: 2845
+gap: 3845
+gap: 4845
+gap: 5845
+Checkpoint by TIMEOUT for Epoch 63 at time 682891 | Logs: 21, Full: 16.41%
+gap: 1000
+gap: 2000
+gap: 3000
+gap: 4000
+gap: 5000
+Checkpoint by TIMEOUT for Epoch 64 at time 687891 | Logs: 21, Full: 16.41%
+gap: 1000
+gap: 2000
+gap: 3000
+gap: 4000
+gap: 5000
+Checkpoint by TIMEOUT for Epoch 65 at time 692891 | Logs: 23, Full: 17.97%
+gap: 1000
+gap: 2000
+gap: 3000
+gap: 4000
+gap: 5000
+Checkpoint by TIMEOUT for Epoch 66 at time 697891 | Logs: 21, Full: 16.41%
+gap: 1000
+gap: 2000
+gap: 3000
+gap: 4000
+gap: 5000
+Checkpoint by TIMEOUT for Epoch 67 at time 702998 | Logs: 23, Full: 17.97%
+gap: 892
+gap: 1892
+gap: 2892
+gap: 3892
+gap: 4892
+gap: 5892
+Checkpoint by TIMEOUT for Epoch 68 at time 708891 | Logs: 21, Full: 16.41%
+gap: 1000
+gap: 2000
+gap: 3000
+gap: 4000
+gap: 5000
+Checkpoint by TIMEOUT for Epoch 69 at time 713891 | Logs: 21, Full: 16.41%
+gap: 1000
+gap: 2000
+gap: 3000
+gap: 4000
+gap: 5000
+Checkpoint by TIMEOUT for Epoch 70 at time 718891 | Logs: 23, Full: 17.97%
+gap: 1000
+gap: 2000
+gap: 3000
+gap: 4000
+gap: 5000
+Checkpoint by TIMEOUT for Epoch 71 at time 723891 | Logs: 21, Full: 16.41%
+gap: 1000
+gap: 2000
+gap: 3000
+gap: 4000
+gap: 5000
+Checkpoint by TIMEOUT for Epoch 72 at time 728891 | Logs: 21, Full: 16.41%
+gap: 1000
+gap: 2000
+gap: 3000
+gap: 4000
+gap: 5000
+Checkpoint by TIMEOUT for Epoch 73 at time 733891 | Logs: 23, Full: 17.97%
+gap: 1000
+gap: 2000
+gap: 3000
+gap: 4000
+gap: 5000
+Checkpoint by TIMEOUT for Epoch 74 at time 738891 | Logs: 21, Full: 16.41%
+gap: 1000
+gap: 2000
+gap: 3000
+gap: 4000
+gap: 5000
+Checkpoint by TIMEOUT for Epoch 75 at time 743996 | Logs: 23, Full: 17.97%
+gap: 894
+gap: 1894
+gap: 2894
+gap: 3894
+gap: 4894
+gap: 5894
+Checkpoint by TIMEOUT for Epoch 76 at time 749891 | Logs: 21, Full: 16.41%
+gap: 1000
+gap: 2000
+gap: 3000
+gap: 4000
+gap: 5000
+Checkpoint by TIMEOUT for Epoch 77 at time 754891 | Logs: 21, Full: 16.41%
+gap: 1000
+gap: 2000
+gap: 3000
+gap: 4000
+gap: 5000
+Checkpoint by TIMEOUT for Epoch 78 at time 759891 | Logs: 24, Full: 18.75%
+gap: 1000
+gap: 2000
+gap: 3000
+gap: 4000
+gap: 5000
+Checkpoint by TIMEOUT for Epoch 79 at time 764891 | Logs: 21, Full: 16.41%
+gap: 1000
+gap: 2000
+gap: 3000
+gap: 4000
+gap: 5000
+Checkpoint by TIMEOUT for Epoch 80 at time 770064 | Logs: 21, Full: 16.41%
+gap: 826
+gap: 1826
+gap: 2826
+gap: 3826
+gap: 4826
+gap: 5826
+Checkpoint by TIMEOUT for Epoch 81 at time 776039 | Logs: 48, Full: 37.50%
+gap: 851
+gap: 1851
+gap: 2851
+gap: 3851
+gap: 4851
+gap: 5851
+Checkpoint by TIMEOUT for Epoch 82 at time 782023 | Logs: 85, Full: 66.41%
+gap: 868
+gap: 1868
+gap: 2868
+gap: 3868
+gap: 4868
+gap: 5868
+Checkpoint by TIMEOUT for Epoch 83 at time 787997 | Logs: 66, Full: 51.56%
+gap: 893
+gap: 1893
+gap: 2893
+gap: 3893
+gap: 4893
+gap: 5893
+Checkpoint by TIMEOUT for Epoch 84 at time 794002 | Logs: 85, Full: 66.41%
+gap: 888
+gap: 1888
+gap: 2888
+gap: 3888
+gap: 4888
+gap: 5888
+Checkpoint by TIMEOUT for Epoch 85 at time 800009 | Logs: 66, Full: 51.56%
+gap: 881
+gap: 1881
+gap: 2881
+gap: 3881
+gap: 4881
+[SNIPER] Disabling performance models
+[SNIPER] Leaving ROI after 2.06 seconds
+[SNIPER] Simulated 1.3M instructions, 2.1M cycles, 0.59 IPC
+[SNIPER] Simulation speed 608.0 KIPS (608.0 KIPS / target core - 1644.7ns/instr)
+[SNIPER] Sampling: executed 54.08% of simulated time in detailed mode
+[SNIPER] Setting instrumentation mode to FAST_FORWARD
+[TRACE:0] -- DONE --
+
+FFT with Blocking Transpose
+   1024 Complex Doubles
+   1 Processors
+   65536 Cache lines
+   16 Byte line size
+   4096 Bytes per page
+
+
+                 PROCESS STATISTICS
+            Computation      Transpose     Transpose
+ Proc          Time            Time        Fraction
+    0               371             93       0.25067
+
+                 TIMING INFORMATION
+Start time                        :      -1844408304
+Initialization finish time        :      -1844407886
+Overall finish time               :      -1844407515
+Total time with initialization    :              789
+Total time without initialization :              371
+Overall transpose time            :               93
+Overall transpose fraction        :          0.25067
+
+[SNIPER] End
+[SNIPER] Elapsed time: 4.92 seconds
+
+
+Optional: Run '../../tools/cpistack.py' in this directory to generate cpi-stack output for this run
+Optional: Run '../../tools/mcpat.py' in this directory to generate power output for this run
+Optional: Run '../../tools/dumpstats.py' in this directory to view detailed statistics for this run
+Optional: Run '../../tools/gen_topology.py' in this directory to view the system topology for this run
+

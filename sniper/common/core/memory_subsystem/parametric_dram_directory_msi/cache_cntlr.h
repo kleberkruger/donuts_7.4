@@ -17,7 +17,7 @@
 #include "stats.h"
 #include "subsecond_time.h"
 #include "shmem_perf.h"
-#include "checkpoint_info.h"
+#include "checkpoint_event.h"
 
 #include "boost/tuple/tuple.hpp"
 
@@ -280,7 +280,7 @@ namespace ParametricDramDirectoryMSI
 
          // NVM Checkpoint Support (Added by Kleber Kruger)
          SubsecondTime m_timeout;
-         static const UInt64 DEFAULT_TIMEOUT = 30000000;
+         static const UInt64 DEFAULT_TIMEOUT = 30000000; // (30ms)
 
          // Core-interfacing stuff
          void accessCache(
@@ -357,7 +357,7 @@ namespace ParametricDramDirectoryMSI
 
          // NVM Checkpoint Support (Added by Kleber Kruger)
          std::queue<CacheBlockInfo *> selectDirtyBlocks();
-         void persistCheckpointData(std::queue<CacheBlockInfo *> &data);
+         void persistCheckpointData(UInt64 eid, std::queue<CacheBlockInfo *> &data);
          void flushCacheBlock(CacheBlockInfo *block_info);
 
          // NVM Checkpoint Support (Added by Kleber Kruger)
@@ -418,7 +418,7 @@ namespace ParametricDramDirectoryMSI
          void incrementQBSLookupCost();
 
          // NVM Checkpoint Support (Added by Kleber Kruger)
-         void checkpoint(CheckpointInfo::EventType event_type);
+         void checkpoint(CheckpointEvent::Type event_type);
 
          void enable() { m_master->m_cache->enable(); }
          void disable() { m_master->m_cache->disable(); }

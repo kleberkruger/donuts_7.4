@@ -1,5 +1,5 @@
 #include "cache_set_lrur.h"
-#include "checkpoint_info.h"
+#include "checkpoint_event.h"
 
 CacheSetLRUR::CacheSetLRUR(CacheBase::cache_t cache_type,
                            UInt32 associativity,
@@ -54,7 +54,7 @@ CacheSetLRUR::getReplacementIndex(CacheCntlr *cntlr)
       {
          if (m_lru_bits[i] == max_bits)
          {
-            cntlr->checkpoint(CheckpointInfo::CACHE_SET_THRESHOLD);
+            cntlr->checkpoint(CheckpointEvent::CACHE_SET_THRESHOLD);
             return i;
          }
       }

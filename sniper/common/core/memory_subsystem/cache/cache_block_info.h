@@ -76,7 +76,7 @@ class CacheCntlr
    public:
       virtual bool isInLowerLevelCache(CacheBlockInfo *block_info) { return false; }
       virtual void incrementQBSLookupCost() {}
-      virtual void checkpoint(CheckpointInfo::EventType event_type) {} // Added by Kleber Kruger
+      virtual void checkpoint(CheckpointEvent::Type event_type) {} // Added by Kleber Kruger
 };
 
 #endif /* __CACHE_BLOCK_INFO_H__ */
