@@ -1858,7 +1858,7 @@ CacheCntlr::timeout()
    SubsecondTime last = EpochManager::getInstance()->getCommitedTime();
    SubsecondTime gap = now >= last ? now - last : last - now;
 
-   printf("gap: %lu\n", gap.getNS());
+   // printf("gap: %lu\n", gap.getNS());
 
    if (gap >= m_timeout) checkpoint(CheckpointEvent::TIMEOUT);
 }

@@ -31,8 +31,8 @@ void EpochManager::exit()
 
 void EpochManager::commitCheckpoint(const CheckpointEvent &ckpt)
 {
-   printf("Checkpoint by %s for Epoch %lu at time %lu | Logs: %lu, Full: %.2f%%\n", CheckpointEvent::TypeString(ckpt.getType()),
-          ckpt.getEpochID(), ckpt.getTime().getNS(), ckpt.getNumLogs(), ckpt.getCacheStocking());
+   // printf("Checkpoint by %s for Epoch %lu at time %lu | Logs: %lu, Full: %.2f%%\n", CheckpointEvent::TypeString(ckpt.getType()),
+   //        ckpt.getEpochID(), ckpt.getTime().getNS(), ckpt.getNumLogs(), ckpt.getCacheStocking());
    
    fprintf(m_log_file, "%lu\n", ckpt.getTime().getNS());
 
