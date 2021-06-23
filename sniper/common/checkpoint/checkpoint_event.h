@@ -28,7 +28,11 @@ public:
    CheckpointEvent(const Type event_type,
                    const UInt64 eid, const SubsecondTime &time, 
                    const UInt64 num_logs, const float cache_stocking);
-   
+
+   void commit();
+
+   void persist();
+
    /**
     * @brief Construct a new Checkpoint Event object
     * @param orig 
@@ -51,6 +55,11 @@ public:
     * @return UInt64 
     */
    UInt64 getEpochID() const { return m_eid; }
+
+   /**
+    * @brief Get the Time object
+    * @return SubsecondTime 
+    */
    SubsecondTime getTime() const { return m_time; }
    
    /**

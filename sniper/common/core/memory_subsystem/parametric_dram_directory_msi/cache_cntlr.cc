@@ -1785,15 +1785,15 @@ void CacheCntlr::checkpoint(CheckpointEvent::Type event_type)
    // DonutsUtils::printCache(m_master->m_cache);
 
    std::queue<CacheBlockInfo *> dirty_blocks = selectDirtyBlocks();
-   // if (dirty_blocks.size() > 0)
-   // {
+   if (dirty_blocks.size() > 0)
+   {
       CheckpointEvent ckpt(event_type, EpochManager::getGlobalSystemEID(),
                            getShmemPerfModel()->getElapsedTime(ShmemPerfModel::_SIM_THREAD),
                            dirty_blocks.size(), m_master->m_cache->getCapacityFilled() * 100);
 
       persistCheckpointData(EpochManager::getGlobalSystemEID(), dirty_blocks);
       EpochManager::getInstance()->commitCheckpoint(ckpt);
-   // }
+   }
 
    // printf("STARTING [%lu]\n", EpochManager::getGlobalSystemEID());
    // DonutsUtils::printCache(m_master->m_cache);

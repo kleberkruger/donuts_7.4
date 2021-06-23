@@ -1,4 +1,5 @@
 #include "checkpoint_event.h"
+#include "epoch_manager.h"
 
 CheckpointEvent::CheckpointEvent(const Type event_type,
                                  const UInt64 eid, const SubsecondTime &time,
@@ -17,6 +18,11 @@ CheckpointEvent::CheckpointEvent(const CheckpointEvent &orig)
       m_cache_stocking(orig.m_cache_stocking) {}
 
 CheckpointEvent::~CheckpointEvent() {}
+
+void CheckpointEvent::commit()
+{
+   EpochManager::getInstance()->commitCheckpoint(*this);
+}
 
 const char *CheckpointEvent::TypeString(const CheckpointEvent::Type type)
 {
