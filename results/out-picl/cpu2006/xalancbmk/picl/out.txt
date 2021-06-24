@@ -1,0 +1,32 @@
+[CPU2006] [========== Running benchmark xalancbmk ==========]
+[CPU2006] Running ' SNIPER_APP_LD_PRELOAD=$LD_PRELOAD; unset LD_PRELOAD; /home/kleberkruger/PiCL/sniper/run-sniper -n 1 -m 'localhost' -d '/home/kleberkruger/PiCL/sniper/benchmarks/out/cpu2006/xalancbmk/pikl/v2' -c picl-enabled -s stop-by-icount:1000000000 --roi --curdir=/home/kleberkruger/PiCL/sniper/benchmarks  --  /tmp/tmp3xB9NJ/xalancbmk_base.sniper-x86_64 -v t5.xml xalanc.xsl ':
+[CPU2006] [---------- Beginning of output ----------]
+[SNIPER] Start
+Executing Python script /home/kleberkruger/PiCL/sniper/benchmarks/out/cpu2006/xalancbmk/pikl/v2/sim.scripts.py
+[STOPBYICOUNT] Waiting for application ROI
+[STOPBYICOUNT] Then stopping after simulating at least 1000000000 instructions in detail
+[SNIPER] --------------------------------------------------------------------------------
+[SNIPER] Sniper using SIFT/trace-driven frontend
+[SNIPER] Running pre-ROI region in  CACHE_ONLY mode
+[SNIPER] Running application ROI in DETAILED mode
+[SNIPER] Running post-ROI region in FAST_FORWARD mode
+[SNIPER] --------------------------------------------------------------------------------
+[HOOKS] Entering ROI
+[SNIPER] Enabling performance models
+[STOPBYICOUNT] Application ROI started, now simulating 1000000000 in detail
+[SNIPER] Setting instrumentation mode to DETAILED
+[SNIPER] Disabling performance models
+[SNIPER] Leaving ROI after 20.48 seconds
+[SNIPER] Simulated 0.9M instructions, 10.1M cycles, 0.09 IPC
+[SNIPER] Simulation speed 45.9 KIPS (45.9 KIPS / target core - 21798.7ns/instr)
+[SNIPER] Sampling: executed 13.29% of simulated time in detailed mode
+[SNIPER] Setting instrumentation mode to FAST_FORWARD
+[TRACE:0] -- DONE --
+[PiCL] Log writes: 4298
+[PiCL] Log writes (AVG by Epoch ID): 2149
+[HOOKS] Leaving ROI
+[RECORD-TRACE] Using the Pin frontend (sift/recorder)
+[SNIPER] End
+[SNIPER] Elapsed time: 42.21 seconds
+[CPU2006] [----------    End of output    ----------]
+[CPU2006] Done.

@@ -1,0 +1,26 @@
+[CPU2006] [========== Running benchmark lbm ==========]
+[CPU2006] Running ' SNIPER_APP_LD_PRELOAD=$LD_PRELOAD; unset LD_PRELOAD; /home/kleberkruger/snipersim/sniper/run-sniper -n 1 -m 'localhost' -d '/home/kleberkruger/snipersim/sniper/benchmarks/out/cpu2006/thynvm/v2/470.lbm/kruger/1.0' -c thynvm -s stop-by-icount:1000000000 --roi --curdir=/home/kleberkruger/snipersim/sniper/benchmarks  --  /tmp/tmpKTh65o/lbm_base.sniper-x86_64 3000 reference.dat 0 0 100_100_130_ldc.of ':
+[CPU2006] [---------- Beginning of output ----------]
+[SNIPER] Start
+Executing Python script /home/kleberkruger/snipersim/sniper/benchmarks/out/cpu2006/thynvm/v2/470.lbm/kruger/1.0/sim.scripts.py
+[STOPBYICOUNT] Waiting for application ROI
+[STOPBYICOUNT] Then stopping after simulating at least 1000000000 instructions in detail
+[SNIPER] --------------------------------------------------------------------------------
+[SNIPER] Sniper using SIFT/trace-driven frontend
+[SNIPER] Running pre-ROI region in  CACHE_ONLY mode
+[SNIPER] Running application ROI in DETAILED mode
+[SNIPER] Running post-ROI region in FAST_FORWARD mode
+[SNIPER] --------------------------------------------------------------------------------
+[HOOKS] Entering ROI
+[SNIPER] Enabling performance models
+[STOPBYICOUNT] Application ROI started, now simulating 1000000000 in detail
+[SNIPER] Setting instrumentation mode to DETAILED
+[STOPBYICOUNT] Ending ROI after 1000767275 instructions (1000000000 requested)
+[SNIPER] Disabling performance models
+[SNIPER] Leaving ROI after 3425.91 seconds
+[SNIPER] Simulated 1000.8M instructions, 2231.8M cycles, 0.45 IPC
+[SNIPER] Simulation speed 292.1 KIPS (292.1 KIPS / target core - 3423.3ns/instr)
+[SNIPER] Sampling: executed 99.99% of simulated time in detailed mode
+[SNIPER] Setting instrumentation mode to FAST_FORWARD
+[SNIPER] End
+[SNIPER] Elapsed time: 3424.26 seconds

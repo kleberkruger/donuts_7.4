@@ -1,0 +1,71 @@
+[CPU2006] [========== Running benchmark sjeng ==========]
+[CPU2006] Running ' SNIPER_APP_LD_PRELOAD=$LD_PRELOAD; unset LD_PRELOAD; /home/kleberkruger/PiCL/sniper/run-sniper -n 1 -m 'localhost' -d '/home/kleberkruger/PiCL/sniper/benchmarks/out/cpu2006/sjeng/base/v2' -c picl-disabled -s stop-by-icount:1000000000 --roi --curdir=/home/kleberkruger/PiCL/sniper/benchmarks  --  /tmp/tmpHPl2Dh/sjeng_base.sniper-x86_64 ref.txt ':
+[CPU2006] [---------- Beginning of output ----------]
+[SNIPER] Start
+Executing Python script /home/kleberkruger/PiCL/sniper/benchmarks/out/cpu2006/sjeng/base/v2/sim.scripts.py
+[STOPBYICOUNT] Waiting for application ROI
+[STOPBYICOUNT] Then stopping after simulating at least 1000000000 instructions in detail
+[SNIPER] --------------------------------------------------------------------------------
+[SNIPER] Sniper using SIFT/trace-driven frontend
+[SNIPER] Running pre-ROI region in  CACHE_ONLY mode
+[SNIPER] Running application ROI in DETAILED mode
+[SNIPER] Running post-ROI region in FAST_FORWARD mode
+[SNIPER] --------------------------------------------------------------------------------
+[HOOKS] Entering ROI
+[SNIPER] Enabling performance models
+[STOPBYICOUNT] Application ROI started, now simulating 1000000000 in detail
+[SNIPER] Setting instrumentation mode to DETAILED
+
+Sjeng version SPEC 1.0, Copyright (C) 2000-2005 Gian-Carlo Pascutto
+
+SPEC Workload
+
+  +----+----+----+----+----+----+----+----+
+8 | *R |    |    |    | *K | *B |    | *R |
+  +----+----+----+----+----+----+----+----+
+7 |    | *B | *Q |    |    | *P |  R |    |
+  +----+----+----+----+----+----+----+----+
+6 | *P |    |    |    |    |  P |    |    |
+  +----+----+----+----+----+----+----+----+
+5 |    |    |    |  P | *P |    |    | *P |
+  +----+----+----+----+----+----+----+----+
+4 |    | *P |    |    |    |    |    |    |
+  +----+----+----+----+----+----+----+----+
+3 |    |    |    |    |    |    |  Q |  B |
+  +----+----+----+----+----+----+----+----+
+2 |  P |  P |  P |    |    |    |    |  P |
+  +----+----+----+----+----+----+----+----+
+1 |    |    |  K |  R |    |    |    |    |
+  +----+----+----+----+----+----+----+----+
+
+     a    b    c    d    e    f    g    h
+
+EPD: r3kb1r/1bq2pR1/p4P2/3Pp2p/1p6/6QB/PPP4P/2KR4 b kq - bm Rd8 h4; id "CCC-ANAL-2";
+
+Searching to 12 ply
+Middlegame phase.
+Time for move : 1000000
+ 2  2.45       200 Bxg7 fxg7 Rg8 
+ 2  2.45       993 Bxg7 fxg7 Rg8 
+ 3  2.10      1259 Bxg7 ??
+ 3  2.11      1724 Rd8 !
+ 3  2.44      3553 Rd8 Be6 Bxg7 fxg7 
+ 4  2.45      5553 Rd8 Be6 Bxg7 fxg7 Rg8 
+ 4  2.46      8782 h4 !
+ 4  2.45     11179 Rd8 Be6 Bxg7 fxg7 Rg8 
+ 5  2.21     21737 Rd8 Qb3 Qa5 c4 Bxg7 fxg7 
+ 5  2.21     35796 Rd8 Qb3 Qa5 c4 Bxg7 fxg7 
+ 6  1.92     63209 Rd8 Be6 Bxg7 Bxf7+ Qxf7 fxg7 Qf6 g8=Q+ Rxg8 Qxg8+ 
+ 6  1.93     64970 h4 !
+[STOPBYICOUNT] Ending ROI after 1019776330 instructions (1000000000 requested)
+[SNIPER] Disabling performance models
+[SNIPER] Leaving ROI after 5428.10 seconds
+[SNIPER] Simulated 1019.8M instructions, 810.2M cycles, 1.26 IPC
+[SNIPER] Simulation speed 187.9 KIPS (187.9 KIPS / target core - 5322.8ns/instr)
+[SNIPER] Sampling: executed 99.97% of simulated time in detailed mode
+[SNIPER] Setting instrumentation mode to FAST_FORWARD
+[SNIPER] End
+[SNIPER] Elapsed time: 5426.11 seconds
+[RECORD-TRACE] Using the Pin frontend (sift/recorder)
+[CPU2006] [----------    End of output    ----------]
+[CPU2006] Done.

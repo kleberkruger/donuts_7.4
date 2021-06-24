@@ -1,0 +1,29 @@
+[CPU2006] [========== Running benchmark bwaves ==========]
+[CPU2006] Running ' SNIPER_APP_LD_PRELOAD=$LD_PRELOAD; unset LD_PRELOAD; /home/kleberkruger/PiCL/sniper/run-sniper -n 1 -m 'localhost' -d '/home/kleberkruger/PiCL/sniper/benchmarks/out/cpu2006/bwaves/pikl/v2' -c picl-enabled -s stop-by-icount:1000000000 --roi --curdir=/home/kleberkruger/PiCL/sniper/benchmarks  --  /tmp/tmpffkRfp/bwaves_base.sniper-x86_64  ':
+[CPU2006] [---------- Beginning of output ----------]
+[SNIPER] Start
+Executing Python script /home/kleberkruger/PiCL/sniper/benchmarks/out/cpu2006/bwaves/pikl/v2/sim.scripts.py
+[STOPBYICOUNT] Waiting for application ROI
+[STOPBYICOUNT] Then stopping after simulating at least 1000000000 instructions in detail
+[SNIPER] --------------------------------------------------------------------------------
+[SNIPER] Sniper using SIFT/trace-driven frontend
+[SNIPER] Running pre-ROI region in  CACHE_ONLY mode
+[SNIPER] Running application ROI in DETAILED mode
+[SNIPER] Running post-ROI region in FAST_FORWARD mode
+[SNIPER] --------------------------------------------------------------------------------
+[HOOKS] Entering ROI
+[SNIPER] Enabling performance models
+[STOPBYICOUNT] Application ROI started, now simulating 1000000000 in detail
+[SNIPER] Setting instrumentation mode to DETAILED
+[STOPBYICOUNT] Ending ROI after 1019641424 instructions (1000000000 requested)
+[SNIPER] Disabling performance models
+[SNIPER] Leaving ROI after 5826.60 seconds
+[SNIPER] Simulated 1019.6M instructions, 1700.7M cycles, 0.60 IPC
+[SNIPER] Simulation speed 175.0 KIPS (175.0 KIPS / target core - 5714.4ns/instr)
+[SNIPER] Sampling: executed 99.98% of simulated time in detailed mode
+[SNIPER] Setting instrumentation mode to FAST_FORWARD
+[SNIPER] End
+[SNIPER] Elapsed time: 5829.17 seconds
+[RECORD-TRACE] Using the Pin frontend (sift/recorder)
+[CPU2006] [----------    End of output    ----------]
+[CPU2006] Done.

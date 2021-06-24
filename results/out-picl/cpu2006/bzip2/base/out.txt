@@ -1,0 +1,29 @@
+[CPU2006] [========== Running benchmark bzip2 ==========]
+[CPU2006] Running ' SNIPER_APP_LD_PRELOAD=$LD_PRELOAD; unset LD_PRELOAD; /home/kleberkruger/PiCL/sniper/run-sniper -n 1 -m 'localhost' -d '/home/kleberkruger/PiCL/sniper/benchmarks/out/cpu2006/bzip2/base/v2' -c picl-disabled -s stop-by-icount:1000000000 --roi --curdir=/home/kleberkruger/PiCL/sniper/benchmarks  --  /tmp/tmpMzQhL2/bzip2_base.sniper-x86_64 input.source 280 ':
+[CPU2006] [---------- Beginning of output ----------]
+[SNIPER] Start
+Executing Python script /home/kleberkruger/PiCL/sniper/benchmarks/out/cpu2006/bzip2/base/v2/sim.scripts.py
+[STOPBYICOUNT] Waiting for application ROI
+[STOPBYICOUNT] Then stopping after simulating at least 1000000000 instructions in detail
+[SNIPER] --------------------------------------------------------------------------------
+[SNIPER] Sniper using SIFT/trace-driven frontend
+[SNIPER] Running pre-ROI region in  CACHE_ONLY mode
+[SNIPER] Running application ROI in DETAILED mode
+[SNIPER] Running post-ROI region in FAST_FORWARD mode
+[SNIPER] --------------------------------------------------------------------------------
+[HOOKS] Entering ROI
+[SNIPER] Enabling performance models
+[STOPBYICOUNT] Application ROI started, now simulating 1000000000 in detail
+[SNIPER] Setting instrumentation mode to DETAILED
+[STOPBYICOUNT] Ending ROI after 1019760228 instructions (1000000000 requested)
+[SNIPER] Disabling performance models
+[SNIPER] Leaving ROI after 2833.13 seconds
+[SNIPER] Simulated 1019.8M instructions, 854.3M cycles, 1.19 IPC
+[SNIPER] Simulation speed 359.9 KIPS (359.9 KIPS / target core - 2778.2ns/instr)
+[SNIPER] Sampling: executed 99.97% of simulated time in detailed mode
+[SNIPER] Setting instrumentation mode to FAST_FORWARD
+[SNIPER] End
+[SNIPER] Elapsed time: 2832.67 seconds
+[RECORD-TRACE] Using the Pin frontend (sift/recorder)
+[CPU2006] [----------    End of output    ----------]
+[CPU2006] Done.

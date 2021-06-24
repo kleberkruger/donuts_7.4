@@ -1,0 +1,42 @@
+[CPU2006] [========== Running benchmark soplex ==========]
+[CPU2006] Running ' SNIPER_APP_LD_PRELOAD=$LD_PRELOAD; unset LD_PRELOAD; /home/kleberkruger/PiCL/sniper/run-sniper -n 1 -m 'localhost' -d '/home/kleberkruger/PiCL/sniper/benchmarks/out/cpu2006/soplex/pikl/v2' -c picl-enabled -s stop-by-icount:1000000000 --roi --curdir=/home/kleberkruger/PiCL/sniper/benchmarks  --  /tmp/tmpF6YRAK/soplex_base.sniper-x86_64 -s1 -e -m45000 pds-50.mps ':
+[CPU2006] [---------- Beginning of output ----------]
+[SNIPER] Start
+Executing Python script /home/kleberkruger/PiCL/sniper/benchmarks/out/cpu2006/soplex/pikl/v2/sim.scripts.py
+[STOPBYICOUNT] Waiting for application ROI
+[STOPBYICOUNT] Then stopping after simulating at least 1000000000 instructions in detail
+[SNIPER] --------------------------------------------------------------------------------
+[SNIPER] Sniper using SIFT/trace-driven frontend
+[SNIPER] Running pre-ROI region in  CACHE_ONLY mode
+[SNIPER] Running application ROI in DETAILED mode
+[SNIPER] Running post-ROI region in FAST_FORWARD mode
+[SNIPER] --------------------------------------------------------------------------------
+[HOOKS] Entering ROI
+[SNIPER] Enabling performance models
+[STOPBYICOUNT] Application ROI started, now simulating 1000000000 in detail
+[SNIPER] Setting instrumentation mode to DETAILED
+Delta   =     1.000000e-06
+Epsilon =     1.000000e-17
+Leaving algorithm
+Column representation
+Forest-Tomlin update
+Steep pricing
+Fast ratiotest
+No scaling
+General simplifier
+Weight starter
+loading LP file pds-50.mps
+[TRACE:0] -- DONE --
+[PiCL] Log writes: 6033
+[PiCL] Log writes (AVG by Epoch ID): 3016
+[RECORD-TRACE] Using the Pin frontend (sift/recorder)
+[SNIPER] Disabling performance models
+[SNIPER] Leaving ROI after 10.39 seconds
+[SNIPER] Simulated 0.5M instructions, 6.3M cycles, 0.08 IPC
+[SNIPER] Simulation speed 47.8 KIPS (47.8 KIPS / target core - 20938.9ns/instr)
+[SNIPER] Sampling: executed 9.80% of simulated time in detailed mode
+[SNIPER] Setting instrumentation mode to FAST_FORWARD
+[SNIPER] End
+[SNIPER] Elapsed time: 24.46 seconds
+[CPU2006] [----------    End of output    ----------]
+[CPU2006] Done.

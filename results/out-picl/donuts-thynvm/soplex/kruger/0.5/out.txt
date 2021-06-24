@@ -1,0 +1,40 @@
+[CPU2006] [========== Running benchmark soplex ==========]
+[CPU2006] Running ' SNIPER_APP_LD_PRELOAD=$LD_PRELOAD; unset LD_PRELOAD; /home/kleberkruger/snipersim/sniper/run-sniper -n 1 -m 'localhost' -d '/home/kleberkruger/snipersim/sniper/benchmarks/out/cpu2006/thynvm/v2/450.soplex/kruger/0.5' -c thynvm -s stop-by-icount:1000000000 --roi --curdir=/home/kleberkruger/snipersim/sniper/benchmarks  --  /tmp/tmpCmk3iR/soplex_base.sniper-x86_64 -s1 -e -m45000 pds-50.mps ':
+[CPU2006] [---------- Beginning of output ----------]
+[SNIPER] Start
+Executing Python script /home/kleberkruger/snipersim/sniper/benchmarks/out/cpu2006/thynvm/v2/450.soplex/kruger/0.5/sim.scripts.py
+[STOPBYICOUNT] Waiting for application ROI
+[STOPBYICOUNT] Then stopping after simulating at least 1000000000 instructions in detail
+[SNIPER] --------------------------------------------------------------------------------
+[SNIPER] Sniper using SIFT/trace-driven frontend
+[SNIPER] Running pre-ROI region in  CACHE_ONLY mode
+[SNIPER] Running application ROI in DETAILED mode
+[SNIPER] Running post-ROI region in FAST_FORWARD mode
+[SNIPER] --------------------------------------------------------------------------------
+[HOOKS] Entering ROI
+[SNIPER] Enabling performance models
+[STOPBYICOUNT] Application ROI started, now simulating 1000000000 in detail
+[SNIPER] Setting instrumentation mode to DETAILED
+Delta   =     1.000000e-06
+Epsilon =     1.000000e-17
+Leaving algorithm
+Column representation
+Forest-Tomlin update
+Steep pricing
+Fast ratiotest
+No scaling
+General simplifier
+Weight starter
+loading LP file pds-50.mps
+[STOPBYICOUNT] Ending ROI after 1000335114 instructions (1000000000 requested)
+[SNIPER] Disabling performance models
+[SNIPER] Leaving ROI after 2233.24 seconds
+[SNIPER] Simulated 1000.3M instructions, 1665.4M cycles, 0.60 IPC
+[SNIPER] Simulation speed 447.9 KIPS (447.9 KIPS / target core - 2232.5ns/instr)
+[SNIPER] Sampling: executed 99.61% of simulated time in detailed mode
+[SNIPER] Setting instrumentation mode to FAST_FORWARD
+[SNIPER] End
+[SNIPER] Elapsed time: 2236.75 seconds
+[RECORD-TRACE] Using the Pin frontend (sift/recorder)
+[CPU2006] [----------    End of output    ----------]
+[CPU2006] Done.
