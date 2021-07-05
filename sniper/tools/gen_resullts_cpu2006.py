@@ -5,11 +5,12 @@ import pandas as pd
 
 
 class ExecutionData:
-  def __init__(self, exec_time, num_mem_access, mem_bandwidth_utilization, num_mem_writes, num_mem_logs = 0, num_buffer_overflow = 0):
+  def __init__(self, exec_time, num_mem_access, mem_bandwidth_utilization, num_mem_writes, num_checkpoints = 0, num_mem_logs = 0, num_buffer_overflow = 0):
     self.exec_time = exec_time
     self.num_mem_access = num_mem_access
     self.num_mem_writes = num_mem_writes
     self.mem_bandwidth_utilization = mem_bandwidth_utilization
+    self.num_checkpoints = num_checkpoints
     self.num_mem_logs = num_mem_logs
     self.num_buffer_overflow = num_buffer_overflow
 
@@ -25,7 +26,7 @@ class App:
     self.donuts = donuts
   
   def __str__(self):
-    return 'Name: {}\tBaseline: {}\Donuts: {}'.format(self.name, self.baseline, self.picl, self.donuts)
+    return 'Name: {}\tBaseline: {}\tPiCL: {}\tDonuts: {}\n'.format(self.name, self.baseline, self.picl, self.donuts)
 
 
 def get_exec_time(res):
@@ -61,6 +62,11 @@ def get_num_mem_access(res):
 def get_num_mem_writes(res):
   results = res['results']
   return results['dram.writes'][0]
+
+
+def get_num_mem_checkpoints(res):
+  results = res['results']
+  return map(sum, zip(results['epoch'], results['system_eid']))[0]
 
 
 def get_num_mem_logs(res):
@@ -156,6 +162,15 @@ def get_mem_writes_dataframe(apps):
   return pd.concat({"Memory Writes": mem_writes_df}, axis=1)
 
 
+def get_checkpoints_dataframe(apps):
+  checkpoints_df = pd.DataFrame({
+    # 'PiCL': [ a.picl.num_checkpoints for a in apps ],
+    'Donuts': [ a.donuts.num_checkpoints for a in apps ],
+  }, index = [ a.name for a in apps ])
+  # checkpoints_df = checkpoints_df.reindex(columns=['PiCL', 'Donuts'])
+  return pd.concat({"Checkpoints": checkpoints_df}, axis=1)
+
+
 def generate_results_dataframe(resultsrootdir):
   apps = []
   for app_dir in os.listdir(resultsrootdir):
@@ -168,8 +183,11 @@ def generate_results_dataframe(resultsrootdir):
     except:
       print('An exception occurred in application: {}'.format(app_dir))
 
-  df = pd.concat([get_exec_time_dataframe(apps), get_mem_access_dataframe(apps), 
-    get_mem_bandwidth_utilization_dataframe(apps), get_mem_writes_dataframe(apps)], 
+  df = pd.concat([get_exec_time_dataframe(apps), 
+                  get_mem_access_dataframe(apps), 
+                  get_mem_bandwidth_utilization_dataframe(apps), 
+                  get_mem_writes_dataframe(apps), 
+                  get_checkpoints_dataframe(apps)],
     axis=1, names=['Application'])
   
   # df.index.name = 'Application'
