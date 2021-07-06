@@ -196,15 +196,15 @@ Cache::updateHits(Core::mem_op_t mem_op_type, UInt64 hits)
  * Get percentage (0..1) of modified blocks in cache.
  * Added by Kleber Kruger
  */
-float Cache::getCapacityFilled()
+double Cache::getCapacityFilled()
 {
    UInt64 count = 0;
    for (UInt32 i = 0; i < m_num_sets; i++)
    {
       for (UInt32 j = 0; j < m_associativity; j++)
-         if (peekBlock(i, j)->getCState() == CacheState::MODIFIED) count++;
+         if (peekBlock(i, j)->isDurty()) count++;
    }
-   return (float) count / (m_num_sets * m_associativity);
+   return static_cast<double>(count) / (m_num_sets * m_associativity);
 }
 
 float Cache::getNumCacheThreshold(CacheBase::ReplacementPolicy policy, String cfgname, core_id_t core_id)

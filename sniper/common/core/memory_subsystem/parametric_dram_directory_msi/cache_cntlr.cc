@@ -290,7 +290,7 @@ CacheCntlr::CacheCntlr(MemComponent::component_t mem_component,
       const String key = "donuts/checkpoint_timeout";
       m_timeout = SubsecondTime::NS(Sim()->getCfg()->hasKey(key) ? Sim()->getCfg()->getInt(key) : DEFAULT_TIMEOUT);
 
-      Sim()->getHooksManager()->registerHook(HookType::HOOK_PERIODIC, __timeout, (UInt64)this);
+      Sim()->getHooksManager()->registerHook(HookType::HOOK_PERIODIC, _timeout, (UInt64)this);
    }
 }
 
@@ -1781,11 +1781,11 @@ CacheCntlr::incrementQBSLookupCost()
 
 void CacheCntlr::checkpoint(CheckpointEvent::Type event_type)
 {
-   // printf("ENDING [%lu]\n", EpochManager::getGlobalSystemEID());
-   // DonutsUtils::printCache(m_master->m_cache);
+//   printf("ENDING EPOCH [%lu]...\n", EpochManager::getGlobalSystemEID());
+//   DonutsUtils::printCache(m_master->m_cache);
 
    std::queue<CacheBlockInfo *> dirty_blocks = selectDirtyBlocks();
-   if (dirty_blocks.size() > 0)
+   if (!dirty_blocks.empty())
    {
       CheckpointEvent ckpt(event_type, EpochManager::getGlobalSystemEID(),
                            getShmemPerfModel()->getElapsedTime(ShmemPerfModel::_SIM_THREAD),
@@ -1795,8 +1795,8 @@ void CacheCntlr::checkpoint(CheckpointEvent::Type event_type)
       EpochManager::getInstance()->commitCheckpoint(ckpt);
    }
 
-   // printf("STARTING [%lu]\n", EpochManager::getGlobalSystemEID());
-   // DonutsUtils::printCache(m_master->m_cache);
+//   printf("STARTING [%lu]...\n", EpochManager::getGlobalSystemEID());
+//   DonutsUtils::printCache(m_master->m_cache);
 }
 
 /**
@@ -1813,7 +1813,7 @@ std::queue<CacheBlockInfo *> CacheCntlr::selectDirtyBlocks()
       for (UInt32 offset = 0; offset < m_master->m_cache->getAssociativity(); offset++)
       {
          CacheBlockInfo *block_info = m_master->m_cache->peekBlock(index, offset);
-         if (block_info->getCState() == CacheState::MODIFIED)
+         if (block_info->isDurty())
             dirty_blocks.push(block_info);
       }
    }

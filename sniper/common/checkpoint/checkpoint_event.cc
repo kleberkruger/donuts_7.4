@@ -1,30 +1,30 @@
 #include "checkpoint_event.h"
 #include "epoch_manager.h"
 
-CheckpointEvent::CheckpointEvent(const Type event_type,
-                                 const UInt64 eid, const SubsecondTime &time,
-                                 const UInt64 num_logs, const float cache_stocking)
+CheckpointEvent::CheckpointEvent(Type event_type,
+                                 UInt64 eid, const SubsecondTime &time,
+                                 UInt64 num_logs, float cache_stocking)
     : m_type(event_type),
       m_eid(eid),
       m_time(time),
       m_num_logs(num_logs),
       m_cache_stocking(cache_stocking) {}
 
-CheckpointEvent::CheckpointEvent(const CheckpointEvent &orig)
-    : m_type(orig.m_type),
-      m_eid(orig.m_eid),
-      m_time(orig.m_time),
-      m_num_logs(orig.m_num_logs),
-      m_cache_stocking(orig.m_cache_stocking) {}
+CheckpointEvent::CheckpointEvent(const CheckpointEvent &orig) = default;
 
-CheckpointEvent::~CheckpointEvent() {}
+CheckpointEvent::~CheckpointEvent() = default;
 
-void CheckpointEvent::commit()
+void CheckpointEvent::commit() const
 {
    EpochManager::getInstance()->commitCheckpoint(*this);
 }
 
-const char *CheckpointEvent::TypeString(const CheckpointEvent::Type type)
+//void CheckpointEvent::persist()
+//{
+////   EpochManager::getInstance()->registerPersistedEID(m_eid, now);
+//}
+
+const char *CheckpointEvent::TypeString(CheckpointEvent::Type type)
 {
    switch (type)
    {

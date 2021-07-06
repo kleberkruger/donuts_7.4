@@ -10,7 +10,7 @@ CacheSetLRUR::CacheSetLRUR(CacheBase::cache_t cache_type,
     : CacheSetLRU(cache_type, associativity, blocksize, set_info, num_attempts),
       m_checkpoint_th(checkpoint_threshold) {}
 
-CacheSetLRUR::~CacheSetLRUR() {}
+CacheSetLRUR::~CacheSetLRUR() = default;
 
 /** 
  * Select the index to be removed.
@@ -42,11 +42,12 @@ CacheSetLRUR::getReplacementIndex(CacheCntlr *cntlr)
       }
 
       // Check if all blocks are modified
-      if (m_cache_block_info_array[i]->getCState() == CacheState::MODIFIED)
+      if (m_cache_block_info_array[i]->isDurty())
          num_modified++;
    }
 
-   if (num_modified >= m_associativity * m_checkpoint_th)
+   auto threshold = static_cast<UInt32>(static_cast<float>(m_associativity) * m_checkpoint_th);
+   if (num_modified >= threshold)
    {
       max_bits = m_associativity - 1;
       // Return the oldest block among the modified ones

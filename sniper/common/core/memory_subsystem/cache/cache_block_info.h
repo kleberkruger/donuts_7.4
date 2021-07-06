@@ -43,6 +43,7 @@ class CacheBlockInfo
       virtual void clone(CacheBlockInfo* cache_block_info);
 
       bool isValid() const { return (m_tag != ((IntPtr) ~0)); }
+      bool isDurty() const { return (m_cstate == CacheState::MODIFIED); } // Added by Kleber Kruger
 
       IntPtr getTag() const { return m_tag; }
       CacheState::cstate_t getCState() const { return m_cstate; }

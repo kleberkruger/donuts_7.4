@@ -361,7 +361,7 @@ namespace ParametricDramDirectoryMSI
          void flushCacheBlock(CacheBlockInfo *block_info);
 
          // NVM Checkpoint Support (Added by Kleber Kruger)
-         static SInt64 __timeout(UInt64 arg, UInt64 val) { ((CacheCntlr *)arg)->timeout(); return 0; }
+         static SInt64 _timeout(UInt64 arg, UInt64 val) { ((CacheCntlr *)arg)->timeout(); return 0; }
          void timeout();
 
       public:
@@ -414,11 +414,11 @@ namespace ParametricDramDirectoryMSI
          bool isLastLevel(void) { return ! m_next_cache_cntlr; }
          bool isShared(core_id_t core_id); //< Return true if core shares this cache
 
-         bool isInLowerLevelCache(CacheBlockInfo *block_info);
-         void incrementQBSLookupCost();
+         bool isInLowerLevelCache(CacheBlockInfo *block_info) override;
+         void incrementQBSLookupCost() override;
 
          // NVM Checkpoint Support (Added by Kleber Kruger)
-         void checkpoint(CheckpointEvent::Type event_type);
+         void checkpoint(CheckpointEvent::Type event_type) override;
 
          void enable() { m_master->m_cache->enable(); }
          void disable() { m_master->m_cache->disable(); }

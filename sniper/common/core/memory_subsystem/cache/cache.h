@@ -56,7 +56,7 @@ class Cache : public CacheBase
       ~Cache();
 
       CacheBase::ReplacementPolicy getReplacementPolicy() { return m_replacement_policy; } // Added by Kleber Kruger
-      float getCapacityFilled();                                                           // Added by Kleber Kruger
+      double getCapacityFilled();                                                          // Added by Kleber Kruger
 
       Lock& getSetLock(IntPtr addr);
 

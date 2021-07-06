@@ -14,7 +14,7 @@ public:
       NUM_EVENT_TYPES = TIMEOUT
    } Type;
 
-   static const char *TypeString(const Type type);
+   static const char *TypeString(Type type);
 
    /**
     * @brief Construct a new Checkpoint Event object
@@ -25,13 +25,11 @@ public:
     * @param num_logs 
     * @param cache_stocking 
     */
-   CheckpointEvent(const Type event_type,
-                   const UInt64 eid, const SubsecondTime &time, 
-                   const UInt64 num_logs, const float cache_stocking);
+   CheckpointEvent(Type event_type, UInt64 eid, const SubsecondTime &time, UInt64 num_logs, float cache_stocking);
 
-   void commit();
+   void commit() const;
 
-   void persist();
+   void persist() const;
 
    /**
     * @brief Construct a new Checkpoint Event object
@@ -58,9 +56,9 @@ public:
 
    /**
     * @brief Get the Time object
-    * @return SubsecondTime 
+    * @return SubsecondTime
     */
-   SubsecondTime getTime() const { return m_time; }
+   const SubsecondTime &getTime() const { return m_time; }
    
    /**
     * @brief Get the Num Logs object
