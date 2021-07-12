@@ -1,13 +1,12 @@
 #ifndef NVM_PERF_MODEL_CONSTANT_H
 #define NVM_PERF_MODEL_CONSTANT_H
 
-#include "dram_perf_model.h"
+#include "nvm_perf_model.h"
 #include "queue_model.h"
-#include "fixed_types.h"
 #include "subsecond_time.h"
 #include "dram_cntlr_interface.h"
 
-class NvmPerfModelConstant : public DramPerfModel
+class NvmPerfModelConstant : public NvmPerfModel
 {
 private:
    QueueModel *m_queue_model;

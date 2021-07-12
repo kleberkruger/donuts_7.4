@@ -29,12 +29,14 @@ class DramPerfModel
       static DramPerfModel* createDramPerfModel(core_id_t core_id, UInt32 cache_block_size);
 
       DramPerfModel(core_id_t core_id, UInt64 cache_block_size) : m_enabled(false), m_num_accesses(0) {}
-      virtual ~DramPerfModel() {}
-      virtual SubsecondTime getAccessLatency(SubsecondTime pkt_time, UInt64 pkt_size, core_id_t requester, IntPtr address, DramCntlrInterface::access_t access_type, ShmemPerf *perf) = 0;
+      virtual ~DramPerfModel() = default;
+
+      virtual SubsecondTime getAccessLatency(SubsecondTime pkt_time, UInt64 pkt_size, core_id_t requester, IntPtr address,
+                                             DramCntlrInterface::access_t access_type, ShmemPerf *perf) = 0;
       void enable() { m_enabled = true; }
       void disable() { m_enabled = false; }
 
-      UInt64 getTotalAccesses() { return m_num_accesses; }
+      UInt64 getTotalAccesses() const { return m_num_accesses; }
 };
 
 #endif /* __DRAM_PERF_MODEL_H__ */

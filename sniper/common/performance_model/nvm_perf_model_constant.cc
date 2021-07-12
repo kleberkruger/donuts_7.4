@@ -6,30 +6,22 @@
 #include "shmem_perf.h"
 
 NvmPerfModelConstant::NvmPerfModelConstant(core_id_t core_id, UInt32 cache_block_size) :
-      DramPerfModel(core_id, cache_block_size),
+      NvmPerfModel(core_id, cache_block_size),
       m_queue_model(nullptr),
       m_nvm_read_cost(SubsecondTime::FS() * static_cast<uint64_t>(TimeConverter<float>::NStoFS(
-            Sim()->getCfg()->getFloat("perf_model/nvm/read_latency")))), // Operate in fs for higher precision before converting to uint64_t/SubsecondTime
+            Sim()->getCfg()->getFloat("perf_model/nvm/read_latency")))),
       m_nvm_write_cost(SubsecondTime::FS() * static_cast<uint64_t>(TimeConverter<float>::NStoFS(
             Sim()->getCfg()->getFloat("perf_model/nvm/write_latency")))),
-      m_nvm_bandwidth(8 * Sim()->getCfg()->getFloat("perf_model/nvm/per_controller_bandwidth")), // Bandwidth convert bytes to bits
+      m_nvm_bandwidth(8 * Sim()->getCfg()->getFloat("perf_model/nvm/per_controller_bandwidth")),
       m_total_queueing_delay(SubsecondTime::Zero()),
       m_total_access_latency(SubsecondTime::Zero())
 {
-//   m_nvm_read_cost = SubsecondTime::FS() * static_cast<uint64_t>(TimeConverter<float>::NStoFS(
-//         Sim()->getCfg()->getFloat("perf_model/nvm/read_latency")));
-//   m_nvm_write_cost = SubsecondTime::FS() * static_cast<uint64_t>(TimeConverter<float>::NStoFS(
-//         Sim()->getCfg()->getFloat("perf_model/nvm/write_latency")));
-
-   if (Sim()->getCfg()->getBool("perf_model/nvm/queue_model/enabled")) {
+   if (Sim()->getCfg()->getBool("perf_model/nvm/queue_model/enabled"))
+   {
       m_queue_model = QueueModel::create("nvm-queue", core_id,
                                          Sim()->getCfg()->getString("perf_model/nvm/queue_model/type"),
                                          m_nvm_bandwidth.getRoundedLatency(8 * cache_block_size)); // bytes to bits
    }
-   // FIX-ME: Retirar estas métricas (necessário por causa do sim.out)
-   registerStatsMetric("dram", core_id, "total-access-latency", &m_total_access_latency);
-   registerStatsMetric("dram", core_id, "total-queueing-delay", &m_total_queueing_delay);
-
    registerStatsMetric("nvm", core_id, "total-access-latency", &m_total_access_latency);
    registerStatsMetric("nvm", core_id, "total-queueing-delay", &m_total_queueing_delay);
 }
@@ -61,10 +53,9 @@ NvmPerfModelConstant::getAccessLatency(SubsecondTime pkt_time, UInt64 pkt_size, 
    SubsecondTime access_cost = (access_type == DramCntlrInterface::WRITE) ? m_nvm_write_cost : m_nvm_read_cost;
    SubsecondTime access_latency = queue_delay + processing_time + access_cost;
 
-//   printf("- NVM ACCESS: %s | queue_delay + processing_time + access_cost = (%lu + %lu + %lu) = %lu\n",
-//          (access_type == DramCntlrInterface::WRITE) ? "WRITE" : "READ",
-//          queue_delay.getNS(), processing_time.getNS(), access_cost.getNS(), access_latency.getNS());
-
+   printf("- NVM ACCESS: %s | queue_delay + processing_time + access_cost = (%lu + %lu + %lu) = (%lu ns)\n",
+          (access_type == DramCntlrInterface::WRITE) ? "WRITE" : "READ",
+          queue_delay.getNS(), processing_time.getNS(), access_cost.getNS(), access_latency.getNS());
 
    perf->updateTime(pkt_time);
    perf->updateTime(pkt_time + queue_delay, ShmemPerf::DRAM_QUEUE);

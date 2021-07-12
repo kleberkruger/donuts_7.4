@@ -3,7 +3,6 @@
 #include "dram_perf_model_constant.h"
 #include "dram_perf_model_readwrite.h"
 #include "dram_perf_model_normal.h"
-#include "nvm_perf_model_constant.h"
 #include "config.hpp"
 
 DramPerfModel* DramPerfModel::createDramPerfModel(core_id_t core_id, UInt32 cache_block_size)
@@ -12,8 +11,7 @@ DramPerfModel* DramPerfModel::createDramPerfModel(core_id_t core_id, UInt32 cach
 
    if (type == "constant")
    {
-//      return new DramPerfModelConstant(core_id, cache_block_size);
-      return new NvmPerfModelConstant(core_id, cache_block_size);
+      return new DramPerfModelConstant(core_id, cache_block_size);
    }
    else if (type == "readwrite")
    {
