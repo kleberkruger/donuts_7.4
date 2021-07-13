@@ -59,8 +59,7 @@ class CacheSet
 
       virtual UInt32 getReplacementIndex(CacheCntlr *cntlr) = 0;
       virtual void updateReplacementIndex(UInt32) = 0;
-
-      bool isValidReplacement(UInt32 index);
+      virtual bool isValidReplacement(UInt32 index); // Modified by Kleber Kruger (now is virtual)
 };
 
 #endif /* CACHE_SET_H */
