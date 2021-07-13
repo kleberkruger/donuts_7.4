@@ -5,7 +5,7 @@
 
 NvmPerfModel* NvmPerfModel::createNvmPerfModel(core_id_t core_id, UInt32 cache_block_size)
 {
-   String type = Sim()->getCfg()->getString("perf_model/nvm/type");
+   String type = Sim()->getCfg()->getString("perf_model/dram/type");
 
    if (type == "constant")
    {

@@ -35,6 +35,8 @@ namespace PrL1PrL2DramDirectoryMSI
          void addToDramAccessCount(IntPtr address, access_t access_type);
          void printDramAccessCount(void);
 
+         static DramPerfModel *createDramPerfModel(core_id_t core_id, UInt32 cache_block_size); // Added by Kleber Kruger
+
       public:
          DramCntlr(MemoryManagerBase* memory_manager,
                ShmemPerfModel* shmem_perf_model,

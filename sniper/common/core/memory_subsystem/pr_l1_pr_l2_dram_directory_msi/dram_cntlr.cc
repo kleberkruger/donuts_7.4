@@ -6,6 +6,9 @@
 #include "stats.h"
 #include "fault_injection.h"
 #include "shmem_perf.h"
+#include "config.h"           // Added by Kleber Kruger
+#include "config.hpp"         // Added by Kleber Kruger
+#include "nvm_perf_model.h"   // Added by Kleber Kruger
 
 #if 0
    extern Lock iolock;
@@ -28,9 +31,10 @@ DramCntlr::DramCntlr(MemoryManagerBase* memory_manager,
    , m_reads(0)
    , m_writes(0)
 {
-   m_dram_perf_model = DramPerfModel::createDramPerfModel(
-         memory_manager->getCore()->getId(),
-         cache_block_size);
+//   m_dram_perf_model = DramPerfModel::createDramPerfModel(
+//         memory_manager->getCore()->getId(),
+//         cache_block_size);
+   m_dram_perf_model = createDramPerfModel(memory_manager->getCore()->getId(), cache_block_size); // Modified by Kleber Kruger (old implementation above)
 
    m_fault_injector = Sim()->getFaultinjectionManager()
       ? Sim()->getFaultinjectionManager()->getFaultInjector(memory_manager->getCore()->getId(), MemComponent::DRAM)
@@ -134,6 +138,15 @@ DramCntlr::printDramAccessCount()
          }
       }
    }
+}
+
+DramPerfModel*
+DramCntlr::createDramPerfModel(core_id_t core_id, UInt32 cache_block_size)
+{
+   String param = "perf_model/dram/technology";
+   return Sim()->getCfg()->hasKey(param) && Sim()->getCfg()->getString(param) == "nvm" ?
+          NvmPerfModel::createNvmPerfModel(core_id, cache_block_size) :
+          DramPerfModel::createDramPerfModel(core_id, cache_block_size);
 }
 
 }
