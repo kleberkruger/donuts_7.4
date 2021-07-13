@@ -24,6 +24,9 @@ class HitWhere
          DRAM_LOCAL,
          DRAM_REMOTE,
          CACHE_REMOTE,
+         NVM,        // Added by Kleber Kruger
+         NVM_LOCAL,  // Added by Kleber Kruger (will be needed?)
+         NVM_REMOTE, // Added by Kleber Kruger (will be needed?)
          SIBLING,
          L1_SIBLING = MemComponent::L1_DCACHE + SIBLING,
          L2_SIBLING = MemComponent::L2_CACHE + SIBLING,

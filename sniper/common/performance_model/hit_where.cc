@@ -19,6 +19,9 @@ const char * HitWhereString(HitWhere::where_t where) {
       case HitWhere::DRAM_LOCAL:      return "dram-local";
       case HitWhere::DRAM_REMOTE:     return "dram-remote";
       case HitWhere::CACHE_REMOTE:    return "cache-remote";
+      case HitWhere::NVM:             return "nvm";        // Added by Kleber Kruger
+      case HitWhere::NVM_LOCAL:       return "nvm-local";  // Added by Kleber Kruger
+      case HitWhere::NVM_REMOTE:      return "nvm-remote"; // Added by Kleber Kruger
       case HitWhere::UNKNOWN:         return "unknown";
       case HitWhere::PREDICATE_FALSE: return "predicate-false";
       case HitWhere::PREFETCH_NO_MAPPING: return "prefetch-no-mapping";
