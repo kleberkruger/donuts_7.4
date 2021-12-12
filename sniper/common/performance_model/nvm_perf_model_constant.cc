@@ -53,9 +53,13 @@ NvmPerfModelConstant::getAccessLatency(SubsecondTime pkt_time, UInt64 pkt_size, 
    SubsecondTime access_cost = (access_type == DramCntlrInterface::WRITE) ? m_nvm_write_cost : m_nvm_read_cost;
    SubsecondTime access_latency = queue_delay + processing_time + access_cost;
 
-   printf("- NVM ACCESS: %s | queue_delay + processing_time + access_cost = (%lu + %lu + %lu) = (%lu ns)\n",
-          (access_type == DramCntlrInterface::WRITE) ? "WRITE" : "READ",
+   // printf("- NVM ACCESS: %s | queue_delay + processing_time + access_cost = (%lu + %lu + %lu) = (%lu ns)\n",
+   //        (access_type == DramCntlrInterface::WRITE) ? "WRITE" : "READ",
+   //        queue_delay.getNS(), processing_time.getNS(), access_cost.getNS(), access_latency.getNS());
+   printf("- NVM access: %s | Latency: (%luq + %lup + %lua) = %lu ns\n",
+          (access_type == DramCntlrInterface::WRITE) ? "WRITE" : "READ ",
           queue_delay.getNS(), processing_time.getNS(), access_cost.getNS(), access_latency.getNS());
+
 
    perf->updateTime(pkt_time);
    perf->updateTime(pkt_time + queue_delay, ShmemPerf::DRAM_QUEUE);
