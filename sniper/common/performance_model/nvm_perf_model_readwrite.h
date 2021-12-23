@@ -14,6 +14,7 @@ private:
    QueueModel *m_queue_model_write;
    SubsecondTime m_nvm_read_cost;
    SubsecondTime m_nvm_write_cost;
+   SubsecondTime m_nvm_log_cost;
    ComponentBandwidth m_nvm_bandwidth;
    bool m_shared_readwrite;
 

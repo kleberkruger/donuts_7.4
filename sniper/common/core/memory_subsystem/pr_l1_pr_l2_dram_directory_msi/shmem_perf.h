@@ -32,6 +32,9 @@ class ShmemPerf
          DRAM_QUEUE,
          DRAM_BUS,
          DRAM_DEVICE,
+         // LOG_QUEUE,  // Added by Kleber Kruger
+         // LOG_BUS,    // Added by Kleber Kruger
+         // LOG_DEVICE, // Added by Kleber Kruger // FIX-ME: it's necessary???
          UNKNOWN,
          NUM_SHMEM_TIMES
       } shmem_times_type_t;

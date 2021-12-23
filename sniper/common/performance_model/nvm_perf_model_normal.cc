@@ -16,13 +16,14 @@ NvmPerfModelNormal::NvmPerfModelNormal(core_id_t core_id, UInt32 cache_block_siz
          Sim()->getCfg()->getFloat("perf_model/dram/normal/standard_deviation")));
 
    // Operate in fs for higher precision before converting to uint64_t/SubsecondTime
-   SubsecondTime nvm_read_latency = SubsecondTime::FS() * static_cast<uint64_t>(TimeConverter<float>::NStoFS(
-         Sim()->getCfg()->getFloat("perf_model/dram/read_latency")));
+   SubsecondTime nvm_read_latency = NvmPerfModel::getReadLatency();
    m_nvm_read_cost = new NormalTimeDistribution(nvm_read_latency, nvm_latency_stddev);
 
-   SubsecondTime nvm_write_latency = SubsecondTime::FS() * static_cast<uint64_t>(TimeConverter<float>::NStoFS(
-         Sim()->getCfg()->getFloat("perf_model/dram/write_latency")));
+   SubsecondTime nvm_write_latency = NvmPerfModel::getWriteLatency();
    m_nvm_write_cost = new NormalTimeDistribution(nvm_write_latency, nvm_latency_stddev);
+
+   SubsecondTime nvm_log_latency = NvmPerfModel::getLogLatency();
+   m_nvm_log_cost = new NormalTimeDistribution(nvm_log_latency, nvm_latency_stddev);
 
    if (Sim()->getCfg()->getBool("perf_model/dram/queue_model/enabled")) {
       m_queue_model = QueueModel::create("dram-queue", core_id,
@@ -42,6 +43,7 @@ NvmPerfModelNormal::~NvmPerfModelNormal()
    }
    delete m_nvm_read_cost;
    delete m_nvm_write_cost;
+   delete m_nvm_log_cost;
 }
 
 SubsecondTime

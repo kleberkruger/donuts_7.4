@@ -26,3 +26,29 @@ NvmPerfModel* NvmPerfModel::createNvmPerfModel(core_id_t core_id, UInt32 cache_b
       LOG_PRINT_ERROR("Invalid NVM model type %s", type.c_str());
    }
 }
+
+SubsecondTime NvmPerfModel::getReadLatency()
+{
+   float latency = Sim()->getCfg()->hasKey("perf_model/dram/read_latency") ? 
+                   Sim()->getCfg()->getFloat("perf_model/dram/read_latency") : 
+                   Sim()->getCfg()->getFloat("perf_model/dram/latency");
+
+   return SubsecondTime::FS() * static_cast<uint64_t>(TimeConverter<float>::NStoFS(latency));
+}
+
+SubsecondTime NvmPerfModel::getWriteLatency()
+{
+   float latency = Sim()->getCfg()->hasKey("perf_model/dram/write_latency") ? 
+                   Sim()->getCfg()->getFloat("perf_model/dram/write_latency") : 
+                   Sim()->getCfg()->getFloat("perf_model/dram/latency");
+
+   return SubsecondTime::FS() * static_cast<uint64_t>(TimeConverter<float>::NStoFS(latency));
+}
+
+SubsecondTime NvmPerfModel::getLogLatency()
+{
+   float latency = Sim()->getCfg()->hasKey("perf_model/dram/log_latency") ? 
+                   Sim()->getCfg()->getFloat("perf_model/dram/log_latency") : 0;
+
+   return SubsecondTime::FS() * static_cast<uint64_t>(TimeConverter<float>::NStoFS(latency));
+}

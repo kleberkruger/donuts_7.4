@@ -9,8 +9,10 @@ NvmPerfModelReadWrite::NvmPerfModelReadWrite(core_id_t core_id, UInt32 cache_blo
       NvmPerfModel(core_id, cache_block_size),
       m_queue_model_read(nullptr),
       m_queue_model_write(nullptr),
-      m_nvm_bandwidth(
-            8 * Sim()->getCfg()->getFloat("perf_model/dram/per_controller_bandwidth")), // Convert bytes to bits
+      m_nvm_read_cost(NvmPerfModel::getReadLatency()),
+      m_nvm_write_cost(NvmPerfModel::getWriteLatency()),
+      m_nvm_log_cost(NvmPerfModel::getLogLatency()),
+      m_nvm_bandwidth(8 * Sim()->getCfg()->getFloat("perf_model/dram/per_controller_bandwidth")), // Convert bytes to bits
       m_shared_readwrite(Sim()->getCfg()->getBool("perf_model/dram/readwrite/shared")),
       m_total_read_queueing_delay(SubsecondTime::Zero()),
       m_total_write_queueing_delay(SubsecondTime::Zero()),

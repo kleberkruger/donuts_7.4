@@ -24,6 +24,9 @@ const char* shmem_reason_names[] = {
    "dram-queue",
    "dram-bus",
    "dram-device",
+   // "log-queue",   // Added by Kleber Kruger
+   // "log-bus",     // Added by Kleber Kruger
+   // "log-device"   // Added by Kleber Kruger
    "unknown",
 };
 

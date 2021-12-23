@@ -30,6 +30,8 @@ DramCntlr::DramCntlr(MemoryManagerBase* memory_manager,
    : DramCntlrInterface(memory_manager, shmem_perf_model, cache_block_size)
    , m_reads(0)
    , m_writes(0)
+   , m_logs(0)
+   , m_log_enabled(DramCntlr::getLogEnabled())
 {
 //   m_dram_perf_model = DramPerfModel::createDramPerfModel(
 //         memory_manager->getCore()->getId(),
@@ -43,6 +45,7 @@ DramCntlr::DramCntlr(MemoryManagerBase* memory_manager,
    m_dram_access_count = new AccessCountMap[DramCntlrInterface::NUM_ACCESS_TYPES];
    registerStatsMetric("dram", memory_manager->getCore()->getId(), "reads", &m_reads);
    registerStatsMetric("dram", memory_manager->getCore()->getId(), "writes", &m_writes);
+   registerStatsMetric("dram", memory_manager->getCore()->getId(), "logs", &m_logs); // Added by Kleber Kruger
 }
 
 DramCntlr::~DramCntlr()
@@ -71,6 +74,11 @@ DramCntlr::getDataFromDram(IntPtr address, core_id_t requester, Byte* data_buf, 
       memcpy((void*) data_buf, (void*) m_data_map[address], getCacheBlockSize());
    }
 
+   // Added by Kleber Kruger
+   if (m_log_enabled) 
+      logDataToDram(address, requester, data_buf, now);
+
+   // printf("getDataFromDram (%lu)\n", address); // Added by Kleber Kruger
    SubsecondTime dram_access_latency = runDramPerfModel(requester, now, address, READ, perf);
 
    ++m_reads;
@@ -98,6 +106,11 @@ DramCntlr::putDataToDram(IntPtr address, core_id_t requester, Byte* data_buf, Su
          m_fault_injector->postWrite(address, address, getCacheBlockSize(), (Byte*)m_data_map[address], now);
    }
 
+   // Added by Kleber Kruger
+   if (m_log_enabled) 
+      logDataToDram(address, requester, data_buf, now);
+
+   // printf("putDataToDram (%lu)\n", address); // Added by Kleber Kruger
    SubsecondTime dram_access_latency = runDramPerfModel(requester, now, address, WRITE, &m_dummy_shmem_perf);
 
    ++m_writes;
@@ -109,11 +122,46 @@ DramCntlr::putDataToDram(IntPtr address, core_id_t requester, Byte* data_buf, Su
    return boost::tuple<SubsecondTime, HitWhere::where_t>(dram_access_latency, HitWhere::DRAM);
 }
 
+boost::tuple<SubsecondTime, HitWhere::where_t>
+DramCntlr::logDataToDram(IntPtr address, core_id_t requester, Byte* data_buf, SubsecondTime now)
+{
+   // if (Sim()->getFaultinjectionManager())
+   // {
+   //    if (m_data_map[address] == NULL)
+   //    {
+   //       LOG_PRINT_ERROR("Data Buffer does not exist");
+   //    }
+   //    memcpy((void*) m_data_map[address], (void*) data_buf, getCacheBlockSize());
+
+   //    // NOTE: assumes error occurs in memory. If we want to model bus errors, insert the error into data_buf instead
+   //    if (m_fault_injector)
+   //       m_fault_injector->postWrite(address, address, getCacheBlockSize(), (Byte*)m_data_map[address], now);
+   // }
+
+   // printf("logDataToDram (%lu)\n", address); // Added by Kleber Kruger
+   createLogEntry(address, data_buf);
+   SubsecondTime dram_access_latency = runDramPerfModel(requester, now, address, LOG, &m_dummy_shmem_perf);
+
+   ++m_logs;
+   #ifdef ENABLE_DRAM_ACCESS_COUNT
+   addToDramAccessCount(address, LOG);
+   #endif
+   MYLOG("L @ %08lx", address);
+
+   return boost::tuple<SubsecondTime, HitWhere::where_t>(dram_access_latency, HitWhere::DRAM);
+}
+
 SubsecondTime
 DramCntlr::runDramPerfModel(core_id_t requester, SubsecondTime time, IntPtr address, DramCntlrInterface::access_t access_type, ShmemPerf *perf)
 {
    UInt64 pkt_size = getCacheBlockSize();
    SubsecondTime dram_access_latency = m_dram_perf_model->getAccessLatency(time, pkt_size, requester, address, access_type, perf);
+
+   // Added by Kleber Kruger
+   printf("%5s | [%16lu] (%luns)\n", access_type == DramCntlrInterface::WRITE ? "WRITE" : 
+                                     access_type == DramCntlrInterface::READ ? "READ" : "LOG",
+                                     address, dram_access_latency.getNS());
+
    return dram_access_latency;
 }
 
@@ -132,9 +180,14 @@ DramCntlr::printDramAccessCount()
       {
          if ((*i).second > 100)
          {
+            // LOG_PRINT("Dram Cntlr(%i), Address(0x%x), Access Count(%llu), Access Type(%s)",
+            //       m_memory_manager->getCore()->getId(), (*i).first, (*i).second,
+            //       (k == READ)? "READ" : "WRITE");
+
+            // Modified by Kleber Kruger
             LOG_PRINT("Dram Cntlr(%i), Address(0x%x), Access Count(%llu), Access Type(%s)",
                   m_memory_manager->getCore()->getId(), (*i).first, (*i).second,
-                  (k == READ)? "READ" : "WRITE");
+                  (k == READ)? "READ" : (k == WRITE)? "WRITE" : "LOG");
          }
       }
    }
@@ -147,6 +200,19 @@ DramCntlr::createDramPerfModel(core_id_t core_id, UInt32 cache_block_size)
    return Sim()->getCfg()->hasKey(param) && Sim()->getCfg()->getString(param) == "nvm" ?
           NvmPerfModel::createNvmPerfModel(core_id, cache_block_size) :
           DramPerfModel::createDramPerfModel(core_id, cache_block_size);
+}
+
+bool
+DramCntlr::getLogEnabled()
+{
+   String param = "perf_model/dram/log_enabled";
+   return Sim()->getCfg()->hasKey(param) && Sim()->getCfg()->getBool(param);
+}
+
+void
+DramCntlr::createLogEntry(IntPtr address, Byte* data_buf)
+{
+   // printf("Creating log entry { metadata: %lu, data: %u }\n", address, (unsigned int) *data_buf);
 }
 
 }

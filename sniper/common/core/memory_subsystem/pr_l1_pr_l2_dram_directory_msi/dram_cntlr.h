@@ -27,6 +27,8 @@ namespace PrL1PrL2DramDirectoryMSI
          typedef std::unordered_map<IntPtr,UInt64> AccessCountMap;
          AccessCountMap* m_dram_access_count;
          UInt64 m_reads, m_writes;
+         UInt64 m_logs;       // Added by Kleber Kruger
+         bool m_log_enabled;  // Added by Kleber Kruger
 
          ShmemPerf m_dummy_shmem_perf;
 
@@ -36,6 +38,8 @@ namespace PrL1PrL2DramDirectoryMSI
          void printDramAccessCount(void);
 
          static DramPerfModel *createDramPerfModel(core_id_t core_id, UInt32 cache_block_size); // Added by Kleber Kruger
+         static bool getLogEnabled();                                                           // Added by Kleber Kruger
+         static void createLogEntry(IntPtr address, Byte* data_buf);                            // Added by Kleber Kruger
 
       public:
          DramCntlr(MemoryManagerBase* memory_manager,
@@ -49,5 +53,8 @@ namespace PrL1PrL2DramDirectoryMSI
          // Run DRAM performance model. Pass in begin time, returns latency
          boost::tuple<SubsecondTime, HitWhere::where_t> getDataFromDram(IntPtr address, core_id_t requester, Byte* data_buf, SubsecondTime now, ShmemPerf *perf);
          boost::tuple<SubsecondTime, HitWhere::where_t> putDataToDram(IntPtr address, core_id_t requester, Byte* data_buf, SubsecondTime now);
+         
+         // Added by Kleber Kruger (for Donuts NVM model)
+         boost::tuple<SubsecondTime, HitWhere::where_t> logDataToDram(IntPtr address, core_id_t requester, Byte* data_buf, SubsecondTime now);
    };
 }
