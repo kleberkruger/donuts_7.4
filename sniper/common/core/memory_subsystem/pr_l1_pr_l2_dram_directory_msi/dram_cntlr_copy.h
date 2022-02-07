@@ -28,11 +28,7 @@ namespace PrL1PrL2DramDirectoryMSI
          AccessCountMap* m_dram_access_count;
          UInt64 m_reads, m_writes;
          UInt64 m_logs;       // Added by Kleber Kruger
-         UInt64 m_log_ends;   // Added by Kleber Kruger
-         UInt32 m_log_size;   // Added by Kleber Kruger
-         Uint32 m_log_buffer; // Added by Kleber Kruger
          bool m_log_enabled;  // Added by Kleber Kruger
-         bool m_log_type;     // Added by Kleber Kruger // FIXME: Change to enum (undo-logging or cmd)
 
          ShmemPerf m_dummy_shmem_perf;
 
@@ -43,8 +39,6 @@ namespace PrL1PrL2DramDirectoryMSI
 
          static DramPerfModel *createDramPerfModel(core_id_t core_id, UInt32 cache_block_size); // Added by Kleber Kruger
          static bool getLogEnabled();                                                           // Added by Kleber Kruger
-         static UInt32 getLogRowBufferSize();                                                   // Added by Kleber Kruger
-         static bool getLogType();                                                              // Added by Kleber Kruger // FIXME: change return to enum
          static void createLogEntry(IntPtr address, Byte* data_buf);                            // Added by Kleber Kruger
 
       public:
