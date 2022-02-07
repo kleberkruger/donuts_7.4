@@ -29,8 +29,8 @@ namespace PrL1PrL2DramDirectoryMSI
          UInt64 m_reads, m_writes;
          UInt64 m_logs;       // Added by Kleber Kruger
          UInt64 m_log_ends;   // Added by Kleber Kruger
+         UInt32 m_log_buffer; // Added by Kleber Kruger
          UInt32 m_log_size;   // Added by Kleber Kruger
-         Uint32 m_log_buffer; // Added by Kleber Kruger
          bool m_log_enabled;  // Added by Kleber Kruger
          bool m_log_type;     // Added by Kleber Kruger // FIXME: Change to enum (undo-logging or cmd)
 

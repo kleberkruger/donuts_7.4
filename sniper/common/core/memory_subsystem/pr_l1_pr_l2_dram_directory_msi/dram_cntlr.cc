@@ -32,9 +32,9 @@ DramCntlr::DramCntlr(MemoryManagerBase* memory_manager,
    , m_writes(0)
    , m_logs(0)
    , m_log_ends(0)
-   , m_log_buffer(0),
-   , m_log_enabled(DramCntlr::getLogEnabled())
+   , m_log_buffer(0)
    , m_log_size(DramCntlr::getLogRowBufferSize())
+   , m_log_enabled(DramCntlr::getLogEnabled())
    , m_log_type(DramCntlr::getLogType()) // FIXME: Change by enum type
 {
 //   m_dram_perf_model = DramPerfModel::createDramPerfModel(
@@ -135,17 +135,19 @@ DramCntlr::logDataToDram(IntPtr address, core_id_t requester, Byte* data_buf, Su
 
    UInt64 cache_block_size = getCacheBlockSize();
 
+   SubsecondTime dram_access_latency;
+
    // Filling the buffer...
    if (m_log_buffer + cache_block_size >= m_log_size)
    {
-      SubsecondTime dram_access_latency = runDramPerfModel(requester, now, address, LOG, &m_dummy_shmem_perf);
+      dram_access_latency = runDramPerfModel(requester, now, address, LOG, &m_dummy_shmem_perf);
       m_log_ends++;
       m_log_buffer = 0;
    }
    else
    {
       m_log_buffer += cache_block_size;
-      SubsecondTime dram_access_latency = SubsecondTime::Zero();
+      dram_access_latency = SubsecondTime::Zero();
    }
 
    ++m_logs;
