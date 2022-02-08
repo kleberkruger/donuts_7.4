@@ -28,8 +28,6 @@ NvmCntlr::NvmCntlr(MemoryManagerBase* memory_manager,
       ShmemPerfModel* shmem_perf_model,
       UInt32 cache_block_size)
    : DramCntlr(memory_manager, shmem_perf_model, cache_block_size)
-   , m_reads(0)
-   , m_writes(0)
    , m_logs(0)
    , m_log_ends(0)
    , m_log_buffer(0)
@@ -37,29 +35,8 @@ NvmCntlr::NvmCntlr(MemoryManagerBase* memory_manager,
    , m_log_enabled(NvmCntlr::getLogEnabled())
    , m_log_type(NvmCntlr::getLogType()) // FIXME: Change by enum type
 {
-   printf("NVM SELECIONADA 1\n");
-   m_dram_perf_model = createDramPerfModel(memory_manager->getCore()->getId(), cache_block_size); // Modified by Kleber Kruger (old implementation above)
-   printf("NVM SELECIONADA 2\n");
-
-   m_fault_injector = Sim()->getFaultinjectionManager()
-      ? Sim()->getFaultinjectionManager()->getFaultInjector(memory_manager->getCore()->getId(), MemComponent::DRAM)
-      : NULL;
-
-   // m_dram_access_count = new AccessCountMap[DramCntlrInterface::NUM_ACCESS_TYPES];
-   registerStatsMetric("nvm", memory_manager->getCore()->getId(), "reads", &m_reads);
-   registerStatsMetric("nvm", memory_manager->getCore()->getId(), "writes", &m_writes);
-   registerStatsMetric("nvm", memory_manager->getCore()->getId(), "logs", &m_logs);         // Added by Kleber Kruger
-   registerStatsMetric("nvm", memory_manager->getCore()->getId(), "log_ends", &m_log_ends); // Added by Kleber Kruger
-
-   printf("NVM SELECIONADA 3\n");
-}
-
-NvmCntlr::~NvmCntlr()
-{
-   printDramAccessCount();
-   delete [] m_dram_access_count;
-
-   delete m_dram_perf_model;
+   registerStatsMetric("nvm", memory_manager->getCore()->getId(), "logs", &m_logs);
+   registerStatsMetric("nvm", memory_manager->getCore()->getId(), "log_ends", &m_log_ends);
 }
 
 boost::tuple<SubsecondTime, HitWhere::where_t>
@@ -80,7 +57,7 @@ NvmCntlr::getDataFromDram(IntPtr address, core_id_t requester, Byte* data_buf, S
       memcpy((void*) data_buf, (void*) m_data_map[address], getCacheBlockSize());
    }
 
-   SubsecondTime dram_access_latency = runDramPerfModel(requester, now, address, READ, perf);
+   SubsecondTime dram_access_latency = DramCntlr::runDramPerfModel(requester, now, address, READ, perf);
 
    // Added by Kleber Kruger
    if (m_log_enabled) 
@@ -111,7 +88,7 @@ NvmCntlr::putDataToDram(IntPtr address, core_id_t requester, Byte* data_buf, Sub
          m_fault_injector->postWrite(address, address, getCacheBlockSize(), (Byte*)m_data_map[address], now);
    }
 
-   SubsecondTime dram_access_latency = runDramPerfModel(requester, now, address, WRITE, &m_dummy_shmem_perf);
+   SubsecondTime dram_access_latency = DramCntlr::runDramPerfModel(requester, now, address, WRITE, &m_dummy_shmem_perf);
 
    // Added by Kleber Kruger
    if (m_log_enabled) 
@@ -135,13 +112,12 @@ NvmCntlr::logDataToDram(IntPtr address, core_id_t requester, Byte* data_buf, Sub
    createLogEntry(address, data_buf);
 
    UInt64 cache_block_size = getCacheBlockSize();
-
    SubsecondTime dram_access_latency;
 
    // Filling the buffer...
    if (m_log_buffer + cache_block_size >= m_log_size)
    {
-      dram_access_latency = runDramPerfModel(requester, now, address, LOG, &m_dummy_shmem_perf);
+      dram_access_latency = DramCntlr::runDramPerfModel(requester, now, address, LOG, &m_dummy_shmem_perf);
       m_log_ends++;
       m_log_buffer = 0;
    }
@@ -160,26 +136,6 @@ NvmCntlr::logDataToDram(IntPtr address, core_id_t requester, Byte* data_buf, Sub
    return boost::tuple<SubsecondTime, HitWhere::where_t>(dram_access_latency, HitWhere::DRAM);
 }
 
-SubsecondTime
-NvmCntlr::runDramPerfModel(core_id_t requester, SubsecondTime time, IntPtr address, DramCntlrInterface::access_t access_type, ShmemPerf *perf)
-{
-   UInt64 pkt_size = getCacheBlockSize();
-   SubsecondTime dram_access_latency = m_dram_perf_model->getAccessLatency(time, pkt_size, requester, address, access_type, perf);
-
-   // Added by Kleber Kruger
-   // printf("%5s | [%16lu] (%luns)\n", access_type == DramCntlrInterface::WRITE ? "WRITE" : 
-   //                                   access_type == DramCntlrInterface::READ ? "READ" : "LOG",
-   //                                   address, dram_access_latency.getNS());
-
-   return dram_access_latency;
-}
-
-void
-NvmCntlr::addToDramAccessCount(IntPtr address, DramCntlrInterface::access_t access_type)
-{
-   m_dram_access_count[access_type][address] = m_dram_access_count[access_type][address] + 1;
-}
-
 void
 NvmCntlr::printDramAccessCount()
 {
@@ -189,11 +145,6 @@ NvmCntlr::printDramAccessCount()
       {
          if ((*i).second > 100)
          {
-            // LOG_PRINT("Dram Cntlr(%i), Address(0x%x), Access Count(%llu), Access Type(%s)",
-            //       m_memory_manager->getCore()->getId(), (*i).first, (*i).second,
-            //       (k == READ)? "READ" : "WRITE");
-
-            // Modified by Kleber Kruger
             LOG_PRINT("Dram Cntlr(%i), Address(0x%x), Access Count(%llu), Access Type(%s)",
                   m_memory_manager->getCore()->getId(), (*i).first, (*i).second,
                   (k == READ)? "READ" : (k == WRITE)? "WRITE" : "LOG");
@@ -209,15 +160,6 @@ NvmCntlr::checkpoint()
 //    SubsecondTime dram_access_latency = runDramPerfModel(requester, now, address, LOG, &m_dummy_shmem_perf);
    m_log_ends++;
    m_log_buffer = 0;
-}
-
-DramPerfModel*
-NvmCntlr::createDramPerfModel(core_id_t core_id, UInt32 cache_block_size)
-{
-   String param = "perf_model/dram/technology";
-   return Sim()->getCfg()->hasKey(param) && Sim()->getCfg()->getString(param) == "nvm" ?
-          NvmPerfModel::createNvmPerfModel(core_id, cache_block_size) :
-          DramPerfModel::createDramPerfModel(core_id, cache_block_size);
 }
 
 void

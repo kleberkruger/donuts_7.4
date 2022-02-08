@@ -21,51 +21,39 @@ namespace PrL1PrL2DramDirectoryMSI
    class NvmCntlr : public DramCntlr
    {
       private:
-         std::unordered_map<IntPtr, Byte*> m_data_map;
-         DramPerfModel* m_dram_perf_model;
-         FaultInjector* m_fault_injector;
-
-         typedef std::unordered_map<IntPtr,UInt64> AccessCountMap;
-         AccessCountMap* m_dram_access_count;
-         UInt64 m_reads, m_writes;
-         UInt64 m_logs;       // Added by Kleber Kruger
-         UInt64 m_log_ends;   // Added by Kleber Kruger
-         UInt32 m_log_buffer; // Added by Kleber Kruger
-         UInt32 m_log_size;   // Added by Kleber Kruger
-         bool m_log_enabled;  // Added by Kleber Kruger
-         bool m_log_type;     // Added by Kleber Kruger // FIXME: Change to enum (undo-logging or cmd)
-
-         ShmemPerf m_dummy_shmem_perf;
+         UInt64 m_logs;
+         UInt64 m_log_ends; 
+         UInt32 m_log_buffer;
+         UInt32 m_log_size;  
+         bool m_log_enabled;
+         bool m_log_type;
 
          SubsecondTime runDramPerfModel(core_id_t requester, SubsecondTime time, IntPtr address, DramCntlrInterface::access_t access_type, ShmemPerf *perf);
 
          void addToDramAccessCount(IntPtr address, access_t access_type);
          void printDramAccessCount(void);
 
-         static DramPerfModel *createDramPerfModel(core_id_t core_id, UInt32 cache_block_size); // Added by Kleber Kruger
-         static bool getLogEnabled();                                                           // Added by Kleber Kruger
-         static UInt32 getLogRowBufferSize();                                                   // Added by Kleber Kruger
-         static bool getLogType();                                                              // Added by Kleber Kruger // FIXME: change return to enum
-         static void createLogEntry(IntPtr address, Byte* data_buf);                            // Added by Kleber Kruger
+         static bool getLogEnabled();
+         static UInt32 getLogRowBufferSize();
+         static bool getLogType();
+
+         static void createLogEntry(IntPtr address, Byte* data_buf);
 
       public:
          NvmCntlr(MemoryManagerBase* memory_manager,
                ShmemPerfModel* shmem_perf_model,
                UInt32 cache_block_size);
 
-         ~NvmCntlr();
-
-         DramPerfModel* getDramPerfModel() { return m_dram_perf_model; }
+         ~NvmCntlr() = default;
 
          // Run DRAM performance model. Pass in begin time, returns latency
          boost::tuple<SubsecondTime, HitWhere::where_t> getDataFromDram(IntPtr address, core_id_t requester, Byte* data_buf, SubsecondTime now, ShmemPerf *perf);
          boost::tuple<SubsecondTime, HitWhere::where_t> putDataToDram(IntPtr address, core_id_t requester, Byte* data_buf, SubsecondTime now);
          
-         // Added by Kleber Kruger (for Donuts NVM model)
+         // For Donuts NVM model
          boost::tuple<SubsecondTime, HitWhere::where_t> logDataToDram(IntPtr address, core_id_t requester, Byte* data_buf, SubsecondTime now);
 
          // TODO: implement this method called on checkpoint events
-         // Added by Kleber Kruger (for Donuts NVM model)
          void checkpoint();
    };
 }
