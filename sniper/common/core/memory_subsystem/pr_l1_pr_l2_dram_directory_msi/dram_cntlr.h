@@ -62,5 +62,9 @@ namespace PrL1PrL2DramDirectoryMSI
          
          // Added by Kleber Kruger (for Donuts NVM model)
          boost::tuple<SubsecondTime, HitWhere::where_t> logDataToDram(IntPtr address, core_id_t requester, Byte* data_buf, SubsecondTime now);
+
+         // TODO: implement this method called on checkpoint events
+         // Added by Kleber Kruger (for Donuts NVM model)
+         void checkpoint();
    };
 }

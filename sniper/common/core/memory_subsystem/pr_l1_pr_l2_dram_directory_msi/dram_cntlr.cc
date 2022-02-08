@@ -51,6 +51,8 @@ DramCntlr::DramCntlr(MemoryManagerBase* memory_manager,
    registerStatsMetric("dram", memory_manager->getCore()->getId(), "writes", &m_writes);
    registerStatsMetric("dram", memory_manager->getCore()->getId(), "logs", &m_logs);         // Added by Kleber Kruger
    registerStatsMetric("dram", memory_manager->getCore()->getId(), "log_ends", &m_log_ends); // Added by Kleber Kruger
+
+   printf("DRAM SELECIONADA\n");
 }
 
 DramCntlr::~DramCntlr()
@@ -199,6 +201,15 @@ DramCntlr::printDramAccessCount()
          }
       }
    }
+}
+
+// TODO: implement this method called on checkpoint events
+void
+DramCntlr::checkpoint()
+{
+   // SubsecondTime dram_access_latency = runDramPerfModel(requester, now, address, LOG, &m_dummy_shmem_perf);
+   m_log_ends++;
+   m_log_buffer = 0;
 }
 
 DramPerfModel*

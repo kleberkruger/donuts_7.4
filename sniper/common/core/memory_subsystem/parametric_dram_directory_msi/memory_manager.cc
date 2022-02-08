@@ -229,28 +229,18 @@ MemoryManager::MemoryManager(Core* core,
    {
       m_dram_cntlr_present = true;
 
-      // // Modified by Kleber Kruger 
-      // // Default implementation: m_dram_cntlr = new PrL1PrL2DramDirectoryMSI::DramCntlr
-      // String param = "perf_model/dram/technology";
-      // if (Sim()->getCfg()->hasKey(param) && Sim()->getCfg()->getString(param) == "nvm")
-      // {
-      //    m_dram_cntlr = new PrL1PrL2DramDirectoryMSI::NvmCntlr(this,
+      // Modified by Kleber Kruger 
+      // Default implementation:
+      // m_dram_cntlr = new PrL1PrL2DramDirectoryMSI::DramCntlr(this,
       //       getShmemPerfModel(),
       //       getCacheBlockSize());
-      //       Sim()->getStatsManager()->logTopology("dram-cntlr", core->getId(), core->getId());    
-      // }
-      // else
-      // {
-      //    m_dram_cntlr = new PrL1PrL2DramDirectoryMSI::DramCntlr(this,
-      //       getShmemPerfModel(),
-      //       getCacheBlockSize());
-      //       Sim()->getStatsManager()->logTopology("dram-cntlr", core->getId(), core->getId());
-      // }
-
-      m_dram_cntlr = new PrL1PrL2DramDirectoryMSI::DramCntlr(this,
-         getShmemPerfModel(),
-         getCacheBlockSize());
-         Sim()->getStatsManager()->logTopology("dram-cntlr", core->getId(), core->getId());
+      // New implementation:
+      
+      String param = "perf_model/dram/technology";
+      m_dram_cntlr = Sim()->getCfg()->hasKey(param) && Sim()->getCfg()->getString(param) == "nvm" ?
+                     new PrL1PrL2DramDirectoryMSI::NvmCntlr(this, getShmemPerfModel(), getCacheBlockSize()) :
+                     new PrL1PrL2DramDirectoryMSI::DramCntlr(this, getShmemPerfModel(), getCacheBlockSize());
+      Sim()->getStatsManager()->logTopology("dram-cntlr", core->getId(), core->getId());
 
       if (Sim()->getCfg()->getBoolArray("perf_model/dram/cache/enabled", core->getId()))
       {
