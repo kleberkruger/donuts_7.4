@@ -20,26 +20,14 @@ namespace PrL1PrL2DramDirectoryMSI
 {
    class NvmCntlr : public DramCntlr
    {
-      private:
-         UInt64 m_logs;
-         UInt64 m_log_ends; 
-         UInt32 m_log_buffer;
-         UInt32 m_log_size;  
-         bool m_log_enabled;
-         bool m_log_type;
-
-         SubsecondTime runDramPerfModel(core_id_t requester, SubsecondTime time, IntPtr address, DramCntlrInterface::access_t access_type, ShmemPerf *perf);
-
-         void addToDramAccessCount(IntPtr address, access_t access_type);
-         void printDramAccessCount(void);
-
-         static bool getLogEnabled();
-         static UInt32 getLogRowBufferSize();
-         static bool getLogType();
-
-         static void createLogEntry(IntPtr address, Byte* data_buf);
-
       public:
+         typedef enum 
+         {
+            UNDO_LOGGING = 0,
+            LOG_BY_COMMAND = 1,
+            NUM_LOG_TYPES
+         } log_type_t;
+
          NvmCntlr(MemoryManagerBase* memory_manager,
                ShmemPerfModel* shmem_perf_model,
                UInt32 cache_block_size);
@@ -55,5 +43,25 @@ namespace PrL1PrL2DramDirectoryMSI
 
          // TODO: implement this method called on checkpoint events
          void checkpoint();
+
+      private:
+         UInt64 m_logs;
+         UInt64 m_log_ends; 
+         UInt32 m_log_buffer;
+         UInt32 m_log_size;  
+         bool m_log_enabled;
+         log_type_t m_log_type;
+
+         SubsecondTime runDramPerfModel(core_id_t requester, SubsecondTime time, IntPtr address, DramCntlrInterface::access_t access_type, ShmemPerf *perf);
+
+         void addToDramAccessCount(IntPtr address, access_t access_type);
+         void printDramAccessCount(void);
+
+         static bool getLogEnabled();
+         static UInt32 getLogRowBufferSize();
+         static log_type_t getLogType();
+
+         // TODO: create log entries corretly (data + metadata)
+         static void createLogEntry(IntPtr address, Byte* data_buf);
    };
 }

@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import os
 import argparse
 
@@ -10,7 +12,7 @@ class Application:
 		self.min_cores = min_cores
 
 	def __repr__(self):
-		return '{}.{} ({})'.format(self.id, self.name, self.category)
+		return f"{self.id}.{self.name} - [category: {self.category}, min cores: {self.min_cores}]"
 
 
 CPU2006_APPS = [
@@ -48,33 +50,45 @@ CPU2006_APPS = [
 ]
 
 def parse_args():
-    parser = argparse.ArgumentParser()
-    args = parse_args()
+	parser = argparse.ArgumentParser()
+
+	parser.add_argument('config', type=str, nargs='+', help='experiment configutarions')
+	parser.add_argument('-s', '--slots', type=int, default=4, help='number of task-spooler slots')
+	parser.add_argument('-b', '--benchmark', type=str, nargs='+', 
+						choices=['npb', 'parsec', 'splash2', 'cpu2006', 'cpu2017', 'all'], default=['cpu2006'],
+                        help='benchmark selected')
+	parser.add_argument('-a', '--apps', type=str, nargs='+', default=['all'], help='applications to running')
+	parser.add_argument('-i', '--in', '--input', type=str, nargs='+', default=['ref'], help='input type')
+	parser.add_argument('-o', '--out', '--output', type=str, default='out/cpu2006', help='output base path') # Arrumar isso aqui {out/cpu2006/ref}?
+	parser.add_argument('-n', '--cores', type=int, nargs='+', default=[1], help='number of cores to running')
+	parser.add_argument('-t', '--instr', type=int, nargs='+', default=[1000000000], help='number of instructions')
+
+	return parser.parse_args()
 
 
 def add_app_to_spooler(app, input, num_cores, config, out_dir, num_instr):
-	os.system('mkdir -p {}'.format(out_dir))
-	cmd = 'tsp ./run-sniper -p cpu2006-{} -i {} -n {} -c {} -d {} -s stop-by-icount:{} \> {}'.\
-		format(app.name, input, num_cores, config, out_dir, num_instr, '{}/out.txt'.format(out_dir))
+	os.system(f"tsp mkdir -p {out_dir}")
+	cmd = f"tsp ./run-sniper -p cpu2006-{app.name} -i {input} -n {num_cores} -c {config} -d {out_dir} -s stop-by-icount:{num_instr}"
 	print(cmd)
 	os.system(cmd)
 
 def main():
     os.chdir(os.environ['BENCHMARKS_ROOT'])
 
-    num_slots = 4
+    num_slots = 6
     app_list = CPU2006_APPS
     input = 'ref'
     num_cores = 1
-    config = 'baseline'
+    config = 'baseline-nvm'
     out_dir_base = 'out/cpu2006'
-    num_instr = 40000000
+    num_instr = 1000000000
 
-    os.system('tsp -S {}'.format(num_slots))
+    os.system(f"tsp -S {num_slots}")
     for app in app_list:
-        out_dir = '{}/{}/{}'.format(out_dir_base, app.name, config)
+        out_dir = f"{out_dir_base}/{app.name}/{config}"
         add_app_to_spooler(app, input, num_cores, config, out_dir, num_instr)
 
 
 if __name__ == "__main__":
     main()
+	# print(parse_args())

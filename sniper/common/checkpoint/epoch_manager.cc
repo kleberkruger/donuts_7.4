@@ -17,6 +17,7 @@ EpochManager::~EpochManager() = default;
 
 void EpochManager::start()
 {
+   // TODO: Pra que este arquivo se nenhum mecanismo de checkpoint não está ativo?
    String path = Sim()->getConfig()->getOutputDirectory() + "/sim.ckpts.csv";
    if ((m_log_file = fopen(path.c_str(), "w")) == nullptr)
       fprintf(stderr, "Error on creating sim.ckpts.csv\n");

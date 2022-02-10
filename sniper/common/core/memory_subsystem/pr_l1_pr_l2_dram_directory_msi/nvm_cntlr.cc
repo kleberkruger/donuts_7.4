@@ -33,7 +33,7 @@ NvmCntlr::NvmCntlr(MemoryManagerBase* memory_manager,
    , m_log_buffer(0)
    , m_log_size(NvmCntlr::getLogRowBufferSize())
    , m_log_enabled(NvmCntlr::getLogEnabled())
-   , m_log_type(NvmCntlr::getLogType()) // FIXME: Change by enum type
+   , m_log_type(NvmCntlr::getLogType())
 {
    registerStatsMetric("nvm", memory_manager->getCore()->getId(), "logs", &m_logs);
    registerStatsMetric("nvm", memory_manager->getCore()->getId(), "log_ends", &m_log_ends);
@@ -59,7 +59,6 @@ NvmCntlr::getDataFromDram(IntPtr address, core_id_t requester, Byte* data_buf, S
 
    SubsecondTime dram_access_latency = DramCntlr::runDramPerfModel(requester, now, address, READ, perf);
 
-   // Added by Kleber Kruger
    if (m_log_enabled) 
       logDataToDram(address, requester, data_buf, now);
 
@@ -182,11 +181,11 @@ NvmCntlr::getLogRowBufferSize()
    return Sim()->getCfg()->hasKey(param) ? Sim()->getCfg()->getInt(param) : 1024;
 }
 
-bool
+NvmCntlr::log_type_t
 NvmCntlr::getLogType()
 {
    String param = "perf_model/dram/log_type";
-   return false;
+   return NvmCntlr::UNDO_LOGGING;
 }
 
 }
