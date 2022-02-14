@@ -91,7 +91,7 @@ NvmPerfModelConstant::getLogLatency(SubsecondTime pkt_time, UInt64 pkt_size, cor
    SubsecondTime processing_time = m_nvm_bandwidth.getRoundedLatency(8 * pkt_size); // bytes to bits
 
    // Compute Queue Delay
-   // --- Use outra fila!
+   // TODO: Use outra fila?
    // SubsecondTime queue_delay = m_queue_model ? m_queue_model->computeQueueDelay(pkt_time, processing_time, requester)
    //                                           : SubsecondTime::Zero();
    SubsecondTime queue_delay = SubsecondTime::Zero(); // FIX-ME!
@@ -101,10 +101,10 @@ NvmPerfModelConstant::getLogLatency(SubsecondTime pkt_time, UInt64 pkt_size, cor
    // printf("- NVM access: %5s | Latency: (%luq + %lup + %lua) = %lu ns\n", "LOG"
    //        queue_delay.getNS(), processing_time.getNS(), access_cost.getNS(), access_latency.getNS());
 
-   // perf->updateTime(pkt_time);
-   // perf->updateTime(pkt_time + queue_delay, ShmemPerf::LOG_QUEUE);
-   // perf->updateTime(pkt_time + queue_delay + processing_time, ShmemPerf::LOG_BUS);
-   // perf->updateTime(pkt_time + queue_delay + processing_time + access_cost, ShmemPerf::LOG_DEVICE);
+   perf->updateTime(pkt_time);
+   perf->updateTime(pkt_time + queue_delay, ShmemPerf::LOG_QUEUE);
+   perf->updateTime(pkt_time + queue_delay + processing_time, ShmemPerf::LOG_BUS);
+   perf->updateTime(pkt_time + queue_delay + processing_time + access_cost, ShmemPerf::NVM_DEVICE);
 
    // Update Memory Counters
    // m_num_accesses++;

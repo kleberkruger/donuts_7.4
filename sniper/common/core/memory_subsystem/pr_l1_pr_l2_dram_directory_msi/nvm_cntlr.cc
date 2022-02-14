@@ -10,6 +10,8 @@
 #include "config.hpp"         // Added by Kleber Kruger
 #include "nvm_perf_model.h"   // Added by Kleber Kruger
 
+// #include "hit_where.h"
+
 #if 0
    extern Lock iolock;
 #  include "core_manager.h"
@@ -35,8 +37,8 @@ NvmCntlr::NvmCntlr(MemoryManagerBase* memory_manager,
    , m_log_enabled(NvmCntlr::getLogEnabled())
    , m_log_type(NvmCntlr::getLogType())
 {
-   registerStatsMetric("nvm", memory_manager->getCore()->getId(), "logs", &m_logs);
-   registerStatsMetric("nvm", memory_manager->getCore()->getId(), "log_ends", &m_log_ends);
+   registerStatsMetric("dram", memory_manager->getCore()->getId(), "logs", &m_logs);
+   registerStatsMetric("dram", memory_manager->getCore()->getId(), "log_ends", &m_log_ends);
 }
 
 boost::tuple<SubsecondTime, HitWhere::where_t>
@@ -60,7 +62,16 @@ NvmCntlr::getDataFromDram(IntPtr address, core_id_t requester, Byte* data_buf, S
    SubsecondTime dram_access_latency = DramCntlr::runDramPerfModel(requester, now, address, READ, perf);
 
    if (m_log_enabled) 
-      logDataToDram(address, requester, data_buf, now);
+   {
+      HitWhere::where_t hit_where = HitWhere::MISS;
+      SubsecondTime latency;
+      boost::tie(latency, hit_where) = logDataToDram(address, requester, data_buf, now);
+
+      SubsecondTime total = dram_access_latency + latency;
+      // printf("LOAD | dram_latency + log_latency = total_latency: (%lu + %lu) = %lu\n", dram_access_latency.getNS(), latency.getNS(), total.getNS());
+      
+      dram_access_latency += latency;
+   }  
 
    ++m_reads;
    #ifdef ENABLE_DRAM_ACCESS_COUNT
@@ -88,10 +99,21 @@ NvmCntlr::putDataToDram(IntPtr address, core_id_t requester, Byte* data_buf, Sub
    }
 
    SubsecondTime dram_access_latency = DramCntlr::runDramPerfModel(requester, now, address, WRITE, &m_dummy_shmem_perf);
+   // printf("STORE %lu | (%lu) dram_latency = %lu\n", address, EpochManager::getGlobalSystemEID(), dram_access_latency.getNS());
 
    // Added by Kleber Kruger
-   if (m_log_enabled) 
-      logDataToDram(address, requester, data_buf, now);
+   bool is_donuts = true;
+   if (m_log_enabled && !is_donuts)
+   {
+      HitWhere::where_t hit_where = HitWhere::MISS;
+      SubsecondTime latency;
+      boost::tie(latency, hit_where) = logDataToDram(address, requester, data_buf, now);
+
+      SubsecondTime total = dram_access_latency + latency;
+      // printf("STORE | dram_latency + log_latency = total_latency: (%lu + %lu) = %lu\n", dram_access_latency.getNS(), latency.getNS(), total.getNS());
+      
+      dram_access_latency += latency;
+   }
 
    ++m_writes;
    #ifdef ENABLE_DRAM_ACCESS_COUNT
@@ -111,19 +133,19 @@ NvmCntlr::logDataToDram(IntPtr address, core_id_t requester, Byte* data_buf, Sub
    createLogEntry(address, data_buf);
 
    UInt64 cache_block_size = getCacheBlockSize();
-   SubsecondTime dram_access_latency;
+   SubsecondTime log_latency;
 
    // Filling the buffer...
    if (m_log_buffer + cache_block_size >= m_log_size)
    {
-      dram_access_latency = DramCntlr::runDramPerfModel(requester, now, address, LOG, &m_dummy_shmem_perf);
+      log_latency = DramCntlr::runDramPerfModel(requester, now, address, LOG, &m_dummy_shmem_perf);
       m_log_ends++;
       m_log_buffer = 0;
    }
    else
    {
       m_log_buffer += cache_block_size;
-      dram_access_latency = SubsecondTime::Zero();
+      log_latency = SubsecondTime::Zero(); // TODO: terá algum custo o log em linha aberta?
    }
 
    ++m_logs;
@@ -132,7 +154,7 @@ NvmCntlr::logDataToDram(IntPtr address, core_id_t requester, Byte* data_buf, Sub
    #endif
    MYLOG("L @ %08lx", address);
 
-   return boost::tuple<SubsecondTime, HitWhere::where_t>(dram_access_latency, HitWhere::DRAM);
+   return boost::tuple<SubsecondTime, HitWhere::where_t>(log_latency, HitWhere::DRAM);
 }
 
 void
@@ -164,7 +186,8 @@ NvmCntlr::checkpoint()
 void
 NvmCntlr::createLogEntry(IntPtr address, Byte* data_buf)
 {
-   // printf("Creating log entry { metadata: %lu, data: %u }\n", address, (unsigned int) *data_buf);
+   // UInt64 eid = EpochManager::getGlobalSystemEID();
+   // printf("Creating log entry for epoch: %lu { metadata: %lu, data: %u }\n", eid, address, (unsigned int) *data_buf);
 }
 
 bool
