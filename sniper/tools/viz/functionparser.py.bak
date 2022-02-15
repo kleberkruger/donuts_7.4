@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
-import subprocess, io
+import subprocess, cStringIO
 
 #script that takes a rtntrace file and parses it
 
@@ -30,7 +30,7 @@ def parseFunctions(inputfile = None, inputdata = None):
   if inputfile:
     f=open(inputfile, "r")
   elif inputdata:
-    f=io.StringIO(inputdata)
+    f=cStringIO.StringIO(inputdata)
   else:
     return None,None
   i=0
@@ -39,7 +39,7 @@ def parseFunctions(inputfile = None, inputdata = None):
   for line in f:
     output=line.rstrip(' \n').split('\t')
     if i == 0:
-      name2idx = dict([(a[1],a[0]) for a in enumerate(output)])
+      name2idx = dict(map(lambda a:(a[1],a[0]), enumerate(output)))
     #only functions that execute 1 or more instructions are stored
     if i > 0 and float(output[name2idx['instruction_count']]) >0:
       d = dict(
@@ -95,5 +95,5 @@ def parseFunctions(inputfile = None, inputdata = None):
   return functiondata, total
 
 def parseFunctionsDict(d):
-  da = list(zip(*list(d.items())))
+  da = zip(*d.items())
   return parseFunctions(inputdata = ('\t'.join(map(str,da[0]))+'\n'+'\t'.join(map(str,da[1]))))
