@@ -10,7 +10,7 @@ class CpiResults:
       raise ValueError('No cycles accounted during interval')
     # Create an ordered list of all labels used
     labels = set()
-    for core, (res, total, other, scale) in self.results.items():
+    for core, (res, total, other, scale) in list(self.results.items()):
       for name, value in res:
         labels.add(name)
     self.labels = [ label for label in self.cpiitems.names if label in labels ]
@@ -20,7 +20,7 @@ class CpiResults:
   def get_data(self, metric = 'cpi'):
     data = {}
 
-    for core, (res, total, other, scale) in self.results.items():
+    for core, (res, total, other, scale) in list(self.results.items()):
       data[core] = {}
       for name, value in res:
         if metric == 'cpi':

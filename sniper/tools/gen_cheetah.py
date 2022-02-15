@@ -1,10 +1,10 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import sys, os, getopt, subprocess, sniper_lib
 
 def generate_cheetah(jobid = None, resultsdir = '.', partial = None, outputbase = 'cheetah', title = None, yscale = (0, 50), logy = False, diff = False):
   res = sniper_lib.get_results(jobid = jobid, resultsdir = resultsdir, partial = partial)
-  data = dict([ (k.split('.')[1], v) for k, v in res['results'].items() if k.startswith('cheetah.') ])
+  data = dict([ (k.split('.')[1], v) for k, v in list(res['results'].items()) if k.startswith('cheetah.') ])
 
   def grouping_sortkey(grouping):
     if grouping == 'global':
@@ -17,8 +17,8 @@ def generate_cheetah(jobid = None, resultsdir = '.', partial = None, outputbase 
   def grouping_title(grouping):
     return grouping
 
-  GROUPINGS = sorted(data.keys(), key = grouping_sortkey)
-  xmax = 1 << max(map(len, data.values()))
+  GROUPINGS = sorted(list(data.keys()), key = grouping_sortkey)
+  xmax = 1 << max(list(map(len, list(data.values()))))
 
   o = file(outputbase + '.input', 'w')
   o.write('''\
@@ -58,7 +58,7 @@ plot %s
 
 if __name__ == '__main__':
   def usage():
-    print 'Usage:', sys.argv[0], '[-h (help)] [-j <jobid> | -d <resultsdir (default: .)>] [--partial=<begin:end (roi-begin:roi-end)>] [-o <output (cheetah)>] [-t <title>] [-y <ymax> | --logy=<miny:maxy>] [--diff]'
+    print('Usage:', sys.argv[0], '[-h (help)] [-j <jobid> | -d <resultsdir (default: .)>] [--partial=<begin:end (roi-begin:roi-end)>] [-o <output (cheetah)>] [-t <title>] [-y <ymax> | --logy=<miny:maxy>] [--diff]')
     sys.exit(-1)
 
   jobid = 0
@@ -72,8 +72,8 @@ if __name__ == '__main__':
 
   try:
     opts, args = getopt.getopt(sys.argv[1:], "hj:d:o:t:y:", [ 'partial=', 'logy=', 'diff' ])
-  except getopt.GetoptError, e:
-    print e
+  except getopt.GetoptError as e:
+    print(e)
     usage()
   for o, a in opts:
     if o == '-h':
@@ -81,7 +81,7 @@ if __name__ == '__main__':
     if o == '-d':
       resultsdir = a
     if o == '-j':
-      jobid = long(a)
+      jobid = int(a)
     if o == '-o':
       outputbase = a
     if o == '--partial':
@@ -94,7 +94,7 @@ if __name__ == '__main__':
   if o == '-y':
     yscale = 0, float(a)
   if o == '--logy':
-    yscale = map(float, a.split(':'))
+    yscale = list(map(float, a.split(':')))
     logy = True
   if o == '--diff':
     diff = True

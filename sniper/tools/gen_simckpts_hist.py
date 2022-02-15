@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import argparse, os, csv, sys
 import numpy as np
 import pandas as pd
@@ -52,7 +54,7 @@ def main():
     args = parser.parse_args()
     filepath = os.path.splitext(args.filepath)[0]
 
-    print("[HISTOGRAM] [ Generating histogram from file: '{}.csv' ]".format(filepath))
+    print(("[HISTOGRAM] [ Generating histogram from file: '{}.csv' ]".format(filepath)))
     
     with open(filepath + '.csv') as csv_file:
         data = sorted(collect_data_2(csv_file)) # sorted apenas para entregar os bins ordenados
@@ -85,7 +87,7 @@ def main():
     # plt.savefig(filepath + '.svg')
     plt.savefig(filepath + '.pdf')
 
-    print("[HISTOGRAM] [ Histogram generated at: '{}.pdf' ]".format(filepath))
+    print(("[HISTOGRAM] [ Histogram generated at: '{}.pdf' ]".format(filepath)))
 
 
 if __name__ == "__main__":

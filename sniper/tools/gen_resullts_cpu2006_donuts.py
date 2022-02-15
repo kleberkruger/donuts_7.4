@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import os, sniper_lib
 import pandas as pd
@@ -49,12 +49,12 @@ def get_exec_time(res):
     results['performance_model.elapsed_time_fixed'][c] * results['fs_to_cycles_cores'][c]
     for c in range(ncores)
   ]
-  return long(results['performance_model.cycle_count_fixed'][0])
+  return int(results['performance_model.cycle_count_fixed'][0])
 
 
 def get_num_mem_access(res):
   results = res['results']
-  return map(sum, zip(results['dram.reads'], results['dram.writes']))[0]
+  return list(map(sum, list(zip(results['dram.reads'], results['dram.writes']))))[0]
 
 
 def get_num_mem_writes(res):
@@ -76,7 +76,7 @@ def get_avg_mem_bandwidth_utilization(res):
   else:
     time0 = time0_begin - time0_end
 
-  return map(lambda a: 100*a/time0 if time0 else float('inf'), results['dram-queue.total-time-used'])[0]
+  return [100*a/time0 if time0 else float('inf') for a in results['dram-queue.total-time-used']][0]
 
 
 
@@ -174,7 +174,7 @@ def generate_results_dataframe(resultsrootdir):
           get_results_from_resultsdir(app_dir, app_dir + '/kruger/1.0'))
         apps.append(app)
     except:
-      print('An exception occurred in application: {}'.format(app_dir))
+      print(('An exception occurred in application: {}'.format(app_dir)))
 
   df = pd.concat([get_exec_time_dataframe(apps), get_mem_access_dataframe(apps), 
     get_mem_bandwidth_utilization_dataframe(apps), get_mem_writes_dataframe(apps)], 

@@ -27,7 +27,7 @@ class SniperStatsDb(sniper_stats.SniperStatsBase):
     self.names = self.read_metricnames()
 
   def get_snapshots(self):
-    return [ key[1:] for key in self.db.keys() if key.startswith('d') ]
+    return [ key[1:] for key in list(self.db.keys()) if key.startswith('d') ]
 
   def read_metricnames(self):
     names = {}
@@ -57,6 +57,6 @@ class SniperStatsDb(sniper_stats.SniperStatsBase):
 
 if __name__ == '__main__':
   stats = SniperStatsDb()
-  print stats.get_snapshots()
+  print(stats.get_snapshots())
   names = stats.read_metricnames()
-  print stats.read_snapshot('roi-end')
+  print(stats.read_snapshot('roi-end'))

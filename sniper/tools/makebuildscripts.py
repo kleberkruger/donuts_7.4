@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # Create the scripts that define linker flags needed for running an app under Graphite.
 
 import sys, os, subprocess
@@ -55,11 +55,11 @@ env_check_make = 'SELF_DIR := $(dir $(word $(words $(MAKEFILE_LIST)),$(MAKEFILE_
 file('config/buildconf.sh', 'w').write('\n'.join(
   [ message, '' ] +
   [ env_check_sh, '' ] +
-  [ '%s="%s"' % i for i in sorted(flags.items(),key=lambda x:x[0]) ]
+  [ '%s="%s"' % i for i in sorted(list(flags.items()),key=lambda x:x[0]) ]
 ) + '\n')
 
 file('config/buildconf.makefile', 'w').write('\n'.join(
   [ message, '' ] +
   [ env_check_make, '' ] +
-  [ '%s:=%s' % i for i in sorted(flags.items(),key=lambda x:x[0]) ]
+  [ '%s:=%s' % i for i in sorted(list(flags.items()),key=lambda x:x[0]) ]
 ) + '\n')

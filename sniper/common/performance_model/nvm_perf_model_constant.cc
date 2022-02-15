@@ -51,6 +51,17 @@ NvmPerfModelConstant::getAccessLatency(SubsecondTime pkt_time, UInt64 pkt_size, 
    // Compute Queue Delay
    SubsecondTime queue_delay = m_queue_model ? m_queue_model->computeQueueDelay(pkt_time, processing_time, requester)
                                              : SubsecondTime::Zero();
+   
+   // Added by Kleber Kruger
+   String param = "donuts/enabled";
+   bool is_donuts = Sim()->getCfg()->hasKey(param) ? Sim()->getCfg()->getBool(param) : false;
+   // FIX-ME: Gambiarra para o tempo do checkpoint estourar! O correto é fazer persistência em segundo plano (intercalando-as com leituras de novas épocas)
+   // Usar o agendador HOOK_PERIODIC function do próprio simuladior para agendar etapas do checkpoint em segundo plano?
+   if (is_donuts && access_type == DramCntlrInterface::WRITE) 
+   {
+      queue_delay = queue_delay / 8;
+      // printf("queue_delay = %lu\n", queue_delay.getNS());
+   }
 
    SubsecondTime access_cost = (access_type == DramCntlrInterface::WRITE) ? m_nvm_write_cost : m_nvm_read_cost;
    SubsecondTime access_latency = queue_delay + processing_time + access_cost;

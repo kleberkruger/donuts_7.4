@@ -39,8 +39,8 @@ class CpiData:
     fastforward_extrapolate = False
 
 
-    data = collections.defaultdict(lambda: collections.defaultdict(long))
-    for key, values in self.stats.items():
+    data = collections.defaultdict(lambda: collections.defaultdict(int))
+    for key, values in list(self.stats.items()):
       if '.cpi' in key:
         if key.startswith('thread.'):
           # Ignore per-thread statistics
@@ -91,19 +91,19 @@ class CpiData:
       }
       for k in self.stats:
         if k.startswith('interval_timer.cpContr_'):
-          if k not in cpContrMap.keys():
-            print 'Missing in cpContrMap: ', k
+          if k not in list(cpContrMap.keys()):
+            print('Missing in cpContrMap: ', k)
       # Keep 1/width as base CPI component, break down the remainder according to critical path contributors
       BaseBest = instrs[core] / float(sniper_config.get_config(self.config, 'perf_model/core/interval_timer/dispatch_width', core))
       BaseAct = data[core]['Base']
       BaseCp = BaseAct - BaseBest
       scale = BaseCp / (BaseAct or 1)
-      for cpName, cpiName in cpContrMap.items():
+      for cpName, cpiName in list(cpContrMap.items()):
         val = float(self.stats.get(cpName, [0]*ncores)[core]) / 1e6
         data[core]['Base'] -= val * scale
         data[core][cpiName] = data[core].get(cpiName, 0) + val * scale
       # Issue width
-      for key, values in self.stats.items():
+      for key, values in list(self.stats.items()):
         if key.startswith('interval_timer.detailed-cpiBase-'):
           if 'DispatchWidth' in key:
             if 'DispatchRate' not in key: # We already accounted for DispatchRate above, don't do it twice
@@ -116,15 +116,15 @@ class CpiData:
         #    Number of cycles that weren't accounted for when starting this interval
         cycles_extra = time0_extra * cycles_scale[core]
         #    Components that could be the cause of cycles_extra. It should be just one, but if there's many, we'll have to guess
-        sync_components = dict([ (key, value) for key, value in data[core].items() if (key.startswith('Sync') or key == 'StartTime') and value > cycles_extra ])
+        sync_components = dict([ (key, value) for key, value in list(data[core].items()) if (key.startswith('Sync') or key == 'StartTime') and value > cycles_extra ])
         sync_total = sum(sync_components.values())
-        for key, value in sync_components.items():
+        for key, value in list(sync_components.items()):
           data[core][key] -= cycles_extra*value/float(sync_total)
       data[core]['Imbalance'] = cycles_scale[core] * max(times) - sum(data[core].values())
 
     self.data = data
     self.ncores = ncores
-    self.cores = range(ncores)
+    self.cores = list(range(ncores))
     self.instrs = instrs
     self.times = times
     self.cycles_scale = cycles_scale
@@ -137,7 +137,7 @@ class CpiData:
       core,
       1 - (self.data[core].get('StartTime', 0) + self.data[core].get('Imbalance', 0) + self.data[core].get('SyncPthreadCond', 0) + \
            self.data[core].get('SyncPthreadBarrier', 0) + self.data[core].get('SyncJoin', 0) + self.data[core].get('Recv', 0)) / (float(max_time) or 1.)
-    ) for core in self.data.keys() ])
+    ) for core in list(self.data.keys()) ])
 
 
   def filter(self, cores_list = None, core_mincomp = 0):
@@ -155,7 +155,7 @@ class CpiData:
 
 
   def aggregate(self):
-    allkeys = self.data[self.cores[0]].keys()
+    allkeys = list(self.data[self.cores[0]].keys())
     self.data = { 0: dict([ (key, sum([ self.data[core][key] for core in self.cores ]) / len(self.cores)) for key in allkeys ]) }
     self.instrs = { 0: sum(self.instrs[core] for core in self.cores) / len(self.cores) }
     self.ncores = 1

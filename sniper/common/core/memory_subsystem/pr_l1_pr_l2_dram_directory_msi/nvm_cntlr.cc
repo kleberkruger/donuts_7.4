@@ -67,7 +67,7 @@ NvmCntlr::getDataFromDram(IntPtr address, core_id_t requester, Byte* data_buf, S
       SubsecondTime latency;
       boost::tie(latency, hit_where) = logDataToDram(address, requester, data_buf, now);
 
-      SubsecondTime total = dram_access_latency + latency;
+      // SubsecondTime total = dram_access_latency + latency;
       // printf("LOAD | dram_latency + log_latency = total_latency: (%lu + %lu) = %lu\n", dram_access_latency.getNS(), latency.getNS(), total.getNS());
       
       dram_access_latency += latency;
@@ -99,20 +99,24 @@ NvmCntlr::putDataToDram(IntPtr address, core_id_t requester, Byte* data_buf, Sub
    }
 
    SubsecondTime dram_access_latency = DramCntlr::runDramPerfModel(requester, now, address, WRITE, &m_dummy_shmem_perf);
-   // printf("STORE %lu | (%lu) dram_latency = %lu\n", address, EpochManager::getGlobalSystemEID(), dram_access_latency.getNS());
 
    // Added by Kleber Kruger
-   bool is_donuts = true;
+   String param = "donuts/enabled";
+   bool is_donuts = Sim()->getCfg()->hasKey(param) ? Sim()->getCfg()->getBool(param) : false;
    if (m_log_enabled && !is_donuts)
    {
       HitWhere::where_t hit_where = HitWhere::MISS;
       SubsecondTime latency;
       boost::tie(latency, hit_where) = logDataToDram(address, requester, data_buf, now);
 
-      SubsecondTime total = dram_access_latency + latency;
+      // SubsecondTime total = dram_access_latency + latency;
       // printf("STORE | dram_latency + log_latency = total_latency: (%lu + %lu) = %lu\n", dram_access_latency.getNS(), latency.getNS(), total.getNS());
       
       dram_access_latency += latency;
+   }
+   else
+   {
+      // printf("STORE %lu | (%lu) dram_latency = %lu\n", address, EpochManager::getGlobalSystemEID(), dram_access_latency.getNS());
    }
 
    ++m_writes;

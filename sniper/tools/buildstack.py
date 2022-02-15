@@ -42,7 +42,7 @@ def merge_items(data, all_items, nocollapse = False, no_complain_others = False)
     return res, total, other
 
   results = {}
-  for core, values in data.items():
+  for core, values in list(data.items()):
     scale = float(sum(values.values())) or 1. # Conversion factor from sim.stats values to %, for comparison with threshold
     res, total, other = get_items('', all_items, values, scale)
     # Everything that's left in <values> is unknown
