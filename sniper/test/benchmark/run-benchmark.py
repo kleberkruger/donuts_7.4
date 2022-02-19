@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
-import os
-import argparse
+import os, argparse
 
 
 class Application:
@@ -79,9 +78,9 @@ def main():
     app_list = CPU2006_APPS
     input = 'ref'
     num_cores = 1
-    config = 'baseline-nvm'
-    out_dir_base = 'out/test'
-    num_instr = 30000000
+    config = 'donuts-2k'
+    out_dir_base = 'out/cpu2006'
+    num_instr = 1000000000
 
     os.system(f"tsp -S {num_slots}")
     for app in app_list:

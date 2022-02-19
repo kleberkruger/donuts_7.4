@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
 import sys, os, collections, subprocess, sniper_lib, sniper_config
 
@@ -15,9 +15,9 @@ class Function:
     self.name = cppfilt(name).strip()
     self.location = location.split(':')
     self.img = self.location[0]
-    self.offset = int(self.location[1])
+    self.offset = long(self.location[1])
     # link-time address
-    self.ieip = str(int(eip, 16) - self.offset)
+    self.ieip = str(long(eip, 16) - self.offset)
   def __str__(self):
     return self.name
     #return '[%8s] %s' % (self.eip, self.name)
@@ -30,22 +30,22 @@ class Call:
     self.stack = stack
     self.data = data
   def add(self, data):
-    for k, v in list(data.items()):
+    for k, v in data.items():
       self.data[k] = self.data.get(k, 0) + v
   def buildTotal(self, prof):
     # Assumes all children have already been visited!
     self.children = prof.children[self.stack]
     # Add self to global total
-    for k, v in list(self.data.items()):
+    for k, v in self.data.items():
       prof.totals[k] = prof.totals.get(k, 0) + v
     # Add all children to our total
     self.total = dict(self.data)
     for stack in self.children.copy():
-      for k, v in list(prof.calls[stack].total.items()):
+      for k, v in prof.calls[stack].total.items():
         self.total[k] += v
       # Child is to be folded: add it to self, remove from list of children
       if prof.calls[stack].folded:
-        for k, v in list(prof.calls[stack].data.items()):
+        for k, v in prof.calls[stack].data.items():
           if k != 'calls':
             self.data[k] += v
         self.children.remove(stack)
@@ -61,11 +61,11 @@ class Category(Call):
     self.stack = ''
     self.data = {}
   def printLine(self, prof, obj):
-    print('%6.2f%%\t' % (100 * self.data['nonidle_elapsed_time'] / float(prof.totals['nonidle_elapsed_time'])) + \
+    print >> obj, '%6.2f%%\t' % (100 * self.data['nonidle_elapsed_time'] / float(prof.totals['nonidle_elapsed_time'])) + \
                   '%6.2f%%\t' % (100 * self.data['instruction_count'] / float(prof.totals['instruction_count'])) + \
                   '%7.2f\t' % (self.data['instruction_count'] / (prof.fs_to_cycles * float(self.data['nonidle_elapsed_time']))) + \
                   '%7.2f\t' % (1000 * self.data['l2miss'] / float(self.data['instruction_count'])) + \
-                  self.name, file=obj)
+                  self.name
 
 
 class CallPrinter:
@@ -85,30 +85,30 @@ class CallPrinter:
 
 class CallPrinterDefault(CallPrinter):
   def printHeader(self):
-    print('%7s\t%7s\t%7s\t%7s\t%7s\t%7s\t%7s\t%s' % ('calls', 'time', 't.self', 't.wait', 'icount', 'ipc', 'l2.mpki', 'name'), file=self.obj)
+    print >> self.obj, '%7s\t%7s\t%7s\t%7s\t%7s\t%7s\t%7s\t%s' % ('calls', 'time', 't.self', 't.wait', 'icount', 'ipc', 'l2.mpki', 'name')
   def printLine(self, call, offset):
-    print('%7d\t' % call.data['calls'] + \
+    print >> self.obj, '%7d\t' % call.data['calls'] + \
                        '%6.2f%%\t' % (100 * call.total['nonidle_elapsed_time'] / float(self.prof.totals['nonidle_elapsed_time'] or 1)) + \
                        '%6.2f%%\t' % (100 * call.data['nonidle_elapsed_time'] / float(self.prof.totals['nonidle_elapsed_time'] or 1)) + \
                        '%6.2f%%\t' % (100 * call.data['waiting_cost'] / float(self.prof.totals['total_coretime'] or 1)) + \
                        '%6.2f%%\t' % (100 * call.total['instruction_count'] / float(self.prof.totals['instruction_count'] or 1)) + \
                        '%7.2f\t' % (call.total['instruction_count'] / (self.prof.fs_to_cycles * float(call.total['nonidle_elapsed_time'] or 1))) + \
                        '%7.2f\t' % (1000 * call.total['l2miss'] / float(call.total['instruction_count'] or 1)) + \
-                       '  ' * offset + call.name, file=self.obj)
+                       '  ' * offset + call.name
 
 
 class CallPrinterAbsolute(CallPrinter):
   def printHeader(self):
-    print('%7s\t%9s\t%9s\t%9s\t%9s\t%9s\t%9s\t%s' % ('calls', 'cycles', 'c.self', 'c.wait', 'icount', 'i.self', 'l2miss', 'name'), file=self.obj)
+    print >> self.obj, '%7s\t%9s\t%9s\t%9s\t%9s\t%9s\t%9s\t%s' % ('calls', 'cycles', 'c.self', 'c.wait', 'icount', 'i.self', 'l2miss', 'name')
   def printLine(self, call, offset):
-    print('%7d\t' % call.data['calls'] + \
+    print >> self.obj, '%7d\t' % call.data['calls'] + \
                        '%9d\t' % (self.prof.fs_to_cycles * float(call.total['nonidle_elapsed_time'])) + \
                        '%9d\t' % (self.prof.fs_to_cycles * float(call.data['nonidle_elapsed_time'])) + \
                        '%9d\t' % (self.prof.fs_to_cycles * float(call.data['waiting_cost'])) + \
                        '%9d\t' % call.total['instruction_count'] + \
                        '%9d\t' % call.data['instruction_count'] + \
                        '%9d\t' % call.total['l2miss'] + \
-                       '  ' * offset + call.name, file=self.obj)
+                       '  ' * offset + call.name
 
 
 class Profile:
@@ -142,7 +142,7 @@ class Profile:
         stack = line[0].split(':')
         eip = stack[-1]
         stack = ':'.join(map(self.translateEip, stack))
-        data = dict(list(zip(self.headers[1:], list(map(int, line[1:])))))
+        data = dict(zip(self.headers[1:], map(long, line[1:])))
         if stack in self.calls:
           self.calls[stack].add(data)
         else:
@@ -193,7 +193,7 @@ class Profile:
       printer.printTree(stack)
 
   def writeCallgrind(self, obj):
-    bystatic = dict([ (fn.ieip, Category(fn.eip)) for fn in list(self.functions.values()) ])
+    bystatic = dict([ (fn.ieip, Category(fn.eip)) for fn in self.functions.values() ])
     for stack in self.calls:
       fn = self.functions[self.calls[stack].eip]
       bystatic[fn.ieip].add(self.calls[stack].data)
@@ -207,7 +207,7 @@ class Profile:
       bystatic[fn.ieip].children = children
 
     costs = (
-      ('Cycles', 'Cycles',               lambda data: int(self.fs_to_cycles * data['nonidle_elapsed_time'])),
+      ('Cycles', 'Cycles',               lambda data: long(self.fs_to_cycles * data['nonidle_elapsed_time'])),
       ('Calls',  'Calls',                lambda data: data['calls']),
       ('Icount', 'Instruction count',    lambda data: data['instruction_count']),
       ('L2',     'L2 load misses',       lambda data: data['l2miss']),
@@ -216,30 +216,30 @@ class Profile:
     def formatData(data):
       return ' '.join(map(str, [ fn(data) for _, _, fn in costs ]))
 
-    print('cmd: Sniper run', file=obj)
-    print('positions: instr', file=obj)
-    print('events:', ' '.join([ cost for cost, _, _ in costs ]), file=obj)
+    print >> obj, 'cmd: Sniper run'
+    print >> obj, 'positions: instr'
+    print >> obj, 'events:', ' '.join([ cost for cost, _, _ in costs ])
     for cost, desc, _ in costs:
-      print('event: %s : %s' % (cost, desc), file=obj)
-    print('summary:', formatData(self.totals), file=obj)
-    print(file=obj)
+      print >> obj, 'event: %s : %s' % (cost, desc)
+    print >> obj, 'summary:', formatData(self.totals)
+    print >> obj
 
-    for site in sorted(list(bystatic.values()), key = lambda v: v.data.get('instruction_count',0), reverse=True):
+    for site in sorted(bystatic.values(), key = lambda v: v.data.get('instruction_count',0), reverse=True):
       if not site.data:
         continue
       fn = self.functions[site.name]
-      print('ob=%s' % fn.location[0], file=obj)
-      print('fl=%s' % fn.location[2], file=obj)
-      print('fn=%s' % fn.name, file=obj)
-      print('0x%x' % int(fn.ieip), formatData(site.data), file=obj)
-      for _site in list(site.children.values()):
+      print >> obj, 'ob=%s' % fn.location[0]
+      print >> obj, 'fl=%s' % fn.location[2]
+      print >> obj, 'fn=%s' % fn.name
+      print >> obj, '0x%x' % long(fn.ieip), formatData(site.data)
+      for _site in site.children.values():
         _fn = self.functions[_site.name]
-        print('cob=%s' % _fn.location[0], file=obj)
-        print('cfi=%s' % _fn.location[2], file=obj)
-        print('cfn=%s' % _fn.name, file=obj)
-        print('calls=%s 0x%x' % (_site.calls, int(_fn.ieip)), file=obj)
-        print('0x%x' % int(_fn.ieip), formatData(_site.data), file=obj)
-      print(file=obj)
+        print >> obj, 'cob=%s' % _fn.location[0]
+        print >> obj, 'cfi=%s' % _fn.location[2]
+        print >> obj, 'cfn=%s' % _fn.name
+        print >> obj, 'calls=%s 0x%x' % (_site.calls, long(_fn.ieip))
+        print >> obj, '0x%x' % long(_fn.ieip), formatData(_site.data)
+      print >> obj
 
   def summarize(self, catnames, catfilters, obj = sys.stdout):
     def get_catname(func):
@@ -261,11 +261,11 @@ class Profile:
         # Visit parent function
         stack = stack.rpartition(':')[0]
     bytype = dict([ (name, Category(name)) for name in catnames ])
-    for func in list(self.calls.values()):
+    for func in self.calls.values():
       if not func.folded:
         catname = get_catname(func)
         bytype[catname].add(func.data)
-    print('%7s\t%7s\t%7s\t%7s' % ('time', 'icount', 'ipc', 'l2.mpki'), file=obj)
+    print >> obj, '%7s\t%7s\t%7s\t%7s' % ('time', 'icount', 'ipc', 'l2.mpki')
     for name in catnames:
       if bytype[name].data:
         bytype[name].printLine(self, obj = obj)
@@ -276,7 +276,7 @@ if __name__ == '__main__':
   import getopt
 
   def usage():
-    print('%s  [-d <resultsdir (.)> | -o <outputdir>] [--abs]' % sys.argv[0])
+    print '%s  [-d <resultsdir (.)> | -o <outputdir>] [--abs]' % sys.argv[0]
     sys.exit(1)
 
   HOME = os.path.dirname(__file__)
@@ -286,9 +286,9 @@ if __name__ == '__main__':
 
   try:
     opts, cmdline = getopt.getopt(sys.argv[1:], "hd:o:", ['abs'])
-  except getopt.GetoptError as e:
+  except getopt.GetoptError, e:
     # print help information and exit:
-    print(e, file=sys.stderr)
+    print >> sys.stderr, e
     usage()
   for o, a in opts:
     if o == '-h':

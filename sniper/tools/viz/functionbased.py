@@ -200,14 +200,14 @@ def createJSONData(resultsdir, outputdir, title = None, source = None, doxygenpa
 
 if __name__ == '__main__':
   def usage():
-    print()
-    print(('Usage: '+sys.argv[0]+' [-h|--help (help)] [-d <resultsdir (default: .)>] [-o <outputdir (default: .)>] [-t <title>] [-v|--verbose] [-s <sourcecodepath>] [-x <doxygen bin path>]'))
-    print()
-    print("This script generates data for the function-based visualizations.")
-    print("These visualizations contain:")
-    print("                     * roofline model")
-    print("                     * instructions vs time plot")
-    print("                     * automatic suggestions for optimization")
+    print
+    print('Usage: '+sys.argv[0]+' [-h|--help (help)] [-d <resultsdir (default: .)>] [-o <outputdir (default: .)>] [-t <title>] [-v|--verbose] [-s <sourcecodepath>] [-x <doxygen bin path>]')
+    print
+    print "This script generates data for the function-based visualizations."
+    print "These visualizations contain:"
+    print "                     * roofline model"
+    print "                     * instructions vs time plot"
+    print "                     * automatic suggestions for optimization"
 
     sys.exit()
 
@@ -221,7 +221,7 @@ if __name__ == '__main__':
 
   try:
     opts, args = getopt.getopt(sys.argv[1:], "hd:o:t:v:s:x:", [ "help", "verbose" ])
-  except getopt.GetoptError as e:
+  except getopt.GetoptError, e:
     print(e)
     usage()
     sys.exit()
@@ -243,12 +243,12 @@ if __name__ == '__main__':
 
 
   if verbose:
-    print('This script generates data for the roofline model')
+    print 'This script generates data for the roofline model'
 
   createJSONData(resultsdir, outputdir, title, source, doxygenpath)
 
   #write static files
   if outputdir != HOME:
-    print("Copy files to output directory "+outputdir)
+    print "Copy files to output directory "+outputdir
     os.system('cd "%s"; tar c flot/ levels/functionbased/functionbased.html levels/functionbased/*js css/ levels/functionbased/doxygen | tar x -C %s' % (HOME, outputdir))
 

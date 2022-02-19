@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
 import sys, os, re, subprocess
 
@@ -9,7 +9,7 @@ def run_pin(pin_home):
   try:
     ver = ex_ret(pin_home+"/pin -version")
     versplit = ver.split('pin-')[1].split('\n')[0].split('-')
-    print(versplit[0] + '.' + versplit[1])
+    print versplit[0] + '.' + versplit[1]
     return True
   except:
     return False
@@ -40,6 +40,6 @@ for line in file(headerfile):
       version[var] = res.group(1)
       break
 
-print(version.get('PIN_PRODUCT_VERSION_MAJOR', '?') + '.' \
+print version.get('PIN_PRODUCT_VERSION_MAJOR', '?') + '.' \
     + version.get('PIN_PRODUCT_VERSION_MINOR', '?') + '.' \
-    + version.get('PIN_BUILD_NUMBER', '?'))
+    + version.get('PIN_BUILD_NUMBER', '?')

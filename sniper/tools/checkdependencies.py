@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
 import sys, os
 
@@ -46,7 +46,7 @@ def find_file(filename):
 
 for package, filename in DEPENDENCIES:
   if not find_file(filename):
-    print('*** Please install package %s' % package)
+    print '*** Please install package %s' % package
     missing = True
 
 

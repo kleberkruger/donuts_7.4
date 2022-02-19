@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 #
 # Copyright 2008-2009 Jose Fonseca
 #
@@ -35,17 +35,17 @@ import locale
 # Python 2.x/3.x compatibility
 if sys.version_info[0] >= 3:
     PYTHON_3 = True
-    def compat_iteritems(x): return list(x.items())  # No iteritems() in Python 3
-    def compat_itervalues(x): return list(x.values())  # No itervalues() in Python 3
+    def compat_iteritems(x): return x.items()  # No iteritems() in Python 3
+    def compat_itervalues(x): return x.values()  # No itervalues() in Python 3
     def compat_keys(x): return list(x.keys())  # keys() is a generator in Python 3
-    str = str  # No class basestring in Python 3
-    chr = chr # No unichr in Python 3
+    basestring = str  # No class basestring in Python 3
+    unichr = chr # No unichr in Python 3
     xrange = range # No xrange in Python 3
 else:
     PYTHON_3 = False
-    def compat_iteritems(x): return iter(x.items())
-    def compat_itervalues(x): return iter(x.values())
-    def compat_keys(x): return list(x.keys())
+    def compat_iteritems(x): return x.iteritems()
+    def compat_itervalues(x): return x.itervalues()
+    def compat_keys(x): return x.keys()
 
 
 try:
@@ -55,7 +55,7 @@ except ImportError:
     pass
 
 
-MULTIPLICATION_SIGN = chr(0xd7)
+MULTIPLICATION_SIGN = unichr(0xd7)
 
 
 def times(x):
@@ -335,7 +335,7 @@ class Profile(Object):
             node = frontier.pop()
             visited.add(node)
             f = self.functions[node]
-            newNodes = list(f.calls.keys())
+            newNodes = f.calls.keys()
             frontier = frontier.union(set(newNodes) - visited)
         subtreeFunctions = {}
         for n in visited:
@@ -344,8 +344,8 @@ class Profile(Object):
 
     def prune_leaf(self, leaf):
         edgesUp = collections.defaultdict(set)
-        for f in list(self.functions.keys()):
-            for n in list(self.functions[f].calls.keys()):
+        for f in self.functions.keys():
+            for n in self.functions[f].calls.keys():
                 edgesUp[n].add(f)
         # build the tree up
         visited = set()
@@ -361,7 +361,7 @@ class Profile(Object):
         for n in path:
             f = self.functions[n]
             newCalls = {}
-            for c in list(f.calls.keys()):
+            for c in f.calls.keys():
                 if c in path:
                     newCalls[c] = f.calls[c]
             f.calls = newCalls
@@ -756,7 +756,7 @@ class LineParser(Parser):
         return self.__eof
 
 
-XML_ELEMENT_START, XML_ELEMENT_END, XML_CHARACTER_DATA, XML_EOF = list(range(4))
+XML_ELEMENT_START, XML_ELEMENT_END, XML_CHARACTER_DATA, XML_EOF = range(4)
 
 
 class XmlToken:
@@ -824,7 +824,7 @@ class XmlTokenizer:
                 self.tokens.append(token)
             self.character_data = ''
 
-    def __next__(self):
+    def next(self):
         size = 16*1024
         while self.index >= len(self.tokens) and not self.final:
             self.tokens = []
@@ -870,7 +870,7 @@ class XmlParser(Parser):
         self.consume()
 
     def consume(self):
-        self.token = next(self.tokenizer)
+        self.token = self.tokenizer.next()
 
     def match_element_start(self, name):
         return self.token.type == XML_ELEMENT_START and self.token.name_or_data == name
@@ -2712,7 +2712,7 @@ class PstatsParser:
                 caller = self.get_function(fn)
                 call = Call(callee.id)
                 if isinstance(value, tuple):
-                    for i in range(0, len(value), 4):
+                    for i in xrange(0, len(value), 4):
                         nc, cc, tt, ct = value[i:i+4]
                         if CALLS in call:
                             call[CALLS] += cc
@@ -3063,7 +3063,7 @@ class DotWriter:
     def id(self, id):
         if isinstance(id, (int, float)):
             s = str(id)
-        elif isinstance(id, str):
+        elif isinstance(id, basestring):
             if id.isalnum() and not id.startswith('0x'):
                 s = id
             else:

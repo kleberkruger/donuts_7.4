@@ -1,9 +1,9 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
 import sys, Image, ImageDraw
 
 if len(sys.argv) < 2:
-  print(('Usage: %s <filename> [<time_min>] [<time_max>]' % sys.argv[0]))
+  print 'Usage: %s <filename> [<time_min>] [<time_max>]' % sys.argv[0]
   sys.exit(-1)
 
 
@@ -25,9 +25,9 @@ _ROI_END = None
 
 for line in file(FILENAME):
   try:
-    cpu, time, state = list(map(int, line.split()))
+    cpu, time, state = map(long, line.split())
   except ValueError:
-    print(('Ignoring invalid line', line))
+    print 'Ignoring invalid line', line
     continue
   NTHREADS = max(NTHREADS, cpu + 1)
   _TSTART = min(_TSTART, time)
@@ -58,9 +58,9 @@ states = [[ 0 for i in range(NTHREADS) ] for j in range(WIDTH) ]
 
 for line in file(FILENAME):
   try:
-    cpu, time, state = list(map(int, line.split()))
+    cpu, time, state = map(long, line.split())
   except ValueError:
-    print(('Ignoring invalid line', line))
+    print 'Ignoring invalid line', line
     continue
   if state > 3: continue
   if cpu in lasttime:

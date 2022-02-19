@@ -29,7 +29,7 @@ class SniperStatsSqlite(sniper_stats.SniperStatsBase):
     if prefixids:
       prefixid = prefixids[0][0]
       if metrics:
-        nameids = [ str(nameid) for nameid, (objectname, metricname) in list(self.names.items()) if '%s.%s' % (objectname, metricname) in metrics ]
+        nameids = [ str(nameid) for nameid, (objectname, metricname) in self.names.items() if '%s.%s' % (objectname, metricname) in metrics ]
         namefilter = ' and nameid in (%s)' % ','.join(nameids)
       else:
         namefilter = ''
@@ -60,5 +60,5 @@ class SniperStatsSqlite(sniper_stats.SniperStatsBase):
 
 if __name__ == '__main__':
   stats = SniperStatsSqlite()
-  print(stats.get_snapshots())
-  print(stats.read_snapshot('roi-end'))
+  print stats.get_snapshots()
+  print stats.read_snapshot('roi-end')

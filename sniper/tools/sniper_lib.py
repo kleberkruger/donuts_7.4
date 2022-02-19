@@ -1,6 +1,6 @@
 # A copy of this file is distributed with the binaries of Sniper and Benchmarks
 
-import sys, os, re, subprocess, io, sniper_stats, sniper_config
+import sys, os, re, subprocess, cStringIO, sniper_stats, sniper_config
 try:
   import json
 except ImportError:
@@ -11,7 +11,7 @@ try:
   try:
     import env_setup
     sys.path.append(os.path.join(env_setup.benchmarks_root(), 'tools', 'scheduler'))
-  except EnvironmentError as e:
+  except EnvironmentError, e:
     pass
   import intelqueue, iqclient, packdir, app_constraints
   ic = iqclient.IntelClient()
@@ -113,7 +113,7 @@ def stats_process(config, results):
   stats['pthread_locks_contended'] = float(sum(stats.get('pthread.pthread_mutex_lock_contended', [0]))) / (sum(stats.get('pthread.pthread_mutex_lock_count', [0])) or 1)
   # femtosecond to cycles conversion
   freq = [ 1e9 * float(sniper_config.get_config(config, 'perf_model/core/frequency', idx)) for idx in range(ncores) ]
-  stats['fs_to_cycles_cores'] = [f / 1e15 for f in freq]
+  stats['fs_to_cycles_cores'] = map(lambda f: f / 1e15, freq)
   # Backwards compatible version returning fs_to_cycles for core 0, for heterogeneous configurations fs_to_cycles_cores needs to be used
   stats['fs_to_cycles'] = stats['fs_to_cycles_cores'][0]
   # Fixed versions of [idle|nonidle] elapsed time
@@ -131,7 +131,7 @@ def stats_process(config, results):
   if 'performance_model.elapsed_time' in stats and 'performance_model.cycle_count' not in stats:
     stats['performance_model.cycle_count'] = [ stats['fs_to_cycles_cores'][idx] * stats['performance_model.elapsed_time'][idx] for idx in range(ncores) ]
   if 'thread.nonidle_elapsed_time' in stats and 'thread.nonidle_cycle_count' not in stats:
-    stats['thread.nonidle_cycle_count'] = [ int(stats['fs_to_cycles'] * t) for t in stats['thread.nonidle_elapsed_time'] ]
+    stats['thread.nonidle_cycle_count'] = [ long(stats['fs_to_cycles'] * t) for t in stats['thread.nonidle_elapsed_time'] ]
   # IPC
   if 'performance_model.cycle_count' in stats:
     stats['ipc'] = [
@@ -194,7 +194,7 @@ def parse_results_from_dir(resultsdir, partial = None, metrics = None):
   powerfile = os.path.join(resultsdir, 'power.py')
   if os.path.exists(powerfile):
     exec(open(powerfile).read())
-    for key, value in list(power.items()):
+    for key, value in power.items():
       results.append(('power.%s' % key, -1, value))
 
   return results
@@ -304,7 +304,7 @@ def kill_children():
 class OutputToLess:
   def __enter__(self):
     if sys.stdout.isatty():
-      self.stream = io.StringIO()
+      self.stream = cStringIO.StringIO()
       sys.stdout = self.stream
     else:
       self.stream = None
@@ -314,7 +314,7 @@ class OutputToLess:
       sys.stdout = sys.__stdout__
       if exc_type:
         # Dump output up to error
-        print(self.stream.getvalue(), end=' ')
+        print self.stream.getvalue(),
         # Process exception normally
         return False
       data = self.stream.getvalue()

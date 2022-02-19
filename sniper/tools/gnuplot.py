@@ -34,7 +34,7 @@ set xlabel "Core"
   gnuplot_cmd_list.append(cmd)
 
   for i in range(0,len(titles)):
-    for c in list(data.keys()):
+    for c in data.keys():
       gnuplot_cmd_list.append('"%s" ' % c)
       for (t,_) in titles:
         gnuplot_cmd_list.append('%s ' % data[c].get(t, 0.0))
@@ -50,5 +50,5 @@ set xlabel "Core"
     p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
     out, err = p.communicate(''.join(gnuplot_cmd_list))
   except OSError:
-    print("Warning: Unable to run gnuplot to create cpi stack graphs.  Maybe gnuplot is not installed?")
+    print "Warning: Unable to run gnuplot to create cpi stack graphs.  Maybe gnuplot is not installed?"
 
