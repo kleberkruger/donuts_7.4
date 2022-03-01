@@ -18,9 +18,14 @@ private:
    SubsecondTime m_total_queueing_delay;
    SubsecondTime m_total_access_latency;
 
+   UInt16 m_write_buffer_size;
+
    // Added by Kleber Kruger
    SubsecondTime getLogLatency(SubsecondTime pkt_time, UInt64 pkt_size, core_id_t requester, IntPtr address,
                                   DramCntlrInterface::access_t access_type, ShmemPerf *perf);
+
+   static bool isDonuts();
+   static UInt16 getWriteBufferSize();
 
 public:
    NvmPerfModelConstant(core_id_t core_id, UInt32 cache_block_size);

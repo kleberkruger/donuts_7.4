@@ -13,7 +13,8 @@ NvmPerfModelConstant::NvmPerfModelConstant(core_id_t core_id, UInt32 cache_block
       m_nvm_log_cost(NvmPerfModel::getLogLatency()),
       m_nvm_bandwidth(8 * Sim()->getCfg()->getFloat("perf_model/dram/per_controller_bandwidth")),
       m_total_queueing_delay(SubsecondTime::Zero()),
-      m_total_access_latency(SubsecondTime::Zero())
+      m_total_access_latency(SubsecondTime::Zero()),
+      m_write_buffer_size(getWriteBufferSize())
 {
    if (Sim()->getCfg()->getBool("perf_model/dram/queue_model/enabled"))
    {
@@ -52,15 +53,12 @@ NvmPerfModelConstant::getAccessLatency(SubsecondTime pkt_time, UInt64 pkt_size, 
    SubsecondTime queue_delay = m_queue_model ? m_queue_model->computeQueueDelay(pkt_time, processing_time, requester)
                                              : SubsecondTime::Zero();
    
-   // Added by Kleber Kruger
-   String param = "donuts/enabled";
-   bool is_donuts = Sim()->getCfg()->hasKey(param) ? Sim()->getCfg()->getBool(param) : false;
    // FIX-ME: Gambiarra para o tempo do checkpoint estourar! O correto é fazer persistência em segundo plano (intercalando-as com leituras de novas épocas)
    // Usar o agendador HOOK_PERIODIC function do próprio simuladior para agendar etapas do checkpoint em segundo plano?
-   if (is_donuts && access_type == DramCntlrInterface::WRITE) 
+   if (isDonuts() && access_type == DramCntlrInterface::WRITE) 
    {
-      queue_delay = queue_delay / 8;
-      // printf("queue_delay = %lu\n", queue_delay.getNS());
+      queue_delay = queue_delay / m_write_buffer_size;
+      printf("queue_delay = %lu\n", queue_delay.getNS());
    }
 
    SubsecondTime access_cost = (access_type == DramCntlrInterface::WRITE) ? m_nvm_write_cost : m_nvm_read_cost;
@@ -123,4 +121,16 @@ NvmPerfModelConstant::getLogLatency(SubsecondTime pkt_time, UInt64 pkt_size, cor
    // m_total_queueing_delay += queue_delay;
 
    return access_latency;
+}
+
+bool NvmPerfModelConstant::isDonuts()
+{
+   String param = "donuts/enabled";
+   return Sim()->getCfg()->hasKey(param) ? Sim()->getCfg()->getBool(param) : false;
+}
+
+UInt16 NvmPerfModelConstant::getWriteBufferSize()
+{
+   String param = "donuts/write_buffer_size";
+   return (UInt16) (isDonuts() && Sim()->getCfg()->hasKey(param)) ? Sim()->getCfg()->getInt(param) : 1;
 }

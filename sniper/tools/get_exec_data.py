@@ -14,7 +14,9 @@ def main():
     "num_buffer_overflow": get_num_buffer_overflow(res),
     "num_checkpoints": get_num_checkpoints(res),
   }
-  sys.stdout.write(json.dumps(data))
+  # sys.stdout.write(json.dumps(data))
+  print(json.dumps(data))
+  
 
 
 def is_donuts(config):
