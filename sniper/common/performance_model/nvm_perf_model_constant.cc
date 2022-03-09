@@ -58,7 +58,7 @@ NvmPerfModelConstant::getAccessLatency(SubsecondTime pkt_time, UInt64 pkt_size, 
    if (isDonuts() && access_type == DramCntlrInterface::WRITE) 
    {
       queue_delay = queue_delay / m_write_buffer_size;
-      printf("queue_delay = %lu\n", queue_delay.getNS());
+      // printf("queue_delay = %lu\n", queue_delay.getNS());
    }
 
    SubsecondTime access_cost = (access_type == DramCntlrInterface::WRITE) ? m_nvm_write_cost : m_nvm_read_cost;

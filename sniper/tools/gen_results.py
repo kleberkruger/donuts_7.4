@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import os, subprocess, argparse, json
+from this import d
 import pandas as pd
 
 # path = "/home/kleber.kruger/donuts/sniper/benchmarks/out/cpu2006/gcc/donuts-1k"
@@ -210,7 +211,134 @@ def main(resultsrootdir = None, output = '.', silent = False):
 
   df = generate_results_dataframe(apps)
   generate_sheet(df, '.')
+  
+  
+
+
+
+
+
+def get_exec_time_dataframe_2(apps):
+  exec_time_df = pd.DataFrame({
+    'Donuts-50': [ a.donuts_50.exec_time for a in apps ],
+    'Donuts-75': [ a.donuts_75.exec_time for a in apps ],
+    'Donuts-100': [ a.donuts_100.exec_time for a in apps ],
+  }, index = [ a.name for a in apps ])
+  return pd.concat({"Execution Time": exec_time_df}, axis=1)
+
+
+def get_mem_access_dataframe_2(apps):
+  mem_access_df = pd.DataFrame({
+    'Donuts-50': [ a.donuts_50.num_mem_access for a in apps ],
+    'Donuts-75': [ a.donuts_75.num_mem_access for a in apps ],
+    'Donuts-100': [ a.donuts_100.num_mem_access for a in apps ],
+  }, index = [ a.name for a in apps ])
+  return pd.concat({"Memory Access": mem_access_df}, axis=1)
+
+
+def get_mem_bandwidth_usage_dataframe_2(apps):
+  mem_bandwidth_usage_df = pd.DataFrame({
+    'Donuts-50': [ a.donuts_50.mem_bandwidth_usage / 100.0 for a in apps ],
+    'Donuts-75': [ a.donuts_75.mem_bandwidth_usage / 100.0 for a in apps ],
+    'Donuts-100': [ a.donuts_100.mem_bandwidth_usage / 100.0 for a in apps ],
+  }, index = [ a.name for a in apps ])
+  return pd.concat({"Average DRAM Bandwidth Usage": mem_bandwidth_usage_df}, axis=1)
+
+
+def get_mem_writes_dataframe_2(apps):
+  mem_writes_df = pd.DataFrame({
+    'Donuts-50': [ a.donuts_50.num_mem_writes for a in apps ],
+    'Donuts-75': [ a.donuts_75.num_mem_writes for a in apps ],
+    'Donuts-100': [ a.donuts_100.num_mem_writes for a in apps ],
+  }, index = [ a.name for a in apps ])
+  return pd.concat({"Memory Writes": mem_writes_df}, axis=1)
+
+
+def get_checkpoints_dataframe_2(apps):
+  checkpoints_df = pd.DataFrame({
+    'Donuts-50': [ a.donuts_50.num_checkpoints for a in apps ],
+    'Donuts-75': [ a.donuts_75.num_checkpoints for a in apps ],
+    'Donuts-100': [ a.donuts_100.num_checkpoints for a in apps ],
+  }, index = [ a.name for a in apps ])
+  return pd.concat({"Checkpoints": checkpoints_df}, axis=1)
+
+
+def generate_results_dataframe_2(apps):
+  df = pd.concat([
+    get_exec_time_dataframe_2(apps),
+    get_mem_access_dataframe_2(apps),
+    get_mem_writes_dataframe_2(apps),
+    get_mem_bandwidth_usage_dataframe_2(apps),
+    get_checkpoints_dataframe_2(apps)
+  ], axis=1, names=['Application'])
+  return df
+  
+  
+class App_2:
+  def __init__(self, name, donuts_50, donuts_75, donuts_100):
+    self.name = name
+    self.donuts_50 = donuts_50
+    self.donuts_75 = donuts_75
+    self.donuts_100 = donuts_100
+  
+  def __str__(self):
+    return f"Name: {self.name}\tDonuts 50: {self.donuts_50}\tDonuts 75: {self.donuts_75}\tDonuts 100: {self.donuts_100}\n"
+
+  
+def main_2(resultsrootdir = None):
+  args = parse_args()
+  if resultsrootdir is None:
+    resultsrootdir = f"{os.environ['BENCHMARKS_ROOT']}/out/cpu2006/threshold"
+  
+  apps = []
+  # for app_name in os.listdir(resultsrootdir):
+  
+  app_cpu2006_sorted = [
+    'libquantum', 
+    'bwaves', 
+    'cactusADM', 
+    'lbm', 
+    'wrf', 
+    'leslie3d',
+    'sjeng',
+    'bzip2',
+    'mcf',
+    'zeusmp',
+    'milc',
+    'astar',
+    # 'gobmk',
+    # 'perlbench',
+    # 'gcc',
+    # 'omnetpp',
+    # 'gromacs',
+    # 'dealII',
+    # 'namd',
+    # 'calculix',
+    # 'gamess',
+    # 'h264ref',
+    # 'sphinx3',
+    # 'povray',
+    # 'tonto',
+    # 'GemsFDTD'
+  ]
+  
+  for app_name in app_cpu2006_sorted:
+    app_dir = f"{resultsrootdir}/{app_name}"
+    try:
+      if os.path.isdir(app_dir) and app_dir != 'threshold':
+        app = App_2(app_name, 
+                    get_execution_data(f"{app_dir}/donuts-th50"),
+                    get_execution_data(f"{app_dir}/donuts-th75"),
+                    get_execution_data(f"{app_dir}/donuts-th100"))
+        apps.append(app)
+    except:
+      print(f"An exception occurred in application: {app_dir}")
+  
+  df = generate_results_dataframe_2(apps)
+  print(df)
+  generate_sheet(df, '.')
 
 
 if __name__ == '__main__':
-  main()
+  # main()
+  main_2()

@@ -78,8 +78,8 @@ def main():
     app_list = CPU2006_APPS
     input = 'ref'
     num_cores = 1
-    config = 'donuts-2k'
-    out_dir_base = 'out/cpu2006'
+    config = 'donuts-4k'
+    out_dir_base = 'out/cpu2006/wb32'
     num_instr = 1000000000
 
     os.system(f"tsp -S {num_slots}")
