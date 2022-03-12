@@ -221,7 +221,9 @@ def main(resultsrootdir = None, output = '.', silent = False):
 def get_exec_time_dataframe_2(apps):
   exec_time_df = pd.DataFrame({
     'Donuts-50': [ a.donuts_50.exec_time for a in apps ],
+    'Donuts-63': [ a.donuts_63.exec_time for a in apps ],
     'Donuts-75': [ a.donuts_75.exec_time for a in apps ],
+    'Donuts-88': [ a.donuts_88.exec_time for a in apps ],
     'Donuts-100': [ a.donuts_100.exec_time for a in apps ],
   }, index = [ a.name for a in apps ])
   return pd.concat({"Execution Time": exec_time_df}, axis=1)
@@ -230,7 +232,9 @@ def get_exec_time_dataframe_2(apps):
 def get_mem_access_dataframe_2(apps):
   mem_access_df = pd.DataFrame({
     'Donuts-50': [ a.donuts_50.num_mem_access for a in apps ],
+    'Donuts-63': [ a.donuts_63.num_mem_access for a in apps ],
     'Donuts-75': [ a.donuts_75.num_mem_access for a in apps ],
+    'Donuts-88': [ a.donuts_88.num_mem_access for a in apps ],
     'Donuts-100': [ a.donuts_100.num_mem_access for a in apps ],
   }, index = [ a.name for a in apps ])
   return pd.concat({"Memory Access": mem_access_df}, axis=1)
@@ -239,7 +243,9 @@ def get_mem_access_dataframe_2(apps):
 def get_mem_bandwidth_usage_dataframe_2(apps):
   mem_bandwidth_usage_df = pd.DataFrame({
     'Donuts-50': [ a.donuts_50.mem_bandwidth_usage / 100.0 for a in apps ],
+    'Donuts-63': [ a.donuts_63.mem_bandwidth_usage / 100.0 for a in apps ],
     'Donuts-75': [ a.donuts_75.mem_bandwidth_usage / 100.0 for a in apps ],
+    'Donuts-88': [ a.donuts_88.mem_bandwidth_usage / 100.0 for a in apps ],
     'Donuts-100': [ a.donuts_100.mem_bandwidth_usage / 100.0 for a in apps ],
   }, index = [ a.name for a in apps ])
   return pd.concat({"Average DRAM Bandwidth Usage": mem_bandwidth_usage_df}, axis=1)
@@ -248,7 +254,9 @@ def get_mem_bandwidth_usage_dataframe_2(apps):
 def get_mem_writes_dataframe_2(apps):
   mem_writes_df = pd.DataFrame({
     'Donuts-50': [ a.donuts_50.num_mem_writes for a in apps ],
+    'Donuts-63': [ a.donuts_63.num_mem_writes for a in apps ],
     'Donuts-75': [ a.donuts_75.num_mem_writes for a in apps ],
+    'Donuts-88': [ a.donuts_88.num_mem_writes for a in apps ],
     'Donuts-100': [ a.donuts_100.num_mem_writes for a in apps ],
   }, index = [ a.name for a in apps ])
   return pd.concat({"Memory Writes": mem_writes_df}, axis=1)
@@ -257,7 +265,9 @@ def get_mem_writes_dataframe_2(apps):
 def get_checkpoints_dataframe_2(apps):
   checkpoints_df = pd.DataFrame({
     'Donuts-50': [ a.donuts_50.num_checkpoints for a in apps ],
+    'Donuts-63': [ a.donuts_63.num_checkpoints for a in apps ],
     'Donuts-75': [ a.donuts_75.num_checkpoints for a in apps ],
+    'Donuts-88': [ a.donuts_88.num_checkpoints for a in apps ],
     'Donuts-100': [ a.donuts_100.num_checkpoints for a in apps ],
   }, index = [ a.name for a in apps ])
   return pd.concat({"Checkpoints": checkpoints_df}, axis=1)
@@ -275,10 +285,12 @@ def generate_results_dataframe_2(apps):
   
   
 class App_2:
-  def __init__(self, name, donuts_50, donuts_75, donuts_100):
+  def __init__(self, name, donuts_50, donuts_63, donuts_75, donuts_88, donuts_100):
     self.name = name
     self.donuts_50 = donuts_50
+    self.donuts_63 = donuts_63
     self.donuts_75 = donuts_75
+    self.donuts_88 = donuts_88
     self.donuts_100 = donuts_100
   
   def __str__(self):
@@ -328,7 +340,9 @@ def main_2(resultsrootdir = None):
       if os.path.isdir(app_dir) and app_dir != 'threshold':
         app = App_2(app_name, 
                     get_execution_data(f"{app_dir}/donuts-th50"),
+                    get_execution_data(f"{app_dir}/donuts-th63"),
                     get_execution_data(f"{app_dir}/donuts-th75"),
+                    get_execution_data(f"{app_dir}/donuts-th88"),
                     get_execution_data(f"{app_dir}/donuts-th100"))
         apps.append(app)
     except:
