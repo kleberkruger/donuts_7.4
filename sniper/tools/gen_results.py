@@ -1,173 +1,129 @@
 #!/usr/bin/env python3
 
-import os, subprocess, argparse, json
-from this import d
+# Default results path: 
+# BENCHMARKS_ROOT/out/<test-name>/<benchmark-name>/<app-name>/<config>
+
+import argparse, os, subprocess, json, re
 import pandas as pd
 
-# path = "/home/kleber.kruger/donuts/sniper/benchmarks/out/cpu2006/gcc/donuts-1k"
-# output = subprocess.check_output(["./get_exec_data.py", path], universal_newlines=True)
-# print(output)
+import re
 
-class ExecutionData:
-  def __init__(self, exec_time, mem_bandwidth_usage, num_mem_access, num_mem_writes,
+def atoi(text):
+  return int(text) if text.isdigit() else text
+
+def natural_keys(text):
+  return [atoi(c) for c in re.split(r'(\d+)', text)]
+
+class RunData:
+    
+  def __init__(self, data, runtime, avg_bandwidth_usage, num_mem_access, num_mem_writes,
                num_mem_logs = 0, num_buffer_overflow = 0, num_checkpoints = 0):
-    self.exec_time = exec_time
-    self.mem_bandwidth_usage = mem_bandwidth_usage
+    self.data = data
+    self.runtime = runtime
+    self.avg_bandwidth_usage = avg_bandwidth_usage
     self.num_mem_access = num_mem_access
     self.num_mem_writes = num_mem_writes
     self.num_mem_logs = num_mem_logs
     self.num_buffer_overflow = num_buffer_overflow
     self.num_checkpoints = num_checkpoints
+    
+  def __repr__(self):
+    return json.dumps(vars(self))
 
-  def __str__(self):
-    return f"[ ExecTime: {self.exec_time}, MemBandwidthUsage: {self.mem_bandwidth_usage} NumMemAccess: {self.num_mem_access}, NumMemWrites: {self.num_mem_writes}, NumMemLogs: {self.num_mem_logs} NumBufferOverflow: {self.num_buffer_overflow}, NumCheckpoints: {self.num_checkpoints}]"
 
-
-class App:
-  def __init__(self, name, baseline, picl, donuts_1k, donuts_2k, donuts_4k, donuts_8k, donuts_16k):
+class AppData:
+      
+  def __init__(self, name, data):
     self.name = name
-    self.baseline = baseline
-    self.picl = picl
-    self.donuts_1k = donuts_1k
-    self.donuts_2k = donuts_2k
-    self.donuts_4k = donuts_4k
-    self.donuts_8k = donuts_8k
-    self.donuts_16k = donuts_16k
+    self.data = data
+
+  def __repr__(self):
+    info = f"{self.name}:\n"
+    for key, value in self.data.items():
+      info += f"\t{key}: {value}\n"
+    return info
   
-  def __str__(self):
-    return f"Name: {self.name}\tBaseline: {self.baseline}\tPiCL: {self.picl}\t\
-      Donuts 1K: {self.donuts_1k}\tDonuts 4K: {self.donuts_4k}\tDonuts 8K: {self.donuts_8k}\n"
-
-
+  
 def parse_args():
-	parser = argparse.ArgumentParser()
-	parser.add_argument('-c', '--config', type=str, nargs='+', default=['all'], help='configutarions')
-	parser.add_argument('-a', '--apps', type=str, nargs='+', default=['all'], help='applications to running')
-	parser.add_argument('-o', '--out', '--output', type=str, default='out/cpu2006', help='output base path')
-	parser.add_argument('-r', '--result', type=str, default=['.'], help='result file')
-	return parser.parse_args()
+  parser = argparse.ArgumentParser()
+  parser.add_argument('-r', '--root', type=str, default=f"{os.environ['BENCHMARKS_ROOT']}/out", help='<root-path> from results directory')
+  parser.add_argument('-t', '--test', type=str, help='test name')
+  parser.add_argument('-p', '--benchmark', type=str, default='cpu2006', help='benchmark selected')
+  parser.add_argument('-a', '--app', '--apps', type=str, nargs='+', default=[], help='applications to extract results')
+  parser.add_argument('-c', '--config', '--configs', type=str, nargs='+', default=[], help='configurations to extract results')
+  parser.add_argument('-b', '--baseline', type=str, help='select baseline configuration')
+  parser.add_argument('-i', '--info', type=str, nargs='+', choices=['r','b','a','w','l','o','c'], default=[], help='information colums')
+  parser.add_argument('-o', '--out', '--output', type=str, default='results_cpu2006.xlsx', help='results output file')
+  parser.add_argument('-e', '--err', '--error', type=str, default='results_error.txt', help='error output file')
+  return parser.parse_args()
 
 
+def find_configs(root_dir, app_names):
+  all_configs = []
+  for app_name in app_names:
+    app_dir = f"{root_dir}/{app_name}"
+    app_configs = list(filter(lambda f: os.path.isdir(f"{app_dir}/{f}"), sorted(os.listdir(app_dir), key=natural_keys)))
+    new_configs = set(app_configs) - set(all_configs)
+    all_configs = all_configs + list(new_configs)
+  return sorted(all_configs, key=natural_keys)
+  
+  
+def get_args(args):
+  root_dir = f"{args.root}/{args.test}" if args.test else args.root
+  root_dir += f"/{args.benchmark}"
+  app_names = args.app if args.app else list(filter(lambda f: 
+    os.path.isdir(f"{root_dir}/{f}"), sorted(os.listdir(root_dir))))
+  configs = args.config if args.config else find_configs(root_dir, app_names)
+  return root_dir, app_names, configs
+
+
+# TODO: create a separated module execution_data?
+# TODO: put in try cat?
 def get_execution_data(path):
   data = json.loads(subprocess.check_output(["./get_exec_data.py", path], universal_newlines=True))
-  return ExecutionData(data['exec_time'], data['mem_bandwidth_usage'], 
-                       data['num_mem_access'], data['num_mem_writes'], data['num_mem_logs'], 
-                       data['num_buffer_overflow'], data['num_checkpoints'])
+  return RunData(data, 
+                 data['exec_time'], data['mem_bandwidth_usage'], 
+                 data['num_mem_access'], data['num_mem_writes'], data['num_mem_logs'], 
+                 data['num_buffer_overflow'], data['num_checkpoints'])
 
 
-def get_exec_time_dataframe(apps):
-  exec_time_df = pd.DataFrame({
-    'Baseline': [ a.baseline.exec_time for a in apps ],
-    'PiCL': [ a.picl.exec_time for a in apps ],
-    'Donuts-1k': [ a.donuts_1k.exec_time for a in apps ],
-    'Donuts-2k': [ a.donuts_2k.exec_time for a in apps ],
-    'Donuts-4k': [ a.donuts_4k.exec_time for a in apps ],
-    'Donuts-8k': [ a.donuts_8k.exec_time for a in apps ],
-    'Donuts-16k': [ a.donuts_16k.exec_time for a in apps ],
-    'Overhead PiCL': [ 0 for a in apps ],
-    'Overhead Donuts-1k': [ 0 for a in apps ],
-    'Overhead Donuts-2k': [ 0 for a in apps ],
-    'Overhead Donuts-4k': [ 0 for a in apps ],
-    'Overhead Donuts-8k': [ 0 for a in apps ],
-    'Overhead Donuts-16k': [ 0 for a in apps ]
-  }, index = [ a.name for a in apps ])
-
-  exec_time_df = exec_time_df.reindex(columns=['Baseline', 'PiCL', 'Donuts-1k', 'Donuts-2k', 'Donuts-4k', 'Donuts-8k', 'Donuts-16k', 'Overhead PiCL', 'Overhead Donuts-1k', 'Overhead Donuts-2k', 'Overhead Donuts-4k', 'Overhead Donuts-8k', 'Overhead Donuts-16k'])
-  return pd.concat({"Execution Time": exec_time_df}, axis=1)
+def get_app_data_array(apps, config):
+  return [a.data[config].runtime for a in apps]
 
 
-def get_mem_access_dataframe(apps):
-  mem_access_df = pd.DataFrame({
-    'Baseline': [ a.baseline.num_mem_access for a in apps ],
-    'PiCL': [ a.picl.num_mem_access for a in apps ],
-    'Donuts-1k': [ a.donuts_1k.num_mem_access for a in apps ],
-    'Donuts-2k': [ a.donuts_2k.num_mem_access for a in apps ],
-    'Donuts-4k': [ a.donuts_4k.num_mem_access for a in apps ],
-    'Donuts-8k': [ a.donuts_8k.num_mem_access for a in apps ],
-    'Donuts-16k': [ a.donuts_16k.num_mem_access for a in apps ],
-    'Overhead PiCL': [ 0 for a in apps ],
-    'Overhead Donuts-1k': [ 0 for a in apps ],
-    'Overhead Donuts-2k': [ 0 for a in apps ],
-    'Overhead Donuts-4k': [ 0 for a in apps ],
-    'Overhead Donuts-8k': [ 0 for a in apps ],
-    'Overhead Donuts-16k': [ 0 for a in apps ]
-  }, index = [ a.name for a in apps ])
-
-  mem_access_df = mem_access_df.reindex(columns=[
-    'Baseline', 'PiCL', 'Donuts-1k', 'Donuts-2k', 'Donuts-4k', 'Donuts-8k', 'Donuts-16k', 
-    'Overhead PiCL', 'Overhead Donuts-1k', 'Overhead Donuts-2k', 'Overhead Donuts-4k', 'Overhead Donuts-8k', 'Overhead Donuts-16k'])
-  return pd.concat({"Memory Access": mem_access_df}, axis=1)
+def get_runtime_dataframe(apps, configs):
+  data = dict([(c, [a.data[c].runtime for a in apps]) for c in configs])
+  runtime_df = pd.DataFrame(data, index = [ a.name for a in apps ])
+  return pd.concat({"Runtime": runtime_df}, axis=1)
 
 
-def get_mem_bandwidth_usage_dataframe(apps):
-  mem_bandwidth_usage_df = pd.DataFrame({
-    'Baseline': [ a.baseline.mem_bandwidth_usage / 100.0 for a in apps ],
-    'PiCL': [ a.picl.mem_bandwidth_usage / 100.0 for a in apps ],
-    'Donuts-1k': [ a.donuts_1k.mem_bandwidth_usage / 100.0 for a in apps ],
-    'Donuts-2k': [ a.donuts_2k.mem_bandwidth_usage / 100.0 for a in apps ],
-    'Donuts-4k': [ a.donuts_4k.mem_bandwidth_usage / 100.0 for a in apps ],
-    'Donuts-8k': [ a.donuts_8k.mem_bandwidth_usage / 100.0 for a in apps ],
-    'Donuts-16k': [ a.donuts_16k.mem_bandwidth_usage / 100.0 for a in apps ],
-    'Delta PiCL': [ 0 for a in apps ],
-    'Delta Donuts-1k': [ 0 for a in apps ],
-    'Delta Donuts-2k': [ 0 for a in apps ],
-    'Delta Donuts-4k': [ 0 for a in apps ],
-    'Delta Donuts-8k': [ 0 for a in apps ],
-    'Delta Donuts-16k': [ 0 for a in apps ]
-  }, index = [ a.name for a in apps ])
-
-  mem_bandwidth_usage_df = mem_bandwidth_usage_df.reindex(columns=[
-    'Baseline', 'PiCL', 'Donuts-1k', 'Donuts-2k', 'Donuts-4k', 'Donuts-8k', 'Donuts-16k', 
-    'Delta PiCL', 'Delta Donuts-1k', 'Delta Donuts-2k', 'Delta Donuts-4k', 'Delta Donuts-8k', 'Delta Donuts-16k'])
-  return pd.concat({"Average DRAM Bandwidth Usage": mem_bandwidth_usage_df}, axis=1)
+def get_dataframe(apps, configs, attr, title):
+  data = dict([(c, [a.data[c].data[attr] for a in apps]) for c in configs])
+  df = pd.DataFrame(data, index = [ a.name for a in apps ])
+  return pd.concat({title: df}, axis=1)
 
 
-def get_mem_writes_dataframe(apps):
-  mem_writes_df = pd.DataFrame({
-    'Baseline': [ a.baseline.num_mem_writes for a in apps ],
-    'PiCL': [ a.picl.num_mem_writes for a in apps ],
-    'Donuts-1k': [ a.donuts_1k.num_mem_writes for a in apps ],
-    'Donuts-2k': [ a.donuts_2k.num_mem_writes for a in apps ],
-    'Donuts-4k': [ a.donuts_4k.num_mem_writes for a in apps ],
-    'Donuts-8k': [ a.donuts_8k.num_mem_writes for a in apps ],
-    'Donuts-16k': [ a.donuts_16k.num_mem_writes for a in apps ],
-    # 'Logging': [ a.picl.num_mem_logs for a in apps ],
-    # 'Buffer Overflow': [ a.picl.num_buffer_overflow for a in apps ],
-    # '%% Logging': [ 0 for a in apps ],
-    'Overhead PiCL': [ 0 for a in apps ],
-    'Overhead Donuts-1k': [ 0 for a in apps ],
-    'Overhead Donuts-2k': [ 0 for a in apps ],
-    'Overhead Donuts-4k': [ 0 for a in apps ],
-    'Overhead Donuts-8k': [ 0 for a in apps ],
-    'Overhead Donuts-16k': [ 0 for a in apps ]
-  }, index = [ a.name for a in apps ])
-
-  mem_writes_df = mem_writes_df.reindex(columns=[
-    'Baseline', 'PiCL', 'Donuts-1k', 'Donuts-2k', 'Donuts-4k', 'Donuts-8k', 'Donuts-16k', 
-    'Overhead PiCL', 'Overhead Donuts-1k', 'Overhead Donuts-2k', 'Overhead Donuts-4k', 'Overhead Donuts-8k', 'Overhead Donuts-16k'])
-  return pd.concat({"Memory Writes": mem_writes_df}, axis=1)
+def get_dataframe_perc(apps, configs, attr, title):
+  data = dict([(c, [a.data[c].data[attr] / 100.0 for a in apps]) for c in configs])
+  df = pd.DataFrame(data, index = [ a.name for a in apps ])
+  return pd.concat({title: df}, axis=1)
 
 
-def get_checkpoints_dataframe(apps):
-  checkpoints_df = pd.DataFrame({
-    'PiCL': [ a.picl.num_checkpoints for a in apps ],
-    'Donuts-1k': [ a.donuts_1k.num_checkpoints for a in apps ],
-    'Donuts-2k': [ a.donuts_2k.num_checkpoints for a in apps ],
-    'Donuts-4k': [ a.donuts_4k.num_checkpoints for a in apps ],
-    'Donuts-8k': [ a.donuts_8k.num_checkpoints for a in apps ],
-    'Donuts-16k': [ a.donuts_16k.num_checkpoints for a in apps ]
-  }, index = [ a.name for a in apps ])
-  # checkpoints_df = checkpoints_df.reindex(columns=['PiCL', 'Donuts'])
-  return pd.concat({"Checkpoints": checkpoints_df}, axis=1)
+def get_avg_bandwidth_usage_dataframe(apps, configs):
+  data = dict([(c, [a.data[c].avg_bandwidth_usage / 100.0 for a in apps]) for c in configs])
+  avg_bandwidth_usage_df = pd.DataFrame(data, index = [ a.name for a in apps ])
+  return pd.concat({"Average DRAM Bandwidth Usage": avg_bandwidth_usage_df}, axis=1)
 
 
-def generate_results_dataframe(apps):
+def generate_results_dataframe(apps, configs):
   df = pd.concat([
-    get_exec_time_dataframe(apps),
-    get_mem_access_dataframe(apps),
-    get_mem_writes_dataframe(apps),
-    get_mem_bandwidth_usage_dataframe(apps),
-    get_checkpoints_dataframe(apps)
+    get_runtime_dataframe(apps, configs),
+    get_avg_bandwidth_usage_dataframe(apps, configs),
+    get_dataframe(apps, configs, 'num_mem_access', 'Memory Access'),
+    get_dataframe(apps, configs, 'num_mem_writes', 'Memory Writes'),
+    get_dataframe(apps, configs, 'num_mem_logs', 'Memory Logs'),
+    get_dataframe(apps, configs, 'num_buffer_overflow', 'Memory Buffer Overflow'),
+    get_dataframe(apps, configs, 'num_checkpoints', 'Number of Checkpoints'),
   ], axis=1, names=['Application'])
   
   # df.index.name = 'Application'
@@ -178,181 +134,23 @@ def generate_sheet(df, output):
   with pd.ExcelWriter(f"{output}/results_cpu2006.xlsx", engine='xlsxwriter') as writer:
     df.to_excel(writer, sheet_name='SPEC CPU2006')
 
-    # startrow, rowssize = 4, df.shape[0]
-    # worksheet = writer.sheets['SPEC CPU2006']
-    # for r in range(startrow, rowssize + startrow):
-    #   worksheet.write_formula('D{}'.format(r), '(C{}-B{})/B{}'.format(r, r, r))
-    #   worksheet.write_formula('G{}'.format(r), '(F{}-E{})/E{}'.format(r, r, r))
-    #   worksheet.write_formula('J{}'.format(r), 'I{}-H{}'.format(r, r))
-    #   worksheet.write_formula('O{}'.format(r), 'M{}/L{}'.format(r, r))
-    #   worksheet.write_formula('P{}'.format(r), 'L{}/(L{}-K{})'.format(r, r, r))
-  
 
-def main(resultsrootdir = None, output = '.', silent = False):
+def main():
   args = parse_args()
-  if resultsrootdir is None:
-    resultsrootdir = f"{os.environ['BENCHMARKS_ROOT']}/out/cpu2006"
-  
+  root_dir, app_names, configs = get_args(args)
   apps = []
-  for app_name in os.listdir(resultsrootdir):
-    app_dir = f"{resultsrootdir}/{app_name}"
+  for app_name in app_names:
+    app_dir = f"{root_dir}/{app_name}"
     try:
-      if os.path.isdir(app_dir) and app_dir != 'cpu2006':
-        app = App(app_name, get_execution_data(f"{app_dir}/baseline-nvm"), 
-                            get_execution_data(f"{app_dir}/picl"), 
-                            get_execution_data(f"{app_dir}/donuts-1k"),
-                            get_execution_data(f"{app_dir}/donuts-2k"), 
-                            get_execution_data(f"{app_dir}/donuts-4k"),
-                            get_execution_data(f"{app_dir}/donuts-8k"),
-                            get_execution_data(f"{app_dir}/donuts-16k"))
-        apps.append(app)
+      app_data = dict([(c, get_execution_data(f"{app_dir}/{c}")) for c in configs])
+      apps.append(AppData(app_name, app_data))
     except:
       print(f"An exception occurred in application: {app_dir}")
-
-  df = generate_results_dataframe(apps)
+  
+  df = generate_results_dataframe(apps, configs)
   generate_sheet(df, '.')
-  
-  
-
-
-
-
-
-def get_exec_time_dataframe_2(apps):
-  exec_time_df = pd.DataFrame({
-    'Donuts-50': [ a.donuts_50.exec_time for a in apps ],
-    'Donuts-63': [ a.donuts_63.exec_time for a in apps ],
-    'Donuts-75': [ a.donuts_75.exec_time for a in apps ],
-    'Donuts-88': [ a.donuts_88.exec_time for a in apps ],
-    'Donuts-100': [ a.donuts_100.exec_time for a in apps ],
-  }, index = [ a.name for a in apps ])
-  return pd.concat({"Execution Time": exec_time_df}, axis=1)
-
-
-def get_mem_access_dataframe_2(apps):
-  mem_access_df = pd.DataFrame({
-    'Donuts-50': [ a.donuts_50.num_mem_access for a in apps ],
-    'Donuts-63': [ a.donuts_63.num_mem_access for a in apps ],
-    'Donuts-75': [ a.donuts_75.num_mem_access for a in apps ],
-    'Donuts-88': [ a.donuts_88.num_mem_access for a in apps ],
-    'Donuts-100': [ a.donuts_100.num_mem_access for a in apps ],
-  }, index = [ a.name for a in apps ])
-  return pd.concat({"Memory Access": mem_access_df}, axis=1)
-
-
-def get_mem_bandwidth_usage_dataframe_2(apps):
-  mem_bandwidth_usage_df = pd.DataFrame({
-    'Donuts-50': [ a.donuts_50.mem_bandwidth_usage / 100.0 for a in apps ],
-    'Donuts-63': [ a.donuts_63.mem_bandwidth_usage / 100.0 for a in apps ],
-    'Donuts-75': [ a.donuts_75.mem_bandwidth_usage / 100.0 for a in apps ],
-    'Donuts-88': [ a.donuts_88.mem_bandwidth_usage / 100.0 for a in apps ],
-    'Donuts-100': [ a.donuts_100.mem_bandwidth_usage / 100.0 for a in apps ],
-  }, index = [ a.name for a in apps ])
-  return pd.concat({"Average DRAM Bandwidth Usage": mem_bandwidth_usage_df}, axis=1)
-
-
-def get_mem_writes_dataframe_2(apps):
-  mem_writes_df = pd.DataFrame({
-    'Donuts-50': [ a.donuts_50.num_mem_writes for a in apps ],
-    'Donuts-63': [ a.donuts_63.num_mem_writes for a in apps ],
-    'Donuts-75': [ a.donuts_75.num_mem_writes for a in apps ],
-    'Donuts-88': [ a.donuts_88.num_mem_writes for a in apps ],
-    'Donuts-100': [ a.donuts_100.num_mem_writes for a in apps ],
-  }, index = [ a.name for a in apps ])
-  return pd.concat({"Memory Writes": mem_writes_df}, axis=1)
-
-
-def get_checkpoints_dataframe_2(apps):
-  checkpoints_df = pd.DataFrame({
-    'Donuts-50': [ a.donuts_50.num_checkpoints for a in apps ],
-    'Donuts-63': [ a.donuts_63.num_checkpoints for a in apps ],
-    'Donuts-75': [ a.donuts_75.num_checkpoints for a in apps ],
-    'Donuts-88': [ a.donuts_88.num_checkpoints for a in apps ],
-    'Donuts-100': [ a.donuts_100.num_checkpoints for a in apps ],
-  }, index = [ a.name for a in apps ])
-  return pd.concat({"Checkpoints": checkpoints_df}, axis=1)
-
-
-def generate_results_dataframe_2(apps):
-  df = pd.concat([
-    get_exec_time_dataframe_2(apps),
-    get_mem_access_dataframe_2(apps),
-    get_mem_writes_dataframe_2(apps),
-    get_mem_bandwidth_usage_dataframe_2(apps),
-    get_checkpoints_dataframe_2(apps)
-  ], axis=1, names=['Application'])
-  return df
-  
-  
-class App_2:
-  def __init__(self, name, donuts_50, donuts_63, donuts_75, donuts_88, donuts_100):
-    self.name = name
-    self.donuts_50 = donuts_50
-    self.donuts_63 = donuts_63
-    self.donuts_75 = donuts_75
-    self.donuts_88 = donuts_88
-    self.donuts_100 = donuts_100
-  
-  def __str__(self):
-    return f"Name: {self.name}\tDonuts 50: {self.donuts_50}\tDonuts 75: {self.donuts_75}\tDonuts 100: {self.donuts_100}\n"
-
-  
-def main_2(resultsrootdir = None):
-  args = parse_args()
-  if resultsrootdir is None:
-    resultsrootdir = f"{os.environ['BENCHMARKS_ROOT']}/out/cpu2006/threshold"
-  
-  apps = []
-  # for app_name in os.listdir(resultsrootdir):
-  
-  app_cpu2006_sorted = [
-    'libquantum', 
-    'bwaves', 
-    'cactusADM', 
-    'lbm', 
-    'wrf', 
-    'leslie3d',
-    'sjeng',
-    'bzip2',
-    'mcf',
-    'zeusmp',
-    'milc',
-    'astar',
-    # 'gobmk',
-    # 'perlbench',
-    # 'gcc',
-    # 'omnetpp',
-    # 'gromacs',
-    # 'dealII',
-    # 'namd',
-    # 'calculix',
-    # 'gamess',
-    # 'h264ref',
-    # 'sphinx3',
-    # 'povray',
-    # 'tonto',
-    # 'GemsFDTD'
-  ]
-  
-  for app_name in app_cpu2006_sorted:
-    app_dir = f"{resultsrootdir}/{app_name}"
-    try:
-      if os.path.isdir(app_dir) and app_dir != 'threshold':
-        app = App_2(app_name, 
-                    get_execution_data(f"{app_dir}/donuts-th50"),
-                    get_execution_data(f"{app_dir}/donuts-th63"),
-                    get_execution_data(f"{app_dir}/donuts-th75"),
-                    get_execution_data(f"{app_dir}/donuts-th88"),
-                    get_execution_data(f"{app_dir}/donuts-th100"))
-        apps.append(app)
-    except:
-      print(f"An exception occurred in application: {app_dir}")
-  
-  df = generate_results_dataframe_2(apps)
   print(df)
-  generate_sheet(df, '.')
 
-
+  
 if __name__ == '__main__':
-  # main()
-  main_2()
+  main()
