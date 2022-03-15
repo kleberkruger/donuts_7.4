@@ -6,8 +6,8 @@ def main():
   path = sys.argv[1]
   res = sniper_lib.get_results(0, path, None)
   data = {
-    "exec_time": get_exec_time(res),
-    "mem_bandwidth_usage": get_avg_mem_bandwidth_usage(res),
+    "runtime": get_runtime(res),
+    "avg_bandwidth_usage": get_avg_bandwidth_usage(res),
     "num_mem_access": get_num_mem_access(res),
     "num_mem_writes": get_num_mem_writes(res),
     "num_mem_logs": get_num_mem_logs(res),
@@ -32,7 +32,7 @@ def get_project_type(config):
   return 'donuts' if is_donuts(config) else 'picl' if is_picl(config) else 'baseline'
 
 
-def get_exec_time(res):
+def get_runtime(res):
   results = res['results']
   config = res['config']
   ncores = int(config['general/total_cores'])
@@ -101,7 +101,7 @@ def get_num_checkpoints(res):
   return results['epoch.system_eid'][0]
 
 
-def get_avg_mem_bandwidth_usage(res):
+def get_avg_bandwidth_usage(res):
   results = res['results']
 
   if 'barrier.global_time_begin' in results:

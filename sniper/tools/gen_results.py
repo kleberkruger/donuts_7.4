@@ -6,29 +6,11 @@
 import argparse, os, subprocess, json, re
 import pandas as pd
 
-import re
-
 def atoi(text):
   return int(text) if text.isdigit() else text
 
 def natural_keys(text):
   return [atoi(c) for c in re.split(r'(\d+)', text)]
-
-class RunData:
-    
-  def __init__(self, data, runtime, avg_bandwidth_usage, num_mem_access, num_mem_writes,
-               num_mem_logs = 0, num_buffer_overflow = 0, num_checkpoints = 0):
-    self.data = data
-    self.runtime = runtime
-    self.avg_bandwidth_usage = avg_bandwidth_usage
-    self.num_mem_access = num_mem_access
-    self.num_mem_writes = num_mem_writes
-    self.num_mem_logs = num_mem_logs
-    self.num_buffer_overflow = num_buffer_overflow
-    self.num_checkpoints = num_checkpoints
-    
-  def __repr__(self):
-    return json.dumps(vars(self))
 
 
 class AppData:
@@ -77,48 +59,27 @@ def get_args(args):
   return root_dir, app_names, configs
 
 
-# TODO: create a separated module execution_data?
 # TODO: put in try cat?
 def get_execution_data(path):
-  data = json.loads(subprocess.check_output(["./get_exec_data.py", path], universal_newlines=True))
-  return RunData(data, 
-                 data['exec_time'], data['mem_bandwidth_usage'], 
-                 data['num_mem_access'], data['num_mem_writes'], data['num_mem_logs'], 
-                 data['num_buffer_overflow'], data['num_checkpoints'])
-
-
-def get_app_data_array(apps, config):
-  return [a.data[config].runtime for a in apps]
-
-
-def get_runtime_dataframe(apps, configs):
-  data = dict([(c, [a.data[c].runtime for a in apps]) for c in configs])
-  runtime_df = pd.DataFrame(data, index = [ a.name for a in apps ])
-  return pd.concat({"Runtime": runtime_df}, axis=1)
+  return json.loads(subprocess.check_output(["./get_exec_data.py", path], universal_newlines=True))
 
 
 def get_dataframe(apps, configs, attr, title):
-  data = dict([(c, [a.data[c].data[attr] for a in apps]) for c in configs])
+  data = dict([(c, [a.data[c][attr] for a in apps]) for c in configs])
   df = pd.DataFrame(data, index = [ a.name for a in apps ])
   return pd.concat({title: df}, axis=1)
 
 
 def get_dataframe_perc(apps, configs, attr, title):
-  data = dict([(c, [a.data[c].data[attr] / 100.0 for a in apps]) for c in configs])
+  data = dict([(c, [a.data[c][attr] / 100.0 for a in apps]) for c in configs])
   df = pd.DataFrame(data, index = [ a.name for a in apps ])
   return pd.concat({title: df}, axis=1)
 
 
-def get_avg_bandwidth_usage_dataframe(apps, configs):
-  data = dict([(c, [a.data[c].avg_bandwidth_usage / 100.0 for a in apps]) for c in configs])
-  avg_bandwidth_usage_df = pd.DataFrame(data, index = [ a.name for a in apps ])
-  return pd.concat({"Average DRAM Bandwidth Usage": avg_bandwidth_usage_df}, axis=1)
-
-
 def generate_results_dataframe(apps, configs):
   df = pd.concat([
-    get_runtime_dataframe(apps, configs),
-    get_avg_bandwidth_usage_dataframe(apps, configs),
+    get_dataframe(apps, configs, 'runtime', 'Runtime'),
+    get_dataframe_perc(apps, configs, 'avg_bandwidth_usage', 'Average Bandwidth Usage'),
     get_dataframe(apps, configs, 'num_mem_access', 'Memory Access'),
     get_dataframe(apps, configs, 'num_mem_writes', 'Memory Writes'),
     get_dataframe(apps, configs, 'num_mem_logs', 'Memory Logs'),
@@ -149,7 +110,6 @@ def main():
   
   df = generate_results_dataframe(apps, configs)
   generate_sheet(df, '.')
-  print(df)
 
   
 if __name__ == '__main__':
