@@ -9,6 +9,10 @@
 
 static AFUNPTR ptr_exit = NULL;
 
+// Added by Kleber Kruger to try supporting Intel Pin 3.22, but this solution does not work!
+// #include "types_vmapi.PH"                 
+// typedef IARG_REG_REFERENCE PIN_REGISTER
+
 static void handleRdtsc(THREADID threadid, PIN_REGISTER * gax, PIN_REGISTER * gdx)
 {
    if (!thread_data[threadid].output)
