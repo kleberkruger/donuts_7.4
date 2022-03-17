@@ -340,3 +340,18 @@ void Simulator::printInstModeSummary()
    }
    printf("[SNIPER] --------------------------------------------------------------------------------\n");
 }
+
+/**
+ * @brief Get the project type.
+ * Implemented projects:
+ * - PiCL
+ * - DONUTS
+ * 
+ * TODO: Implementar este método.
+ * 
+ * @return ProjectType 
+ */
+Simulator::ProjectType Simulator::getProjectType() const
+{
+   return DEFAULT;
+}

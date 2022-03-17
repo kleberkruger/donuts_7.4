@@ -11,6 +11,8 @@ EpochManager::EpochManager() : m_log_file(nullptr), m_system_eid(0)
 
    registerStatsMetric("epoch", 0, "system_eid", &m_system_eid);
    registerStatsMetric("epoch", 0, "persisted_eid", &m_persisted.eid);
+   // TODO: Registrar quantos checkpoints de cada tipo (instr_interval, cache_set_th, cache_th, timeout) ocorreram
+   // TODO: Registrar métricas da média de logs por cada checkpoint, média de preenchimento da cache
 }
 
 EpochManager::~EpochManager() = default;

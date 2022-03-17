@@ -35,6 +35,16 @@ namespace config { class Config; }
 class Simulator
 {
 public:
+
+   // Added by Kleber Kruger
+   enum ProjectType
+   {
+      DEFAULT = 0,
+      PICL,
+      DONUTS,
+      NUM_PROJECT_TYPES
+   } ;
+
    Simulator();
    ~Simulator();
 
@@ -84,6 +94,8 @@ public:
    // Access to the Decoder library for the simulator run
    void createDecoder();
    dl::Decoder *getDecoder();
+
+   ProjectType getProjectType() const; // Added by Kleber Kruger
    
 private:
    Config m_config;

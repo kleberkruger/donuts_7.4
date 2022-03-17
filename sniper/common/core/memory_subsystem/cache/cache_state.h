@@ -17,6 +17,8 @@ class CacheState
          EXCLUSIVE,
          OWNED,
          MODIFIED,
+         // TRANSIENT,  // Added by Kleber Kruger (used on PiCL)
+         // COMMITED,   // Added by Kleber Kruger (used on PiCL)
          NUM_CSTATE_STATES,
          /* Below are special states, used only for reporting */
          INVALID_COLD = NUM_CSTATE_STATES,
@@ -36,6 +38,7 @@ class CacheState
       bool writable()
       {
          return (cstate == MODIFIED);
+         // return (cstate == MODIFIED) || (cstate == TRANSIENT) || (cstate == COMMITED); // Modified by Kleber Kruger
       }
 
    private:

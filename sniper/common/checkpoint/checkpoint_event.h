@@ -8,10 +8,11 @@ class CheckpointEvent
 public:
    typedef enum type_t
    {
-      CACHE_SET_THRESHOLD = 1,
+      INSTRUCTION_RANGE = 0,
+      CACHE_SET_THRESHOLD,
       CACHE_THRESHOLD,
       TIMEOUT,
-      NUM_EVENT_TYPES = TIMEOUT
+      NUM_EVENT_TYPES
    } Type;
 
    static const char *TypeString(Type type);

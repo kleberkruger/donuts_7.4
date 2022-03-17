@@ -28,6 +28,7 @@ const char *CheckpointEvent::TypeString(CheckpointEvent::Type type)
 {
    switch (type)
    {
+      case INSTRUCTION_RANGE:    return "INSTRUCTION_RANGE";
       case CACHE_SET_THRESHOLD:  return "CACHE_SET_THRESHOLD";
       case CACHE_THRESHOLD:      return "CACHE_THRESHOLD";
       case TIMEOUT:              return "TIMEOUT";

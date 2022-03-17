@@ -51,9 +51,7 @@ class CacheBlockInfo
       void setTag(IntPtr tag) { m_tag = tag; }
       void setCState(CacheState::cstate_t cstate) { 
          m_cstate = cstate;
-         // Added by Kleber Kruger
-         if (cstate == CacheState::MODIFIED) 
-            m_eid = EpochManager::getGlobalSystemEID(); 
+         if (cstate == CacheState::MODIFIED) m_eid = EpochManager::getGlobalSystemEID(); // Added by Kleber Kruger
       }
 
       UInt64 getOwner() const { return m_owner; }
