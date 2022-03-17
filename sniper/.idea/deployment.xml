@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="PublishConfigData" remoteFilesAllowedToDisappearOnAutoupload="false">
+  <component name="PublishConfigData" autoUpload="Always" serverName="enqii@lsc" remoteFilesAllowedToDisappearOnAutoupload="false">
     <serverData>
-      <paths name="Google (a6d31366-b94f-4cdc-81a2-ee0b05af8196)">
+      <paths name="enqii@lsc">
         <serverdata>
           <mappings>
-            <mapping deploy="/home/kleberkruger/donuts/sniper" local="$PROJECT_DIR$" web="/" />
+            <mapping deploy="/donuts/sniper" local="$PROJECT_DIR$" />
           </mappings>
         </serverdata>
       </paths>
     </serverData>
+    <option name="myAutoUpload" value="ALWAYS" />
   </component>
 </project>
