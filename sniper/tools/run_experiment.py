@@ -14,6 +14,21 @@ class Application:
 		return f"{self.id}.{self.name} - [category: {self.category}, min cores: {self.min_cores}]"
 
 
+PARSEC_APPS = [ 
+    Application(0, 'blackscholes', '', 2),
+    Application(0, 'bodytrack', '', 3),
+    Application(0, 'facesim', '', 1),
+    Application(0, 'ferret', '', 6),
+    Application(0, 'fluidanimate', '', 2),
+    Application(0, 'freqmine', '', 1),
+    Application(0, 'raytrace', '', 2),
+    Application(0, 'swaptions', '', 2),
+    Application(0, 'vips', '', 3),
+    Application(0, 'x264', '', 1),
+    Application(0, 'canneal', '', 2),
+    Application(0, 'dedup', '', 4),
+]
+
 CPU2006_APPS = [
 	Application(400, 'perlbench', 'integer'),
 	Application(401, 'bzip2', 'integer'),
