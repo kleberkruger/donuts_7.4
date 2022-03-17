@@ -14,6 +14,8 @@
 #include "shmem_perf_model.h"
 #include "shared_cache_block_info.h"
 #include "subsecond_time.h"
+#include "write_buffer_cntlr.h"        // Added by Kleber Kruger
+//#include "onchip_undo_buffer_cntlr.h"  // Added by Kleber Kruger
 
 #include <map>
 
@@ -30,6 +32,7 @@ namespace ParametricDramDirectoryMSI
    class MemoryManager : public MemoryManagerBase
    {
       private:
+         WriteBufferCntlr *m_write_buffer_cntlr; // Added by Kleber Kruger
          CacheCntlr* m_cache_cntlrs[MemComponent::LAST_LEVEL_CACHE + 1];
          NucaCache* m_nuca_cache;
          DramCache* m_dram_cache;

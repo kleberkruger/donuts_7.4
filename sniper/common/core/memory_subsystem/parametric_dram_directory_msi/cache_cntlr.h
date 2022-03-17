@@ -18,6 +18,8 @@
 #include "subsecond_time.h"
 #include "shmem_perf.h"
 #include "checkpoint_event.h"
+#include "write_buffer_cntlr.h"  // Added by Kleber Kruger
+//#include "epoch_manager.h"     // Added by Kleber Kruger
 
 #include "boost/tuple/tuple.hpp"
 
@@ -208,6 +210,7 @@ namespace ParametricDramDirectoryMSI
          CacheMasterCntlr* m_master;
          CacheCntlr* m_next_cache_cntlr;
          CacheCntlr* m_last_level;
+         WriteBufferCntlr *m_write_buffer_cntlr; // Added by Kleber Kruger
          AddressHomeLookup* m_tag_directory_home_lookup;
          std::unordered_map<IntPtr, MemComponent::component_t> m_shmem_req_source_map;
          bool m_perfect;
@@ -385,6 +388,7 @@ namespace ParametricDramDirectoryMSI
 
          void setPrevCacheCntlrs(CacheCntlrList& prev_cache_cntlrs);
          void setNextCacheCntlr(CacheCntlr* next_cache_cntlr) { m_next_cache_cntlr = next_cache_cntlr; }
+         void setWriteBufferCntlr(WriteBufferCntlr *write_buffer_cntlr) { m_write_buffer_cntlr = write_buffer_cntlr; } // Added by Kleber Kruger
          void createSetLocks(UInt32 cache_block_size, UInt32 num_sets, UInt32 core_offset, UInt32 num_cores) { m_master->createSetLocks(cache_block_size, num_sets, core_offset, num_cores); }
          void setDRAMDirectAccess(DramCntlrInterface* dram_cntlr, UInt64 num_outstanding);
 
