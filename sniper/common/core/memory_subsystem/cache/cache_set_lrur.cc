@@ -42,7 +42,7 @@ CacheSetLRUR::getReplacementIndex(CacheCntlr *cntlr)
       }
 
       // Check if all blocks are modified
-      if (m_cache_block_info_array[i]->isDurty())
+      if (m_cache_block_info_array[i]->isDirty())
          num_modified++;
    }
 

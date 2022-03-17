@@ -4,7 +4,10 @@
 # BENCHMARKS_ROOT/out/<test-name>/<benchmark-name>/<app-name>/<config>
 
 import argparse, os, subprocess, json, re
+from tkinter.tix import COLUMN
 import pandas as pd
+
+COLUMN_OPTIONS = ['r','b','a','w','l','o','c']
 
 def atoi(text):
   return int(text) if text.isdigit() else text
@@ -34,7 +37,7 @@ def parse_args():
   parser.add_argument('-a', '--app', '--apps', type=str, nargs='+', default=[], help='applications to extract results')
   parser.add_argument('-c', '--config', '--configs', type=str, nargs='+', default=[], help='configurations to extract results')
   parser.add_argument('-b', '--baseline', type=str, help='select baseline configuration')
-  parser.add_argument('-i', '--info', type=str, nargs='+', choices=['r','b','a','w','l','o','c'], default=[], help='information colums')
+  parser.add_argument('-i', '--info', type=str, nargs='+', choices=COLUMN_OPTIONS, default=COLUMN_OPTIONS, help='information colums')
   parser.add_argument('-o', '--out', '--output', type=str, default='results_cpu2006.xlsx', help='results output file')
   parser.add_argument('-e', '--err', '--error', type=str, default='results_error.txt', help='error output file')
   return parser.parse_args()
@@ -54,51 +57,45 @@ def get_args(args):
   root_dir = f"{args.root}/{args.test}" if args.test else args.root
   root_dir += f"/{args.benchmark}"
   app_names = args.app if args.app else list(filter(lambda f: 
-    os.path.isdir(f"{root_dir}/{f}"), sorted(os.listdir(root_dir))))
+    os.path.isdir(f"{root_dir}/{f}"), sorted(os.listdir(root_dir), key=natural_keys)))
   configs = args.config if args.config else find_configs(root_dir, app_names)
-  return root_dir, app_names, configs
+  return root_dir, app_names, configs, args.info, args.out, args.err
 
 
-# TODO: put in try cat?
 def get_execution_data(path):
   return json.loads(subprocess.check_output(["./get_exec_data.py", path], universal_newlines=True))
 
 
-def get_dataframe(apps, configs, attr, title):
-  data = dict([(c, [a.data[c][attr] for a in apps]) for c in configs])
+def get_dataframe(apps, configs, attr, title = None, in_percent = False):
+  title = attr if title is None else title
+  data = dict([(c, [a.data[c][attr] / (100.0 if in_percent else 1) for a in apps]) for c in configs])
   df = pd.DataFrame(data, index = [ a.name for a in apps ])
   return pd.concat({title: df}, axis=1)
 
 
-def get_dataframe_perc(apps, configs, attr, title):
-  data = dict([(c, [a.data[c][attr] / 100.0 for a in apps]) for c in configs])
-  df = pd.DataFrame(data, index = [ a.name for a in apps ])
-  return pd.concat({title: df}, axis=1)
-
-
-def generate_results_dataframe(apps, configs):
-  df = pd.concat([
-    get_dataframe(apps, configs, 'runtime', 'Runtime'),
-    get_dataframe_perc(apps, configs, 'avg_bandwidth_usage', 'Average Bandwidth Usage'),
-    get_dataframe(apps, configs, 'num_mem_access', 'Memory Access'),
-    get_dataframe(apps, configs, 'num_mem_writes', 'Memory Writes'),
-    get_dataframe(apps, configs, 'num_mem_logs', 'Memory Logs'),
-    get_dataframe(apps, configs, 'num_buffer_overflow', 'Memory Buffer Overflow'),
-    get_dataframe(apps, configs, 'num_checkpoints', 'Number of Checkpoints'),
-  ], axis=1, names=['Application'])
-  
-  # df.index.name = 'Application'
+def generate_results_dataframe(apps, configs, infos):
+  all_dataframes = {
+    'r': get_dataframe(apps, configs, 'runtime', 'Runtime'),
+    'b': get_dataframe(apps, configs, 'avg_bandwidth_usage', 'Average Bandwidth Usage', in_percent=True),
+    'a': get_dataframe(apps, configs, 'num_mem_access', 'Memory Access'),
+    'w': get_dataframe(apps, configs, 'num_mem_writes', 'Memory Writes'),
+    'l': get_dataframe(apps, configs, 'num_mem_logs', 'Memory Logs'),
+    'o': get_dataframe(apps, configs, 'num_buffer_overflow', 'Memory Buffer Overflow'),
+    'c': get_dataframe(apps, configs, 'num_checkpoints', 'Number of Checkpoints'),
+  }
+  df = pd.concat([all_dataframes[i] for i in infos], axis=1, names=['Application'])
+  df.index.name = 'Application'
   return df.sort_index()
 
 
-def generate_sheet(df, output):
-  with pd.ExcelWriter(f"{output}/results_cpu2006.xlsx", engine='xlsxwriter') as writer:
+def generate_sheet(df, out_file):
+  with pd.ExcelWriter(out_file, engine='xlsxwriter') as writer:
     df.to_excel(writer, sheet_name='SPEC CPU2006')
 
 
 def main():
   args = parse_args()
-  root_dir, app_names, configs = get_args(args)
+  root_dir, app_names, configs, infos, out_file, err_file = get_args(args)
   apps = []
   for app_name in app_names:
     app_dir = f"{root_dir}/{app_name}"
@@ -108,8 +105,8 @@ def main():
     except:
       print(f"An exception occurred in application: {app_dir}")
   
-  df = generate_results_dataframe(apps, configs)
-  generate_sheet(df, '.')
+  df = generate_results_dataframe(apps, configs, infos)
+  generate_sheet(df, out_file)
 
   
 if __name__ == '__main__':

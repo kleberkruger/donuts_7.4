@@ -202,7 +202,7 @@ double Cache::getCapacityFilled()
    for (UInt32 i = 0; i < m_num_sets; i++)
    {
       for (UInt32 j = 0; j < m_associativity; j++)
-         if (peekBlock(i, j)->isDurty()) count++;
+         if (peekBlock(i, j)->isDirty()) count++;
    }
    return static_cast<double>(count) / (m_num_sets * m_associativity);
 }

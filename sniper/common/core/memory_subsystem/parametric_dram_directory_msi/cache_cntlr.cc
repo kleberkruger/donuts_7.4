@@ -1813,7 +1813,7 @@ std::queue<CacheBlockInfo *> CacheCntlr::selectDirtyBlocks()
       for (UInt32 offset = 0; offset < m_master->m_cache->getAssociativity(); offset++)
       {
          CacheBlockInfo *block_info = m_master->m_cache->peekBlock(index, offset);
-         if (block_info->isDurty())
+         if (block_info->isDirty())
             dirty_blocks.push(block_info);
       }
    }
