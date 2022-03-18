@@ -1779,7 +1779,7 @@ CacheCntlr::incrementQBSLookupCost()
  * NVM Checkpoint Support
  *****************************************************************************/
 
-void CacheCntlr::checkpoint(CheckpointEvent::Type event_type)
+void CacheCntlr::checkpoint_old(CheckpointEvent::Type event_type)
 {
 //   printf("ENDING EPOCH [%lu]...\n", EpochManager::getGlobalSystemEID());
 //   DonutsUtils::printCache(m_master->m_cache);
@@ -1847,6 +1847,25 @@ CacheCntlr::flushCacheBlock(CacheBlockInfo *block_info)
                                m_core_id_master, getHome(address), /* requester and receiver */
                                address, data_buf, getCacheBlockSize(),
                                HitWhere::UNKNOWN, &m_dummy_shmem_perf, ShmemPerfModel::_SIM_THREAD);
+}
+
+void CacheCntlr::checkpoint(CheckpointEvent::Type event_type)
+{
+   printf("ENDING EPOCH [%lu]...\n", EpochManager::getGlobalSystemEID());
+   DonutsUtils::printCache(m_master->m_cache);
+
+   std::queue<CacheBlockInfo *> dirty_blocks = selectDirtyBlocks();
+   if (!dirty_blocks.empty())
+   {
+      CheckpointEvent ckpt(event_type, EpochManager::getGlobalSystemEID(),
+                           getShmemPerfModel()->getElapsedTime(ShmemPerfModel::_SIM_THREAD),
+                           dirty_blocks.size(), m_master->m_cache->getCapacityFilled() * 100);
+
+      persistCheckpointData(EpochManager::getGlobalSystemEID(), dirty_blocks);
+      EpochManager::getInstance()->commitCheckpoint(ckpt);
+   }
+   printf("STARTING [%lu]...\n", EpochManager::getGlobalSystemEID());
+   DonutsUtils::printCache(m_master->m_cache);
 }
 
 void

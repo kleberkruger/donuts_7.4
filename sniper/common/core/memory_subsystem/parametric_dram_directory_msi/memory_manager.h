@@ -32,7 +32,7 @@ namespace ParametricDramDirectoryMSI
    class MemoryManager : public MemoryManagerBase
    {
       private:
-         WriteBufferCntlr *m_write_buffer_cntlr; // Added by Kleber Kruger
+//         WriteBufferCntlr *m_write_buffer_cntlr; // Added by Kleber Kruger
          CacheCntlr* m_cache_cntlrs[MemComponent::LAST_LEVEL_CACHE + 1];
          NucaCache* m_nuca_cache;
          DramCache* m_dram_cache;

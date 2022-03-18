@@ -67,8 +67,8 @@ NvmCntlr::getDataFromDram(IntPtr address, core_id_t requester, Byte* data_buf, S
       SubsecondTime latency;
       boost::tie(latency, hit_where) = logDataToDram(address, requester, data_buf, now);
 
-      // SubsecondTime total = dram_access_latency + latency;
-      // printf("LOAD | dram_latency + log_latency = total_latency: (%lu + %lu) = %lu\n", dram_access_latency.getNS(), latency.getNS(), total.getNS());
+      SubsecondTime total = dram_access_latency + latency;
+      printf("LOAD | (%lu) latency: (%lu + %lu) = %lu\n", EpochManager::getGlobalSystemEID(), dram_access_latency.getNS(), latency.getNS(), total.getNS());
       
       dram_access_latency += latency;
    }  
@@ -102,7 +102,7 @@ NvmCntlr::putDataToDram(IntPtr address, core_id_t requester, Byte* data_buf, Sub
 
    // Added by Kleber Kruger
    String param = "donuts/enabled";
-   bool is_donuts = Sim()->getCfg()->hasKey(param) ? Sim()->getCfg()->getBool(param) : false;
+   bool is_donuts = Sim()->getCfg()->hasKey(param) && Sim()->getCfg()->getBool(param);
    if (m_log_enabled && !is_donuts)
    {
       HitWhere::where_t hit_where = HitWhere::MISS;
@@ -116,7 +116,7 @@ NvmCntlr::putDataToDram(IntPtr address, core_id_t requester, Byte* data_buf, Sub
    }
    else
    {
-      // printf("STORE %lu | (%lu) dram_latency = %lu\n", address, EpochManager::getGlobalSystemEID(), dram_access_latency.getNS());
+       printf("STORE | (%lu) latency = %lu\n", EpochManager::getGlobalSystemEID(), dram_access_latency.getNS());
    }
 
    ++m_writes;
@@ -151,6 +151,8 @@ NvmCntlr::logDataToDram(IntPtr address, core_id_t requester, Byte* data_buf, Sub
       m_log_buffer += cache_block_size;
       log_latency = SubsecondTime::Zero(); // TODO: terá algum custo o log em linha aberta?
    }
+
+//   printf("LOG | Creating log to entry %lu (log_latency = %lu)\n", address, log_latency.getNS());
 
    ++m_logs;
    #ifdef ENABLE_DRAM_ACCESS_COUNT

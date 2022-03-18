@@ -345,16 +345,16 @@ MemoryManager::MemoryManager(Core* core,
    // The core id to use when sending messages to the directory (master node of the last-level cache)
    m_core_id_master = getCore()->getId() - getCore()->getId() % cache_parameters[m_last_level_cache].shared_cores;
 
-   // Added by Kleber Kruger (creating WriteBuffer)
-   m_write_buffer_cntlr = new WriteBufferCntlr(m_core_id_master,
-                                               this,
-                                               m_tag_directory_home_lookup,
-                                               getCacheBlockSize(),
-                                               getShmemPerfModel());
-
-   // Added by Kleber Kruger (set WriteBufferCntlr to CacheCntlrs)
-   for (UInt32 i = MemComponent::FIRST_LEVEL_CACHE; i <= (UInt32)m_last_level_cache; ++i)
-      m_cache_cntlrs[(MemComponent::component_t)i]->setWriteBufferCntlr(m_write_buffer_cntlr);
+//   // Added by Kleber Kruger (creating WriteBuffer)
+//   m_write_buffer_cntlr = new WriteBufferCntlr(m_core_id_master,
+//                                               this,
+//                                               m_tag_directory_home_lookup,
+//                                               getCacheBlockSize(),
+//                                               getShmemPerfModel());
+//
+//   // Added by Kleber Kruger (set WriteBufferCntlr to CacheCntlrs)
+//   for (UInt32 i = MemComponent::FIRST_LEVEL_CACHE; i <= (UInt32)m_last_level_cache; ++i)
+//      m_cache_cntlrs[(MemComponent::component_t)i]->setWriteBufferCntlr(m_write_buffer_cntlr);
 
    if (m_core_id_master == getCore()->getId())
    {
@@ -424,7 +424,7 @@ MemoryManager::~MemoryManager()
       m_cache_cntlrs[(MemComponent::component_t)i] = NULL;
    }
 
-   delete m_write_buffer_cntlr; // Added by Kleber Kruger
+//   delete m_write_buffer_cntlr; // Added by Kleber Kruger
 
    if (m_nuca_cache)
       delete m_nuca_cache;
