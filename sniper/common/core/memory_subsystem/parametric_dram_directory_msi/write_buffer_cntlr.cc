@@ -38,17 +38,8 @@ WriteBufferCntlr::~WriteBufferCntlr()
    delete m_write_buffer;
 }
 
-UInt32 WriteBufferCntlr::getNumEntries()
+void WriteBufferCntlr::insertEntry(CacheBlockInfo *cache_block_info)
 {
-   if (!Sim()->getCfg()->hasKey("donuts/write_buffer/num_entries"))
-      return DEFAULT_NUM_ENTRIES;
-
-   UInt32 num_entries = Sim()->getCfg()->getInt("donuts/write_buffer/num_entries");
-   return num_entries > 0 ? num_entries : UINT32_MAX;
-}
-
-//void WriteBufferCntlr::insertEntry(CacheBlockInfo *cache_block_info)
-//{
 //   if (m_write_buffer->isFull())
 //   {
 //      stats.overflow++;
@@ -65,26 +56,11 @@ UInt32 WriteBufferCntlr::getNumEntries()
 //   //    flush();
 //   // }
 //   // m_onchip_undo_buffer->insertUndoEntry(system_eid, cache_block_info);
-//}
-//
-//void WriteBufferCntlr::flush(UInt64 persisted_eid)
-//{
-//   auto log_entries = persisted_eid == EpochManager::getGlobalSystemEID()
-//                      ? m_onchip_undo_buffer->removeAllEntries()
-//                      : m_onchip_undo_buffer->removeOldEntries(persisted_eid);
-//
-//   while (!log_entries.empty())
-//   {
-//      auto entry = log_entries.front();
-//      sendDataToNVM(entry);
-//      log_entries.pop();
-//      stats.log_writes++;
-//   }
-//   EpochManager::setGlobalPersistedEID(persisted_eid);
-//}
-//
-//void WriteBufferCntlr::flush()
-//{
+}
+
+
+void WriteBufferCntlr::flush()
+{
 //   auto log_entries = m_write_buffer->removeAllEntries();
 //   while (!log_entries.empty())
 //   {
@@ -93,19 +69,26 @@ UInt32 WriteBufferCntlr::getNumEntries()
 //      log_entries.pop();
 //      stats.log_writes++;
 //   }
-//}
-//
-//
-//void WriteBufferCntlr::sendDataToNVM(const UndoEntry &entry)
-//{
-//   IntPtr address = getLogAddress();
+}
+
+void WriteBufferCntlr::sendDataToNVM(const CacheBlockInfo *cache_block)
+{
+//   IntPtr address = nullptr; // FIXME: Ajustar o endereço
 //   Byte data_buf[getCacheBlockSize()];
 //   getMemoryManager()->sendMsg(PrL1PrL2DramDirectoryMSI::ShmemMsg::CP_REP,
-//                               MemComponent::ONCHIP_UNDO_BUFFER, MemComponent::DRAM,
+//                               MemComponent::LAST_LEVEL_CACHE, MemComponent::NVM,
 //                               m_core_id_master, getHome(address), /* requester and receiver */
 //                               address, data_buf, getCacheBlockSize(),
 //                               HitWhere::UNKNOWN, &m_dummy_shmem_perf, ShmemPerfModel::_SIM_THREAD);
-//}
-//
+}
+
+UInt32 WriteBufferCntlr::getNumEntries()
+{
+   if (!Sim()->getCfg()->hasKey("donuts/write_buffer/num_entries"))
+      return DEFAULT_NUM_ENTRIES;
+
+   UInt32 num_entries = Sim()->getCfg()->getInt("donuts/write_buffer/num_entries");
+   return num_entries > 0 ? num_entries : UINT32_MAX;
+}
 
 }
