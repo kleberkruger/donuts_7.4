@@ -21,12 +21,16 @@ namespace PrL1PrL2DramDirectoryMSI
    class NvmCntlr : public DramCntlr
    {
       public:
-         typedef enum 
+         typedef enum log_type_t
          {
-            UNDO_LOGGING = 0,
-            LOG_BY_COMMAND = 1,
-            NUM_LOG_TYPES
-         } log_type_t;
+            LOGGING_DISABLED = 0,
+            LOGGING_FROM_LOAD,
+            LOGGING_FROM_STORE,
+            LOGGING_FROM_COMMAND,
+            NUM_LOGGING_TYPES
+         } LogType;
+
+         static const char *LogTypeString(LogType type);
 
          NvmCntlr(MemoryManagerBase* memory_manager,
                ShmemPerfModel* shmem_perf_model,
@@ -48,8 +52,7 @@ namespace PrL1PrL2DramDirectoryMSI
          UInt64 m_logs;
          UInt64 m_log_ends; 
          UInt32 m_log_buffer;
-         UInt32 m_log_size;  
-         bool m_log_enabled;
+         UInt32 m_log_size;
          log_type_t m_log_type;
 
          SubsecondTime runDramPerfModel(core_id_t requester, SubsecondTime time, IntPtr address, DramCntlrInterface::access_t access_type, ShmemPerf *perf);
@@ -57,7 +60,10 @@ namespace PrL1PrL2DramDirectoryMSI
          void addToDramAccessCount(IntPtr address, access_t access_type);
          void printDramAccessCount(void);
 
-         static bool getLogEnabled();
+         bool isLogEnabled();
+         bool loggingOnLoad();
+         bool loggingOnStore();
+
          static UInt32 getLogRowBufferSize();
          static log_type_t getLogType();
 

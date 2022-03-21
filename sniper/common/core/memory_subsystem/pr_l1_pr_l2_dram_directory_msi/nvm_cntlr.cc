@@ -34,9 +34,9 @@ NvmCntlr::NvmCntlr(MemoryManagerBase* memory_manager,
    , m_log_ends(0)
    , m_log_buffer(0)
    , m_log_size(NvmCntlr::getLogRowBufferSize())
-   , m_log_enabled(NvmCntlr::getLogEnabled())
    , m_log_type(NvmCntlr::getLogType())
 {
+   printf("LOGGING TYPE %d\n", m_log_type);
    registerStatsMetric("dram", memory_manager->getCore()->getId(), "logs", &m_logs);
    registerStatsMetric("dram", memory_manager->getCore()->getId(), "log_ends", &m_log_ends);
 }
@@ -61,17 +61,21 @@ NvmCntlr::getDataFromDram(IntPtr address, core_id_t requester, Byte* data_buf, S
 
    SubsecondTime dram_access_latency = DramCntlr::runDramPerfModel(requester, now, address, READ, perf);
 
-   if (m_log_enabled) 
+   if (loggingOnLoad()) 
    {
       HitWhere::where_t hit_where = HitWhere::MISS;
       SubsecondTime latency;
       boost::tie(latency, hit_where) = logDataToDram(address, requester, data_buf, now);
 
       SubsecondTime total = dram_access_latency + latency;
-      printf("LOAD | (%lu) latency: (%lu + %lu) = %lu\n", EpochManager::getGlobalSystemEID(), dram_access_latency.getNS(), latency.getNS(), total.getNS());
+      printf("LOG AND LOAD | (%lu) latency: (%lu + %lu) = %lu\n", EpochManager::getGlobalSystemEID(), dram_access_latency.getNS(), latency.getNS(), total.getNS());
       
       dram_access_latency += latency;
-   }  
+   }
+   else 
+   {
+      printf("LOG | (%lu) latency = %lu\n", EpochManager::getGlobalSystemEID(), dram_access_latency.getNS());
+   }
 
    ++m_reads;
    #ifdef ENABLE_DRAM_ACCESS_COUNT
@@ -100,23 +104,20 @@ NvmCntlr::putDataToDram(IntPtr address, core_id_t requester, Byte* data_buf, Sub
 
    SubsecondTime dram_access_latency = DramCntlr::runDramPerfModel(requester, now, address, WRITE, &m_dummy_shmem_perf);
 
-   // Added by Kleber Kruger
-   String param = "donuts/enabled";
-   bool is_donuts = Sim()->getCfg()->hasKey(param) && Sim()->getCfg()->getBool(param);
-   if (m_log_enabled && !is_donuts)
+   if (loggingOnStore())
    {
       HitWhere::where_t hit_where = HitWhere::MISS;
       SubsecondTime latency;
       boost::tie(latency, hit_where) = logDataToDram(address, requester, data_buf, now);
 
-      // SubsecondTime total = dram_access_latency + latency;
-      // printf("STORE | dram_latency + log_latency = total_latency: (%lu + %lu) = %lu\n", dram_access_latency.getNS(), latency.getNS(), total.getNS());
+      SubsecondTime total = dram_access_latency + latency;
+      printf("LOG AND STORE | dram_latency + log_latency = total_latency: (%lu + %lu) = %lu\n", dram_access_latency.getNS(), latency.getNS(), total.getNS());
       
       dram_access_latency += latency;
    }
    else
    {
-       printf("STORE | (%lu) latency = %lu\n", EpochManager::getGlobalSystemEID(), dram_access_latency.getNS());
+      printf("STORE | (%lu) latency = %lu\n", EpochManager::getGlobalSystemEID(), dram_access_latency.getNS());
    }
 
    ++m_writes;
@@ -197,10 +198,39 @@ NvmCntlr::createLogEntry(IntPtr address, Byte* data_buf)
 }
 
 bool
-NvmCntlr::getLogEnabled()
+NvmCntlr::isLogEnabled()
 {
-   String param = "perf_model/dram/log_enabled";
-   return Sim()->getCfg()->hasKey(param) && Sim()->getCfg()->getBool(param);
+   return m_log_type != LOGGING_DISABLED;
+}
+
+bool
+NvmCntlr::loggingOnLoad()
+{
+   return m_log_type == LOGGING_FROM_LOAD;
+}
+
+bool
+NvmCntlr::loggingOnStore()
+{
+   return m_log_type == LOGGING_FROM_STORE;
+}
+
+NvmCntlr::log_type_t
+NvmCntlr::getLogType()
+{
+   String param = "perf_model/dram/log_type";
+   if (!Sim()->getCfg()->hasKey(param) || Sim()->getCfg()->getString(param) == "disabled")
+      return NvmCntlr::LOGGING_DISABLED;
+
+   String value = Sim()->getCfg()->getString(param);
+   if (value == "load")
+      return NvmCntlr::LOGGING_FROM_LOAD;
+   else if (value == "store")
+      return NvmCntlr::LOGGING_FROM_STORE;
+   else if (value == "cmd")
+      return NvmCntlr::LOGGING_FROM_COMMAND;
+   
+   assert(false);
 }
 
 UInt32
@@ -210,11 +240,16 @@ NvmCntlr::getLogRowBufferSize()
    return Sim()->getCfg()->hasKey(param) ? Sim()->getCfg()->getInt(param) : 1024;
 }
 
-NvmCntlr::log_type_t
-NvmCntlr::getLogType()
+const char *NvmCntlr::LogTypeString(NvmCntlr::LogType type)
 {
-   String param = "perf_model/dram/log_type";
-   return NvmCntlr::UNDO_LOGGING;
+   switch (type)
+   {
+      case LOGGING_DISABLED:     return "LOGGING_DISABLED";
+      case LOGGING_FROM_LOAD:    return "LOGGING_FROM_LOAD";
+      case LOGGING_FROM_STORE:   return "LOGGING_FROM_STORE";
+      case LOGGING_FROM_COMMAND: return "LOGGING_FROM_COMMAND";
+      default:                   return "?";
+   }
 }
 
 }
