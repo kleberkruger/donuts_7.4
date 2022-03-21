@@ -155,7 +155,8 @@ CacheCntlr::CacheCntlr(MemComponent::component_t mem_component,
    m_shmem_perf(new ShmemPerf()),
    m_shmem_perf_global(NULL),
    m_shmem_perf_model(shmem_perf_model),
-   m_timeout(SubsecondTime::NS(0)) // Added by Kleber Kruger
+   m_timeout(SubsecondTime::NS(0)),    // Added by Kleber Kruger
+   m_commit_policy(getCommitPolicy())  // Added by Kleber Kruger
 {
    m_core_id_master = m_core_id - m_core_id % m_shared_cores;
    Sim()->getStatsManager()->logTopology(name, core_id, m_core_id_master);
@@ -1829,42 +1830,47 @@ std::queue<CacheBlockInfo *> CacheCntlr::selectDirtyBlocks_old()
    return dirty_blocks;
 }
 
-bool myfunction(std::pair<UInt32, double> i, std::pair<UInt32, double> j) { 
+bool oracle(std::pair<UInt32, double> i, std::pair<UInt32, double> j) { 
    return (i.second > j.second); 
 }
 
 std::queue<CacheBlockInfo *> CacheCntlr::selectDirtyBlocks()
 {
-   std::vector<std::pair<UInt32, double>> sets;
-   for (UInt32 i = 0; i < m_master->m_cache->getNumSets(); i++)
-   {
-      auto used = m_master->m_cache->getSetCapacityFilled(i);
-      if (used > 0)
-         sets.push_back(std::pair<UInt32, double>(i, used));
-   }
-   std::sort(sets.begin(), sets.end(), myfunction);
-
    std::queue<CacheBlockInfo *> dirty_blocks;
-   for (auto set : sets)
+
+   if (m_commit_policy == CacheCntlr::ORACLE)
    {
-      printf("scanning set %u: %.1f%%\n", set.first, (set.second * 100));
-      for (UInt32 offset = 0; offset < m_master->m_cache->getAssociativity(); offset++)
+      std::vector<std::pair<UInt32, double>> sets;
+      for (UInt32 i = 0; i < m_master->m_cache->getNumSets(); i++)
       {
-         CacheBlockInfo *block_info = m_master->m_cache->peekBlock(set.first, offset);
-         if (block_info->isDirty())
-            dirty_blocks.push(block_info);
+         auto used = m_master->m_cache->getSetCapacityFilled(i);
+         if (used > 0)
+            sets.push_back(std::pair<UInt32, double>(i, used));
+      }
+      std::sort(sets.begin(), sets.end(), oracle);
+      for (auto set : sets)
+      {
+         printf("scanning set %u: %.1f%%\n", set.first, (set.second * 100));
+         for (UInt32 offset = 0; offset < m_master->m_cache->getAssociativity(); offset++)
+         {
+            CacheBlockInfo *block_info = m_master->m_cache->peekBlock(set.first, offset);
+            if (block_info->isDirty())
+               dirty_blocks.push(block_info);
+         }
       }
    }
-   // for (UInt32 index = 0; index < m_master->m_cache->getNumSets(); index++)
-   // {
-   //    for (UInt32 offset = 0; offset < m_master->m_cache->getAssociativity(); offset++)
-   //    {
-   //       CacheBlockInfo *block_info = m_master->m_cache->peekBlock(index, offset);
-   //       if (block_info->isDirty())
-   //          dirty_blocks.push(block_info);
-   //    }
-   // }
-
+   else
+   {
+      for (UInt32 index = 0; index < m_master->m_cache->getNumSets(); index++) 
+      {
+         for (UInt32 offset = 0; offset < m_master->m_cache->getAssociativity(); offset++)
+         {
+            CacheBlockInfo *block_info = m_master->m_cache->peekBlock(index, offset);
+            if (block_info->isDirty())
+               dirty_blocks.push(block_info);
+         }
+      }
+   }
    return dirty_blocks;
 }
 
@@ -2497,6 +2503,22 @@ Semaphore*
 CacheCntlr::getNetworkThreadSemaphore()
 {
    return m_network_thread_sem;
+}
+
+CacheCntlr::CommitPolicy
+CacheCntlr::getCommitPolicy()
+{
+   String param = "donuts/commit_policy";
+   if (!Sim()->getCfg()->hasKey(param) || Sim()->getCfg()->getString(param) == "default")
+      return CacheCntlr::DEFAULT;
+
+   String value = Sim()->getCfg()->getString(param);
+   if (value == "sequential")
+      return CacheCntlr::SEQUENTIAL;
+   else if (value == "oracle")
+      return CacheCntlr::ORACLE;
+   
+   assert(false);
 }
 
 }

@@ -203,6 +203,15 @@ namespace ParametricDramDirectoryMSI
 
    class CacheCntlr : ::CacheCntlr
    {
+      // Added by Kleber Kruger
+      public:
+      typedef enum commit_policy_t
+      {
+         SEQUENTIAL,
+         DEFAULT,
+         ORACLE
+      } CommitPolicy;
+            
       private:
          // Data Members
          MemComponent::component_t m_mem_component;
@@ -287,6 +296,8 @@ namespace ParametricDramDirectoryMSI
 
          // Added by Kleber Kruger
          std::queue<CacheBlockInfo *> *m_write_buffer;
+
+         CommitPolicy m_commit_policy; // Added by Kleber Kruger
 
          // Core-interfacing stuff
          void accessCache(
@@ -374,6 +385,9 @@ namespace ParametricDramDirectoryMSI
          // Added by Kleber Kruger
          static SInt64 _flush_write_buffer(UInt64 arg, UInt64 val) { ((CacheCntlr *)arg)->flushWriteBuffer(); return 0; }
          void flushWriteBuffer();
+
+         // Added by Kleber Kruger
+         static CommitPolicy getCommitPolicy();
 
       public:
 
