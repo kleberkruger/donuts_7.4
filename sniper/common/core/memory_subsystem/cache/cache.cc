@@ -207,6 +207,18 @@ double Cache::getCapacityFilled()
    return static_cast<double>(count) / (m_num_sets * m_associativity);
 }
 
+/**
+ * Get percentage (0..1) of modified blocks in cache.
+ * Added by Kleber Kruger
+ */
+double Cache::getSetCapacityFilled(UInt32 index)
+{
+   UInt32 count = 0;
+   for (UInt32 j = 0; j < m_associativity; j++)
+      if (peekBlock(index, j)->isDirty()) count++;
+   return static_cast<double>(count) / m_associativity;
+}
+
 float Cache::getNumCacheThreshold(CacheBase::ReplacementPolicy policy, String cfgname, core_id_t core_id)
 {
    if (policy == CacheBase::LRUR)

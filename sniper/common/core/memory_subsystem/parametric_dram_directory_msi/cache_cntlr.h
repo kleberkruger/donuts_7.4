@@ -285,6 +285,9 @@ namespace ParametricDramDirectoryMSI
          SubsecondTime m_timeout;
          static const UInt64 DEFAULT_TIMEOUT = 30000000; // (30ms)
 
+         // Added by Kleber Kruger
+         std::queue<CacheBlockInfo *> *m_write_buffer;
+
          // Core-interfacing stuff
          void accessCache(
                Core::mem_op_t mem_op_type,
@@ -360,12 +363,17 @@ namespace ParametricDramDirectoryMSI
 
          // NVM Checkpoint Support (Added by Kleber Kruger)
          std::queue<CacheBlockInfo *> selectDirtyBlocks();
+         std::queue<CacheBlockInfo *> selectDirtyBlocks_old();
          void persistCheckpointData(UInt64 eid, std::queue<CacheBlockInfo *> &data);
          void flushCacheBlock(CacheBlockInfo *block_info);
 
          // NVM Checkpoint Support (Added by Kleber Kruger)
          static SInt64 _timeout(UInt64 arg, UInt64 val) { ((CacheCntlr *)arg)->timeout(); return 0; }
          void timeout();
+
+         // Added by Kleber Kruger
+         static SInt64 _flush_write_buffer(UInt64 arg, UInt64 val) { ((CacheCntlr *)arg)->flushWriteBuffer(); return 0; }
+         void flushWriteBuffer();
 
       public:
 
