@@ -36,7 +36,7 @@ NvmCntlr::NvmCntlr(MemoryManagerBase* memory_manager,
    , m_log_size(NvmCntlr::getLogRowBufferSize())
    , m_log_type(NvmCntlr::getLogType())
 {
-   printf("LOGGING TYPE %d\n", m_log_type);
+   // printf("LOGGING TYPE %d\n", m_log_type);
    registerStatsMetric("dram", memory_manager->getCore()->getId(), "logs", &m_logs);
    registerStatsMetric("dram", memory_manager->getCore()->getId(), "log_ends", &m_log_ends);
 }
@@ -67,14 +67,14 @@ NvmCntlr::getDataFromDram(IntPtr address, core_id_t requester, Byte* data_buf, S
       SubsecondTime latency;
       boost::tie(latency, hit_where) = logDataToDram(address, requester, data_buf, now);
 
-      SubsecondTime total = dram_access_latency + latency;
-      printf("LOG AND LOAD | (%lu) latency: (%lu + %lu) = %lu\n", EpochManager::getGlobalSystemEID(), dram_access_latency.getNS(), latency.getNS(), total.getNS());
+      // SubsecondTime total = dram_access_latency + latency;
+      // printf("LOG AND LOAD | (%lu) latency: (%lu + %lu) = %lu\n", EpochManager::getGlobalSystemEID(), dram_access_latency.getNS(), latency.getNS(), total.getNS());
       
       dram_access_latency += latency;
    }
    else 
    {
-      printf("LOG | (%lu) latency = %lu\n", EpochManager::getGlobalSystemEID(), dram_access_latency.getNS());
+      // printf("LOG | (%lu) latency = %lu\n", EpochManager::getGlobalSystemEID(), dram_access_latency.getNS());
    }
 
    ++m_reads;
@@ -110,14 +110,14 @@ NvmCntlr::putDataToDram(IntPtr address, core_id_t requester, Byte* data_buf, Sub
       SubsecondTime latency;
       boost::tie(latency, hit_where) = logDataToDram(address, requester, data_buf, now);
 
-      SubsecondTime total = dram_access_latency + latency;
-      printf("LOG AND STORE | dram_latency + log_latency = total_latency: (%lu + %lu) = %lu\n", dram_access_latency.getNS(), latency.getNS(), total.getNS());
+      // SubsecondTime total = dram_access_latency + latency;
+      // printf("LOG AND STORE | dram_latency + log_latency = total_latency: (%lu + %lu) = %lu\n", dram_access_latency.getNS(), latency.getNS(), total.getNS());
       
       dram_access_latency += latency;
    }
    else
    {
-      printf("STORE | (%lu) latency = %lu\n", EpochManager::getGlobalSystemEID(), dram_access_latency.getNS());
+      // printf("STORE | (%lu) latency = %lu\n", EpochManager::getGlobalSystemEID(), dram_access_latency.getNS());
    }
 
    ++m_writes;

@@ -1789,7 +1789,7 @@ CacheCntlr::incrementQBSLookupCost()
  * NVM Checkpoint Support
  *****************************************************************************/
 
-void CacheCntlr::checkpoint_old(CheckpointEvent::Type event_type)
+void CacheCntlr::checkpoint(CheckpointEvent::Type event_type)
 {
 //   printf("ENDING EPOCH [%lu]...\n", EpochManager::getGlobalSystemEID());
 //   DonutsUtils::printCache(m_master->m_cache);
@@ -1809,13 +1809,40 @@ void CacheCntlr::checkpoint_old(CheckpointEvent::Type event_type)
 //   DonutsUtils::printCache(m_master->m_cache);
 }
 
+void CacheCntlr::checkpoint_old(CheckpointEvent::Type event_type)
+{
+   // printf("ENDING EPOCH [%lu]... (reason: %s)\n", EpochManager::getGlobalSystemEID(), CheckpointEvent::TypeString(event_type));
+   // DonutsUtils::printCache(m_master->m_cache);
+
+   std::queue<CacheBlockInfo *> dirty_blocks = selectDirtyBlocks();
+   if (!dirty_blocks.empty())
+   {
+      CheckpointEvent ckpt(event_type, EpochManager::getGlobalSystemEID(),
+                           getShmemPerfModel()->getElapsedTime(ShmemPerfModel::_SIM_THREAD),
+                           dirty_blocks.size(), m_master->m_cache->getCapacityFilled() * 100);
+
+      persistCheckpointData(EpochManager::getGlobalSystemEID(), dirty_blocks);
+      // printf("write buffer - START: %lu (+%lu)\n", m_write_buffer->size(), dirty_blocks.size());
+      // while (!dirty_blocks.empty()) 
+      // {
+      //    printf("storing in write buffer\n");
+      //    m_write_buffer->push(dirty_blocks.front());
+      //    dirty_blocks.pop();
+      // }
+      // printf("write buffer - END: %lu\n", m_write_buffer->size());
+      EpochManager::getInstance()->commitCheckpoint(ckpt);
+   }
+   // printf("STARTING [%lu]...\n", EpochManager::getGlobalSystemEID());
+   // DonutsUtils::printCache(m_master->m_cache);
+}
+
 /**
  * Select the dirty blocks from the cache.
  * TODO: Instead of sending everything at once, dispatch blocks in burst according to the write buffer size.
  * 
  * @return std::queue<CacheBlockInfo *> 
  */
-std::queue<CacheBlockInfo *> CacheCntlr::selectDirtyBlocks_old()
+std::queue<CacheBlockInfo *> CacheCntlr::selectDirtyBlocks()
 {
    std::queue<CacheBlockInfo *> dirty_blocks;
    for (UInt32 index = 0; index < m_master->m_cache->getNumSets(); index++)
@@ -1834,7 +1861,7 @@ bool oracle(std::pair<UInt32, double> i, std::pair<UInt32, double> j) {
    return (i.second > j.second); 
 }
 
-std::queue<CacheBlockInfo *> CacheCntlr::selectDirtyBlocks()
+std::queue<CacheBlockInfo *> CacheCntlr::selectDirtyBlocks_old()
 {
    std::queue<CacheBlockInfo *> dirty_blocks;
 
@@ -1886,14 +1913,14 @@ void CacheCntlr::persistCheckpointData(UInt64 eid, std::queue<CacheBlockInfo *> 
       flushCacheBlock(dirty_blocks.front());
       dirty_blocks.pop();
    }
-   printf("EPOCH [%lu] PERSISTED.\n", eid);
+   // printf("EPOCH [%lu] PERSISTED.\n", eid);
    EpochManager::getInstance()->registerPersistedEID(eid, getShmemPerfModel()->getElapsedTime(ShmemPerfModel::_SIM_THREAD));
 }
 
 void 
 CacheCntlr::flushCacheBlock(CacheBlockInfo *block_info)
 {
-   printf("cache block [%lu] stored in write buffer \n", block_info->getEpochID());
+   // printf("cache block [%lu] stored in write buffer \n", block_info->getEpochID());
    IntPtr address = m_master->m_cache->tagToAddress(block_info->getTag());
    Byte data_buf[getCacheBlockSize()];
 
@@ -1903,33 +1930,6 @@ CacheCntlr::flushCacheBlock(CacheBlockInfo *block_info)
                                m_core_id_master, getHome(address), /* requester and receiver */
                                address, data_buf, getCacheBlockSize(),
                                HitWhere::UNKNOWN, &m_dummy_shmem_perf, ShmemPerfModel::_USER_THREAD);
-}
-
-void CacheCntlr::checkpoint(CheckpointEvent::Type event_type)
-{
-   printf("ENDING EPOCH [%lu]... (reason: %s)\n", EpochManager::getGlobalSystemEID(), CheckpointEvent::TypeString(event_type));
-   DonutsUtils::printCache(m_master->m_cache);
-
-   std::queue<CacheBlockInfo *> dirty_blocks = selectDirtyBlocks();
-   if (!dirty_blocks.empty())
-   {
-      CheckpointEvent ckpt(event_type, EpochManager::getGlobalSystemEID(),
-                           getShmemPerfModel()->getElapsedTime(ShmemPerfModel::_SIM_THREAD),
-                           dirty_blocks.size(), m_master->m_cache->getCapacityFilled() * 100);
-
-      persistCheckpointData(EpochManager::getGlobalSystemEID(), dirty_blocks);
-      // printf("write buffer - START: %lu (+%lu)\n", m_write_buffer->size(), dirty_blocks.size());
-      // while (!dirty_blocks.empty()) 
-      // {
-      //    printf("storing in write buffer\n");
-      //    m_write_buffer->push(dirty_blocks.front());
-      //    dirty_blocks.pop();
-      // }
-      // printf("write buffer - END: %lu\n", m_write_buffer->size());
-      EpochManager::getInstance()->commitCheckpoint(ckpt);
-   }
-   printf("STARTING [%lu]...\n", EpochManager::getGlobalSystemEID());
-   DonutsUtils::printCache(m_master->m_cache);
 }
 
 void
@@ -1952,13 +1952,13 @@ CacheCntlr::flushWriteBuffer()
    SubsecondTime now = Sim()->getClockSkewMinimizationServer()->getGlobalTime();
    getShmemPerfModel()->updateElapsedTime(now, ShmemPerfModel::_SIM_THREAD);
 
-   printf("flushWriteBuffer | now: %lu\n", now.getNS());
+   // printf("flushWriteBuffer | now: %lu\n", now.getNS());
    UInt32 write_buffer_size = 8;
    for (UInt32 i = 0; i < write_buffer_size; i++)
    {
       if (m_write_buffer->empty())
       {
-         printf("flushWriteBuffer | empty!\n"); // mover para a comparação do for
+         // printf("flushWriteBuffer | empty!\n"); // mover para a comparação do for
          break;
       }
       flushCacheBlock(m_write_buffer->front());

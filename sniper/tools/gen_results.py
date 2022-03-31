@@ -85,7 +85,8 @@ def generate_results_dataframe(apps, configs, infos):
   }
   df = pd.concat([all_dataframes[i] for i in infos], axis=1, names=['Application'])
   df.index.name = 'Application'
-  return df.sort_index()
+  # return df.sort_index()
+  return df
 
 
 def generate_sheet(df, out_file):
