@@ -38,7 +38,7 @@ def parse_args():
   parser.add_argument('-c', '--config', '--configs', type=str, nargs='+', default=[], help='configurations to extract results')
   parser.add_argument('-b', '--baseline', type=str, help='select baseline configuration')
   parser.add_argument('-i', '--info', type=str, nargs='+', choices=COLUMN_OPTIONS, default=COLUMN_OPTIONS, help='information colums')
-  parser.add_argument('-o', '--out', '--output', type=str, default='results_cpu2006.xlsx', help='results output file')
+  parser.add_argument('-o', '--out', '--output', type=str, help='results output file')
   parser.add_argument('-e', '--err', '--error', type=str, default='results_error.txt', help='error output file')
   return parser.parse_args()
 
@@ -62,7 +62,8 @@ def get_args(args):
   app_names = args.app if args.app else list(filter(lambda f: 
     os.path.isdir(f"{root_dir}/{f}"), sorted(os.listdir(root_dir), key=natural_keys)))
   configs = args.config if args.config else find_configs(root_dir, app_names)
-  return root_dir, app_names, configs, args.info, args.out, args.err
+  out_file = f"results_{args.benchmark}.xlsx"
+  return root_dir, app_names, configs, args.info, out_file, args.err
 
 
 def get_execution_data(path):
@@ -106,8 +107,10 @@ def main():
     try:
       app_data = dict([(c, get_execution_data(f"{app_dir}/{c}")) for c in configs])
       apps.append(AppData(app_name, app_data))
+      print(app_name, 'ok')
     except:
-      print(f"An exception occurred in application: {app_dir}")
+      # print(f"An exception occurred in application: {app_dir}")
+      print(app_name, 'failed')
   
   df = generate_results_dataframe(apps, configs, infos)
   generate_sheet(df, out_file)
@@ -117,4 +120,3 @@ if __name__ == '__main__':
   main()
   
 # ./gen_results.py -t spec2017 -p cpu2017 -a perlbench_r gcc_r bwaves_r mcf_r cactuBSSN_r namd_r povray_r lbm_r omnetpp_r wrf_r xalancbmk_r x264_r blender_r cam4_r deepsjeng_r imagick_r leela_r nab_r exchange2_r fotonik3d_r roms_r xz_r perlbench_s gcc_s bwaves_s mcf_s cactuBSSN_s lbm_s omnetpp_s wrf_s xalancbmk_s x264_s cam4_s pop2_s deepsjeng_s imagick_s leela_s nab_s exchange2_s fotonik3d_s roms_s xz_s
-
