@@ -63,6 +63,51 @@ CPU2006_APPS = [
   # # Application(499, 'specrand', 'floating'),
 ]
 
+CPU2017_APPS = [
+  Application(500, 'perlbench_r'),
+  Application(502, 'gcc_r'),
+  Application(503, 'bwaves_r'),
+  Application(505, 'mcf_r'),
+  Application(507, 'cactuBSSN_r'),
+  Application(508, 'namd_r'),
+  Application(511, 'povray_r'),
+  Application(519, 'lbm_r'),
+  Application(520, 'omnetpp_r'),
+  Application(521, 'wrf_r'),
+  Application(523, 'xalancbmk_r'),
+  Application(525, 'x264_r'),
+  Application(526, 'blender_r'),
+  Application(527, 'cam4_r'),
+  Application(531, 'deepsjeng_r'),
+  Application(538, 'imagick_r'),
+  Application(541, 'leela_r'),
+  Application(544, 'nab_r'),
+  Application(548, 'exchange2_r'),
+  Application(549, 'fotonik3d_r'),
+  Application(554, 'roms_r'),
+  Application(557, 'xz_r'),
+  Application(600, 'perlbench_s'),
+  Application(602, 'gcc_s'),
+  Application(603, 'bwaves_s'),
+  Application(605, 'mcf_s'),
+  Application(607, 'cactuBSSN_s'),
+  Application(619, 'lbm_s'),
+  Application(620, 'omnetpp_s'),
+  Application(621, 'wrf_s'),
+  Application(623, 'xalancbmk_s'),
+  Application(625, 'x264_s'),
+  Application(627, 'cam4_s'),
+  Application(628, 'pop2_s'),
+  Application(631, 'deepsjeng_s'),
+  Application(638, 'imagick_s'),
+  Application(641, 'leela_s'),
+  Application(644, 'nab_s'),
+  Application(648, 'exchange2_s'),
+  Application(649, 'fotonik3d_s'),
+  Application(654, 'roms_s'),
+  Application(657, 'xz_s')
+]
+
 
 def parse_args():
   parser = argparse.ArgumentParser()
@@ -81,9 +126,23 @@ def parse_args():
 
 
 def add_app_to_spooler(app, input, num_cores, config, out_dir, num_instr):
+  app_type = 'rate' if app.name.endswith('_r') else 'speed'
+  app_path = f"{os.environ['BENCHMARKS_ROOT']}/cpu2017/{app.id}.{app.name}/run/run_base_ref{app_type}_donuts-m64.0000"
+  make_path = f"{app_path}/Makefile"
+  if not os.path.exists(make_path):
+    print(f"Não existe configuração de execução para o {app.name}")
+    return
+  with open(make_path) as file:
+    speccmd = file.readline()
+    
+  run_sniper_path = f"{os.environ['GRAPHITE_ROOT']}/run-sniper"
+  out_dir = f"{os.environ['BENCHMARKS_ROOT']}/{out_dir}"
   os.system(f"tsp mkdir -p {out_dir}")
-  cmd = f"tsp ./run-sniper -p cpu2006-{app.name} -i {input} -n {num_cores} -c {config} -d {out_dir} -s stop-by-icount:{num_instr}"
+  # cmd = f"tsp ./run-sniper -p cpu2006-{app.name} -i {input} -n {num_cores} -c {config} -d {out_dir} -s stop-by-icount:{num_instr}"
+  cmd = f"tsp {run_sniper_path} -n {num_cores} -c {config} -d {out_dir} -s stop-by-icount:{num_instr} -- {speccmd}"
+  print(f"cd {app_path}")
   print(cmd)
+  os.chdir(app_path)
   os.system(cmd)
 
 
@@ -91,11 +150,11 @@ def main():
   os.chdir(os.environ['BENCHMARKS_ROOT'])
   
   num_slots = 6
-  app_list = CPU2006_APPS
+  app_list = CPU2017_APPS
   input = 'ref'
   num_cores = 1
-  config = 'donuts-load'
-  out_dir_base = 'out/logtype8/cpu2006'
+  config = 'picl-enabled'
+  out_dir_base = 'out/spec2017/cpu2017'
   num_instr = 1000000000
 
   os.system(f"tsp -S {num_slots}")

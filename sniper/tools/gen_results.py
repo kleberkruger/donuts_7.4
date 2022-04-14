@@ -47,7 +47,10 @@ def find_configs(root_dir, app_names):
   all_configs = []
   for app_name in app_names:
     app_dir = f"{root_dir}/{app_name}"
-    app_configs = list(filter(lambda f: os.path.isdir(f"{app_dir}/{f}"), sorted(os.listdir(app_dir), key=natural_keys)))
+    try:
+      app_configs = list(filter(lambda f: os.path.isdir(f"{app_dir}/{f}"), sorted(os.listdir(app_dir), key=natural_keys)))
+    except:
+      print(f"An exception occurred in application: {app_dir}")
     new_configs = set(app_configs) - set(all_configs)
     all_configs = all_configs + list(new_configs)
   return sorted(all_configs, key=natural_keys)
@@ -112,3 +115,6 @@ def main():
   
 if __name__ == '__main__':
   main()
+  
+# ./gen_results.py -t spec2017 -p cpu2017 -a perlbench_r gcc_r bwaves_r mcf_r cactuBSSN_r namd_r povray_r lbm_r omnetpp_r wrf_r xalancbmk_r x264_r blender_r cam4_r deepsjeng_r imagick_r leela_r nab_r exchange2_r fotonik3d_r roms_r xz_r perlbench_s gcc_s bwaves_s mcf_s cactuBSSN_s lbm_s omnetpp_s wrf_s xalancbmk_s x264_s cam4_s pop2_s deepsjeng_s imagick_s leela_s nab_s exchange2_s fotonik3d_s roms_s xz_s
+

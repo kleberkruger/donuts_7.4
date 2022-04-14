@@ -1,0 +1,47 @@
+-E BENCHMARKS_ROOT /home/kleber.kruger/donuts/sniper/benchmarks
+-E BROWSER /home/kleber.kruger/.vscode-server/bin/e18005f0f1b33c29e81d732535d8c0e47cafb0b5/bin/helpers/browser.sh
+-E COLORTERM truecolor
+-E DBUS_SESSION_BUS_ADDRESS 'unix:path=/run/user/1000048/bus'
+-E GIT_ASKPASS /home/kleber.kruger/.vscode-server/bin/e18005f0f1b33c29e81d732535d8c0e47cafb0b5/extensions/git/dist/askpass.sh
+-E GRAPHITE_ROOT /home/kleber.kruger/donuts/sniper
+-E HOME /home/kleber.kruger
+-E LANG en_US.UTF-8
+-E LC_ALL C
+-E LC_LANG C
+-E LD_LIBRARY_PATH /usr/lib64/:/usr/lib/:/lib64
+-E LIBC_FATAL_STDERR_ 1
+-E LOGNAME kleber.kruger
+-E MOTD_SHOWN pam
+-E OLDPWD /home/kleber.kruger/benchmarks/cpu2017/benchspec/CPU/505.mcf_r
+-E OMP_NUM_THREADS 1
+-E OMP_THREAD_LIMIT 1
+-E PATH /home/kleber.kruger/benchmarks/cpu2017/bin:/home/kleber.kruger/.vscode-server/bin/e18005f0f1b33c29e81d732535d8c0e47cafb0b5/bin/remote-cli:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
+-E SHELL /bin/bash
+-E SPEC /home/kleber.kruger/benchmarks/cpu2017
+-E SPECDB_PWD /home/kleber.kruger/benchmarks/cpu2017/benchspec/CPU/505.mcf_r/build
+-E SPECPERLLIB /home/kleber.kruger/benchmarks/cpu2017/bin/lib:/home/kleber.kruger/benchmarks/cpu2017/bin
+-E SSH_CLIENT '143.106.24.195 46636 22'
+-E SSH_CONNECTION '143.106.24.195 46636 10.68.110.22 22'
+-E TERM xterm-256color
+-E TERM_PROGRAM vscode
+-E TERM_PROGRAM_VERSION 1.66.0
+-E USER kleber.kruger
+-E VSCODE_GIT_ASKPASS_EXTRA_ARGS ''
+-E VSCODE_GIT_ASKPASS_MAIN /home/kleber.kruger/.vscode-server/bin/e18005f0f1b33c29e81d732535d8c0e47cafb0b5/extensions/git/dist/askpass-main.js
+-E VSCODE_GIT_ASKPASS_NODE /home/kleber.kruger/.vscode-server/bin/e18005f0f1b33c29e81d732535d8c0e47cafb0b5/node
+-E VSCODE_GIT_IPC_HANDLE /run/user/1000048/vscode-git-2d8c3f2e8e.sock
+-E VSCODE_IPC_HOOK_CLI /run/user/1000048/vscode-ipc-ce5e2c57-7aa6-4087-910e-cbf1b8c31e01.sock
+-E XDG_CACHE_HOME /tmp/.cache_kleber.kruger
+-E XDG_DATA_DIRS /usr/local/share:/usr/share:/var/lib/snapd/desktop
+-E XDG_RUNTIME_DIR /run/user/1000048
+-E XDG_SESSION_CLASS user
+-E XDG_SESSION_ID 2284
+-E XDG_SESSION_TYPE tty
+-r
+-N C
+-C /home/kleber.kruger/benchmarks/cpu2017/benchspec/CPU/502.gcc_r/run/run_base_refrate_donuts-m64.0000
+-o gcc-pp.opts-O3_-finline-limit_0_-fif-conversion_-fif-conversion2.out -e gcc-pp.opts-O3_-finline-limit_0_-fif-conversion_-fif-conversion2.err ../run_base_refrate_donuts-m64.0000/cpugcc_r_base.donuts-m64 gcc-pp.c -O3 -finline-limit=0 -fif-conversion -fif-conversion2 -o gcc-pp.opts-O3_-finline-limit_0_-fif-conversion_-fif-conversion2.s > gcc-pp.opts-O3_-finline-limit_0_-fif-conversion_-fif-conversion2.out 2>> gcc-pp.opts-O3_-finline-limit_0_-fif-conversion_-fif-conversion2.err
+-o gcc-pp.opts-O2_-finline-limit_36000_-fpic.out -e gcc-pp.opts-O2_-finline-limit_36000_-fpic.err ../run_base_refrate_donuts-m64.0000/cpugcc_r_base.donuts-m64 gcc-pp.c -O2 -finline-limit=36000 -fpic -o gcc-pp.opts-O2_-finline-limit_36000_-fpic.s > gcc-pp.opts-O2_-finline-limit_36000_-fpic.out 2>> gcc-pp.opts-O2_-finline-limit_36000_-fpic.err
+-o gcc-smaller.opts-O3_-fipa-pta.out -e gcc-smaller.opts-O3_-fipa-pta.err ../run_base_refrate_donuts-m64.0000/cpugcc_r_base.donuts-m64 gcc-smaller.c -O3 -fipa-pta -o gcc-smaller.opts-O3_-fipa-pta.s > gcc-smaller.opts-O3_-fipa-pta.out 2>> gcc-smaller.opts-O3_-fipa-pta.err
+-o ref32.opts-O5.out -e ref32.opts-O5.err ../run_base_refrate_donuts-m64.0000/cpugcc_r_base.donuts-m64 ref32.c -O5 -o ref32.opts-O5.s > ref32.opts-O5.out 2>> ref32.opts-O5.err
+-o ref32.opts-O3_-fselective-scheduling_-fselective-scheduling2.out -e ref32.opts-O3_-fselective-scheduling_-fselective-scheduling2.err ../run_base_refrate_donuts-m64.0000/cpugcc_r_base.donuts-m64 ref32.c -O3 -fselective-scheduling -fselective-scheduling2 -o ref32.opts-O3_-fselective-scheduling_-fselective-scheduling2.s > ref32.opts-O3_-fselective-scheduling_-fselective-scheduling2.out 2>> ref32.opts-O3_-fselective-scheduling_-fselective-scheduling2.err

@@ -1,7 +1,1 @@
-
-all:
-
-clean:
-	find . -name \*.pyc -exec rm -f {} \;
-
-.PHONY: all
+./specrand_ir_peak.donuts-m64 1255432124 234923
