@@ -14,7 +14,7 @@ def natural_keys(text):
 def extract_command(line):
   cmd = line[line.find("../run"):].split(' ', 1)
   exe, args = os.path.basename(cmd[0]), cmd[1][:cmd[1].find('>')]
-  return './' + exe + ' ' + args
+  return f"./{exe} {args}".strip()
 
 
 def get_app_cmds(path):
@@ -22,15 +22,19 @@ def get_app_cmds(path):
   cmds = []
   with open(path, 'r') as f:
     for line in f:
-      if (line.startswith("-o") or line.startswith("-i") or line.startswith("-e")):
+      if line.startswith('-i') or line.startswith('-o') or line.startswith('-e'):
         cmds.append(extract_command(line))
-    return cmds
+  return cmds
 
 
 def create_makefile(path, cmds):
   with open(path, 'w') as f:
-    for cmd in cmds:
-      print(cmd, file=f)
+    if len(cmds) == 1:
+      print(f"run:\n\t{cmds[0]}", file=f)
+    else:
+      print(f"run: 0\n", file=f)
+      for idx, cmd in enumerate(cmds):
+        print(f"{idx}:\n\t{cmd}", file=f)
 
 
 def main():
