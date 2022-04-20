@@ -1,10 +1,21 @@
 #!/usr/bin/env python3
 
 # Usage:
-# ./get_speccmds.py <path>
-# ./get_speccmds.py <app> <size> <index>
+# ./get_speccmds.py <*path>
+# ./get_speccmds.py <*app (id or id.name or name)> <*size> <index>
 
-import sys, os, errno
+import sys, os, errno, argparse
+
+def parse_args():
+  parser = argparse.ArgumentParser()
+  parser.add_argument('app', type=str, help='application path or id/name (<id>, <name> or <id.name>)')
+  parser.add_argument('input', type=str, nargs='?', choices=['test', 'train', 'ref'], help='input size')
+  parser.add_argument('index', type=int, nargs='?', help='index of input')
+  parser.add_argument('-r', '--root', type=str, default=f"{os.environ['BENCHMARKS_ROOT']}/cpu2017", help='<root-path> from cpu2017 directory')
+  parser.add_argument('-t', '--tune', type=str, choices=['base', 'peak'], default='base', help='tune')
+  parser.add_argument('-o', '--out', '--output', type=str, help='output file')
+  return parser.parse_args()
+
 
 def extract_cmd(line):
   cmd = line[line.find("../run"):].split(' ', 1)
@@ -63,5 +74,7 @@ def main():
 
 if __name__ == '__main__':
   # main()
-  cmd = get_app_spec_cmd('502.gcc_r', 'test', 0)
-  print(cmd)
+  # cmd = get_app_spec_cmd('502.gcc_r', 'test', 0)
+  # print(cmd)
+  args = parse_args()
+  print(args)
