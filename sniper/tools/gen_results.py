@@ -4,7 +4,7 @@
 # BENCHMARKS_ROOT/out/<test-name>/<benchmark-name>/<app-name>/<config>
 
 import argparse, os, subprocess, json, re
-from tkinter.tix import COLUMN
+from distutils.command import config
 import pandas as pd
 
 COLUMN_OPTIONS = ['r','b','a','w','l','o','c']
@@ -49,10 +49,10 @@ def find_configs(root_dir, app_names):
     app_dir = f"{root_dir}/{app_name}"
     try:
       app_configs = list(filter(lambda f: os.path.isdir(f"{app_dir}/{f}"), sorted(os.listdir(app_dir), key=natural_keys)))
+      new_configs = set(app_configs) - set(all_configs)
+      all_configs = all_configs + list(new_configs)
     except:
       print(f"An exception occurred in application: {app_dir}")
-    new_configs = set(app_configs) - set(all_configs)
-    all_configs = all_configs + list(new_configs)
   return sorted(all_configs, key=natural_keys)
   
   
@@ -77,6 +77,12 @@ def get_dataframe(apps, configs, attr, title = None, in_percent = False):
   return pd.concat({title: df}, axis=1)
 
 
+def get_error_dataframe(apps, configs):
+  data = dict([(c, [a.data[c]['error'] if a.data[c]['error'] else '' for a in apps]) for c in configs])
+  df = pd.DataFrame(data, index = [ a.name for a in apps ])
+  return pd.concat({'Error': df}, axis=1)
+
+
 def generate_results_dataframe(apps, configs, infos):
   all_dataframes = {
     'r': get_dataframe(apps, configs, 'runtime', 'Runtime'),
@@ -86,6 +92,7 @@ def generate_results_dataframe(apps, configs, infos):
     'l': get_dataframe(apps, configs, 'num_mem_logs', 'Memory Logs'),
     'o': get_dataframe(apps, configs, 'num_buffer_overflow', 'Memory Buffer Overflow'),
     'c': get_dataframe(apps, configs, 'num_checkpoints', 'Number of Checkpoints'),
+    'e': get_error_dataframe(apps, configs),
   }
   df = pd.concat([all_dataframes[i] for i in infos], axis=1, names=['Application'])
   df.index.name = 'Application'
@@ -102,15 +109,18 @@ def main():
   args = parse_args()
   root_dir, app_names, configs, infos, out_file, err_file = get_args(args)
   apps = []
+  error = False
   for app_name in app_names:
     app_dir = f"{root_dir}/{app_name}"
-    try:
-      app_data = dict([(c, get_execution_data(f"{app_dir}/{c}")) for c in configs])
-      apps.append(AppData(app_name, app_data))
-      print(app_name, 'ok')
-    except:
-      # print(f"An exception occurred in application: {app_dir}")
-      print(app_name, 'failed')
+    # app_data = dict([(c, get_execution_data(f"{app_dir}/{c}")) for c in configs])
+    app_data = dict()
+    for c in configs:
+      app_data[c] = get_execution_data(f"{app_dir}/{c}")
+      if app_data[c]['error']:
+        error = True
+    apps.append(AppData(app_name, app_data))
+  if error:
+    infos.append('e')
   
   df = generate_results_dataframe(apps, configs, infos)
   generate_sheet(df, out_file)
@@ -120,3 +130,4 @@ if __name__ == '__main__':
   main()
   
 # ./gen_results.py -t spec2017 -p cpu2017 -a perlbench_r gcc_r bwaves_r mcf_r cactuBSSN_r namd_r povray_r lbm_r omnetpp_r wrf_r xalancbmk_r x264_r blender_r cam4_r deepsjeng_r imagick_r leela_r nab_r exchange2_r fotonik3d_r roms_r xz_r perlbench_s gcc_s bwaves_s mcf_s cactuBSSN_s lbm_s omnetpp_s wrf_s xalancbmk_s x264_s cam4_s pop2_s deepsjeng_s imagick_s leela_s nab_s exchange2_s fotonik3d_s roms_s xz_s
+# ./gen_results.py -t multicore -p cpu2017 -a perlbench_r gcc_r bwaves_r mcf_r cactuBSSN_r namd_r povray_r lbm_r omnetpp_r wrf_r xalancbmk_r x264_r blender_r cam4_r deepsjeng_r imagick_r leela_r nab_r exchange2_r fotonik3d_r roms_r xz_r

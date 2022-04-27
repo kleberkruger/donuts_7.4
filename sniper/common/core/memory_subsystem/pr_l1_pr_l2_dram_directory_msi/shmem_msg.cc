@@ -107,6 +107,7 @@ namespace PrL1PrL2DramDirectoryMSI
          case WB_REP:
          case DRAM_WRITE_REQ:
          case DRAM_READ_REP:
+         case CHECKPOINT: // Added by Kleber Kruger
             // msg_type + address + cache_block
             return (1 + sizeof(IntPtr) + m_data_length);
 

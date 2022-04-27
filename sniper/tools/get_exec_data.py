@@ -2,22 +2,6 @@
 
 import sys, json, sniper_lib
 
-def main():
-  path = sys.argv[1]
-  res = sniper_lib.get_results(0, path, None)
-  data = {
-    "runtime": get_runtime(res),
-    "avg_bandwidth_usage": get_avg_bandwidth_usage(res),
-    "num_mem_access": get_num_mem_access(res),
-    "num_mem_writes": get_num_mem_writes(res),
-    "num_mem_logs": get_num_mem_logs(res),
-    "num_buffer_overflow": get_num_buffer_overflow(res),
-    "num_checkpoints": get_num_checkpoints(res),
-  }
-  # sys.stdout.write(json.dumps(data))
-  print(json.dumps(data))
-  
-
 
 def is_donuts(config):
   key = 'donuts/enabled'
@@ -114,6 +98,29 @@ def get_avg_bandwidth_usage(res):
     time0 = time0_begin - time0_end
 
   return float([100 * r / time0 if time0 else float('inf') for r in results['dram-queue.total-time-used']][0])
+
+
+def main():
+  path = sys.argv[1]
+  error = None
+  try:
+    res = sniper_lib.get_results(0, path, None)
+  except Exception as e:
+    sys.stderr.write('Exception: {}.\n'.format(str(e)))
+    error = e
+  finally:
+    data = {
+      'runtime': get_runtime(res) if not error else 0,
+      'avg_bandwidth_usage': get_avg_bandwidth_usage(res) if not error else 0.0,
+      'num_mem_access': get_num_mem_access(res) if not error else 0,
+      'num_mem_writes': get_num_mem_writes(res) if not error else 0,
+      'num_mem_logs': get_num_mem_logs(res) if not error else 0,
+      'num_buffer_overflow': get_num_buffer_overflow(res) if not error else 0,
+      'num_checkpoints': get_num_checkpoints(res) if not error else 0,
+      'error': str(error) if error else None
+    }
+    # sys.stdout.write(json.dumps(data, sort_keys=True))
+    print(json.dumps(data, sort_keys=True))
 
 
 if __name__ == "__main__":

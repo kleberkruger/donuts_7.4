@@ -24,9 +24,9 @@ namespace PrL1PrL2DramDirectoryMSI
          typedef enum log_type_t
          {
             LOGGING_DISABLED = 0,
-            LOGGING_FROM_LOAD,
-            LOGGING_FROM_STORE,
-            LOGGING_FROM_COMMAND,
+            LOGGING_ON_LOAD,
+            LOGGING_ON_STORE,
+            LOGGING_ON_COMMAND,
             NUM_LOGGING_TYPES
          } LogType;
 

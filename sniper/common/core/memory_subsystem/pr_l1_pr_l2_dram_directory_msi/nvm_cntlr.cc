@@ -206,13 +206,13 @@ NvmCntlr::isLogEnabled()
 bool
 NvmCntlr::loggingOnLoad()
 {
-   return m_log_type == LOGGING_FROM_LOAD;
+   return m_log_type == LOGGING_ON_LOAD;
 }
 
 bool
 NvmCntlr::loggingOnStore()
 {
-   return m_log_type == LOGGING_FROM_STORE;
+   return m_log_type == LOGGING_ON_STORE;
 }
 
 NvmCntlr::log_type_t
@@ -224,11 +224,11 @@ NvmCntlr::getLogType()
 
    String value = Sim()->getCfg()->getString(param);
    if (value == "load")
-      return NvmCntlr::LOGGING_FROM_LOAD;
+      return NvmCntlr::LOGGING_ON_LOAD;
    else if (value == "store")
-      return NvmCntlr::LOGGING_FROM_STORE;
+      return NvmCntlr::LOGGING_ON_STORE;
    else if (value == "cmd")
-      return NvmCntlr::LOGGING_FROM_COMMAND;
+      return NvmCntlr::LOGGING_ON_COMMAND;
    
    assert(false);
 }
@@ -245,9 +245,9 @@ const char *NvmCntlr::LogTypeString(NvmCntlr::LogType type)
    switch (type)
    {
       case LOGGING_DISABLED:     return "LOGGING_DISABLED";
-      case LOGGING_FROM_LOAD:    return "LOGGING_FROM_LOAD";
-      case LOGGING_FROM_STORE:   return "LOGGING_FROM_STORE";
-      case LOGGING_FROM_COMMAND: return "LOGGING_FROM_COMMAND";
+      case LOGGING_ON_LOAD:      return "LOGGING_FROM_LOAD";
+      case LOGGING_ON_STORE:     return "LOGGING_FROM_STORE";
+      case LOGGING_ON_COMMAND:   return "LOGGING_FROM_COMMAND";
       default:                   return "?";
    }
 }
