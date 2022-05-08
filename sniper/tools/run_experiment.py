@@ -46,7 +46,8 @@ def parse_args():
 
 
 def main():
-  args = parse_args()
+  # args = parse_args()
+  print(ALL_BENCHMARKS['splash2'])
 
 
 if __name__ == "__main__":

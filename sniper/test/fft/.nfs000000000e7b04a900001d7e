@@ -1,0 +1,166 @@
+[SNIPER] Running ['/home/kleber.kruger/donuts/sniper/record-trace', '-o', '/tmp/tmpdDLjRh/run_benchmarks', '-v', '--roi', '-e', '1', '-s', '0', '-r', '1', '--follow', '--routine-tracing', '--', './fft', '-p', '1']
+[SNIPER] Start
+[SNIPER] Running ['bash', '-c', '/home/kleber.kruger/donuts/sniper/lib/sniper -c /home/kleber.kruger/donuts/sniper/config/base.cfg --general/total_cores=1 --general/output_dir=/home/kleber.kruger/donuts/sniper/test/fft/store --config=/home/kleber.kruger/donuts/sniper/config/paper-base.cfg --config=/home/kleber.kruger/donuts/sniper/config/paper-picl.cfg --config=/home/kleber.kruger/donuts/sniper/config/donuts.cfg --config=/home/kleber.kruger/donuts/sniper/config/donuts-test.cfg -g --general/magic=true -g --traceinput/stop_with_first_app=true -g --traceinput/restart_apps=false -g --traceinput/stop_with_first_app=false -g --traceinput/enabled=true -g --traceinput/emulate_syscalls=true -g --traceinput/num_apps=1 -g --traceinput/trace_prefix=/tmp/tmpdDLjRh/run_benchmarks']
+[RECORD-TRACE] Using the Pin frontend (sift/recorder)
+[SIFT_RECORDER] Running /home/kleber.kruger/donuts/sniper/pin_kit/pin -mt -injection child -xyzzy -ifeellucky -follow_execv 1  -t /home/kleber.kruger/donuts/sniper/sift/recorder/obj-intel64/sift_recorder -verbose 1 -debug 0 -roi 1 -roi-mpi 0 -f 0 -d 0 -b 0 -o /tmp/tmpdDLjRh/run_benchmarks -e 1 -s 0 -r 1 -pa 0 -rtntrace 1 -stop 0    -- ./fft -p 1
+[SNIPER] --------------------------------------------------------------------------------
+[SNIPER] Sniper using SIFT/trace-driven frontend
+[SNIPER] Running pre-ROI region in  CACHE_ONLY mode
+[SNIPER] Running application ROI in DETAILED mode
+[SNIPER] Running post-ROI region in FAST_FORWARD mode
+[SNIPER] --------------------------------------------------------------------------------
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+[SNIPER] Enabling performance models
+[SNIPER] Setting instrumentation mode to DETAILED
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+CHECKPOINT FINISHED hehehehehehe
+[SNIPER] Disabling performance models
+[SNIPER] Leaving ROI after 1.05 seconds
+[SNIPER] Simulated 1.3M instructions, 1.8M cycles, 0.68 IPC
+[SNIPER] Simulation speed 1195.1 KIPS (1195.1 KIPS / target core - 836.8ns/instr)
+[SNIPER] Sampling: executed 63.26% of simulated time in detailed mode
+[SNIPER] Setting instrumentation mode to FAST_FORWARD
+[TRACE:0] -- DONE --
+
+FFT with Blocking Transpose
+   1024 Complex Doubles
+   1 Processors
+   65536 Cache lines
+   16 Byte line size
+   4096 Bytes per page
+
+
+                 PROCESS STATISTICS
+            Computation      Transpose     Transpose
+ Proc          Time            Time        Fraction
+    0               488            150       0.30738
+
+                 TIMING INFORMATION
+Start time                        :      -1844408297
+Initialization finish time        :      -1844407884
+Overall finish time               :      -1844407396
+Total time with initialization    :              901
+Total time without initialization :              488
+Overall transpose time            :              150
+Overall transpose fraction        :          0.30738
+
+[SNIPER] End
+[SNIPER] Elapsed time: 5.79 seconds

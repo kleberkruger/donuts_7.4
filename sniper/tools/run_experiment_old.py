@@ -4,6 +4,7 @@ import os, errno
 
 HOME_SNIPER = os.environ['GRAPHITE_ROOT']
 HOME_BENCHMARKS = os.environ['BENCHMARKS_ROOT']
+HOME_DONUTS = os.environ['DONUTS_ROOT']
 postfix = 'donuts-m64.0000'
 
 class Application:
@@ -41,6 +42,40 @@ PARSEC_APPS = [
   Application(0, 'x264', '', 1),
   Application(0, 'canneal', '', 2),
   Application(0, 'dedup', '', 4),
+  Application(0, 'streamcluster', '', 2),
+]
+
+
+SPLASH2_APPS = [
+  Application(0, 'barnes', ''),
+  Application(0, 'cholesky', ''),
+  Application(0, 'fft', ''),
+  Application(0, 'fft_O0', ''),
+  Application(0, 'fft_O1', ''),
+  Application(0, 'fft_O2', ''),
+  Application(0, 'fft_O3', ''),
+  Application(0, 'fft_forever', ''),
+  Application(0, 'fft_rep2', ''),
+  Application(0, 'fmm', ''),
+  Application(0, 'lu.cont', ''),
+  Application(0, 'lu.ncont', ''),
+  Application(0, 'ocean.cont', ''),
+  Application(0, 'ocean.ncont', ''),
+  Application(0, 'radiosity', ''),
+  Application(0, 'radix', ''),
+  Application(0, 'raytrace', ''),
+  Application(0, 'raytrace_opt', ''),
+  Application(0, 'volrend', ''),
+  Application(0, 'water.nsq', ''),
+  Application(0, 'water.sp', ''),
+  Application(0, 'barnes-scale', ''),
+  Application(0, 'fft-scale', ''),
+  Application(0, 'fmm-scale', ''),
+  Application(0, 'lu.cont-scale', ''),
+  Application(0, 'lu.ncont-scale', ''),
+  Application(0, 'ocean.cont-scale', ''),
+  Application(0, 'radix-scale', ''),
+  Application(0, 'water.nsq-scale', ''),
 ]
 
 CPU2006_APPS = [
@@ -143,21 +178,20 @@ def get_spec_cmds(path):
 
 
 def add_app_to_spooler(benchmark, app, input, num_cores, config, out_dir, num_instr, debug=False):  
-  out_dir = f"{HOME_BENCHMARKS}/{out_dir}"
-  
   if (not debug):
     os.system(f"tsp mkdir -p {out_dir}")
-  print(f"tsp mkdir -p {out_dir}")
   
-  # cmd = f"tsp ./run-sniper -p {benchmark}-{app.name} -i {input} -n {num_cores} -c {config} -d {out_dir} -s stop-by-icount:{num_instr}"
-  runpath = app.get_rundir_path(input)
-  specinstr = app.get_cmd(input, 0)
-  print(f"cd {runpath}")
-  # print(specinstr)
-  cmd = f"tsp {HOME_SNIPER}/run-sniper -n {num_cores} -c {config} -d {out_dir} -s stop-by-icount:{num_instr} -- {specinstr}"
+  if benchmark == 'cpu2017':
+    runpath = app.get_rundir_path(input)
+    specinstr = app.get_cmd(input, 0)
+    print(f"cd {runpath}")
+    print(specinstr)
+    cmd = f"tsp {HOME_SNIPER}/run-sniper -n {num_cores} -c {config} -d {out_dir} -s stop-by-icount:{num_instr} -- {specinstr}"
+    os.chdir(runpath)
+  else:
+    cmd = f"tsp ./run-sniper -p {benchmark}-{app.name} -i {input} -n {num_cores} -c {config} -d {out_dir} -s stop-by-icount:{num_instr}"
+  
   print(cmd + '\n')
-  
-  os.chdir(runpath)
   if (not debug):
     os.system(cmd)
   os.chdir(HOME_BENCHMARKS)
@@ -167,12 +201,13 @@ def main(debug=False):
   os.chdir(HOME_BENCHMARKS)
   
   num_slots = 6
-  benchmark = 'cpu2017'
-  app_list = CPU2017_APPS
-  input = 'ref'
+  test_name = 'multicore'
+  benchmark = 'splash2'
+  app_list = SPLASH2_APPS
+  input = 'large'
   num_cores = 8
-  config = 'donuts-store'
-  out_dir_base = 'out/multicore/cpu2017'
+  config = 'donuts-low'
+  out_dir_base = f"{HOME_DONUTS}/results/{test_name}/{num_cores}/{benchmark}"
   num_instr = 1000000000
 
   os.system(f"tsp -S {num_slots}")

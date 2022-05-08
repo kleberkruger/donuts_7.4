@@ -1,0 +1,55 @@
+../../run-sniper -v -n 1 -c donuts-test -d store --roi -- ./fft -p 1
+[SNIPER] Running ['/home/kleber.kruger/donuts/sniper/record-trace', '-o', '/tmp/tmpKAeF1u/run_benchmarks', '-v', '--roi', '-e', '1', '-s', '0', '-r', '1', '--follow', '--routine-tracing', '--', './fft', '-p', '1']
+[SNIPER] Start
+[SNIPER] Running ['bash', '-c', '/home/kleber.kruger/donuts/sniper/lib/sniper -c /home/kleber.kruger/donuts/sniper/config/base.cfg --general/total_cores=1 --general/output_dir=/home/kleber.kruger/donuts/sniper/test/fft/store --config=/home/kleber.kruger/donuts/sniper/config/paper-base.cfg --config=/home/kleber.kruger/donuts/sniper/config/paper-picl.cfg --config=/home/kleber.kruger/donuts/sniper/config/donuts.cfg --config=/home/kleber.kruger/donuts/sniper/config/donuts-test.cfg -g --general/magic=true -g --traceinput/stop_with_first_app=true -g --traceinput/restart_apps=false -g --traceinput/stop_with_first_app=false -g --traceinput/enabled=true -g --traceinput/emulate_syscalls=true -g --traceinput/num_apps=1 -g --traceinput/trace_prefix=/tmp/tmpKAeF1u/run_benchmarks']
+[RECORD-TRACE] Using the Pin frontend (sift/recorder)
+[SIFT_RECORDER] Running /home/kleber.kruger/donuts/sniper/pin_kit/pin -mt -injection child -xyzzy -ifeellucky -follow_execv 1  -t /home/kleber.kruger/donuts/sniper/sift/recorder/obj-intel64/sift_recorder -verbose 1 -debug 0 -roi 1 -roi-mpi 0 -f 0 -d 0 -b 0 -o /tmp/tmpKAeF1u/run_benchmarks -e 1 -s 0 -r 1 -pa 0 -rtntrace 1 -stop 0    -- ./fft -p 1
+[SNIPER] --------------------------------------------------------------------------------
+[SNIPER] Sniper using SIFT/trace-driven frontend
+[SNIPER] Running pre-ROI region in  CACHE_ONLY mode
+[SNIPER] Running application ROI in DETAILED mode
+[SNIPER] Running post-ROI region in FAST_FORWARD mode
+[SNIPER] --------------------------------------------------------------------------------
+[SNIPER] Enabling performance models
+[SNIPER] Setting instrumentation mode to DETAILED
+[SNIPER] Disabling performance models
+[SNIPER] Leaving ROI after 1.02 seconds
+[SNIPER] Simulated 1.3M instructions, 1.9M cycles, 0.68 IPC
+[SNIPER] Simulation speed 1226.4 KIPS (1226.4 KIPS / target core - 815.4ns/instr)
+[SNIPER] Sampling: executed 63.42% of simulated time in detailed mode
+[SNIPER] Setting instrumentation mode to FAST_FORWARD
+[TRACE:0] -- DONE --
+
+FFT with Blocking Transpose
+   1024 Complex Doubles
+   1 Processors
+   65536 Cache lines
+   16 Byte line size
+   4096 Bytes per page
+
+
+                 PROCESS STATISTICS
+            Computation      Transpose     Transpose
+ Proc          Time            Time        Fraction
+    0               491            151       0.30754
+
+                 TIMING INFORMATION
+Start time                        :      -1844408298
+Initialization finish time        :      -1844407884
+Overall finish time               :      -1844407393
+Total time with initialization    :              905
+Total time without initialization :              491
+Overall transpose time            :              151
+Overall transpose fraction        :          0.30754
+
+MAX: 54848
+log_ends: 305
+[SNIPER] End
+[SNIPER] Elapsed time: 5.96 seconds
+
+
+Optional: Run '../../tools/cpistack.py' in this directory to generate cpi-stack output for this run
+Optional: Run '../../tools/mcpat.py' in this directory to generate power output for this run
+Optional: Run '../../tools/dumpstats.py' in this directory to view detailed statistics for this run
+Optional: Run '../../tools/gen_topology.py' in this directory to view the system topology for this run
+

@@ -31,14 +31,27 @@ NvmCntlr::NvmCntlr(MemoryManagerBase* memory_manager,
       UInt32 cache_block_size)
    : DramCntlr(memory_manager, shmem_perf_model, cache_block_size)
    , m_logs(0)
-   , m_log_ends(0)
+   , m_log_ends(0)                               // m_log_rowbuffer_overflows
    , m_log_buffer(0)
-   , m_log_size(NvmCntlr::getLogRowBufferSize())
-   , m_log_type(NvmCntlr::getLogType())
+   , m_log_size(NvmCntlr::getLogRowBufferSize()) // m_log_rowbuffer_size
+   , m_log_disk_space(0)
+   , m_log_max_disk_space(0)
+   , m_log_type(NvmCntlr::getLogType()) // 
 {
    // printf("LOGGING TYPE %d\n", m_log_type);
    registerStatsMetric("dram", memory_manager->getCore()->getId(), "logs", &m_logs);
    registerStatsMetric("dram", memory_manager->getCore()->getId(), "log_ends", &m_log_ends);
+   registerStatsMetric("dram", memory_manager->getCore()->getId(), "log_max_disk_space", &m_log_max_disk_space);
+
+   String path = Sim()->getConfig()->getOutputDirectory() + "/sim.logs.csv";
+   if ((m_log_file = fopen(path.c_str(), "w")) == nullptr)
+      fprintf(stderr, "Error on creating sim.ckpts.csv\n");
+}
+
+NvmCntlr::~NvmCntlr()
+{
+   fprintf(m_log_file, "%lu|%lu|%lu\n", m_logs, m_log_ends, m_log_disk_space);
+   fclose(m_log_file);
 }
 
 boost::tuple<SubsecondTime, HitWhere::where_t>
@@ -185,9 +198,20 @@ NvmCntlr::printDramAccessCount()
 void
 NvmCntlr::checkpoint()
 {
+   // printf("CHECKPOINT %lu | DATA LENGTH: %lu KB | logs: %lu\n", EpochManager::getGlobalSystemEID(), m_log_disk_space, m_logs);
 //    SubsecondTime dram_access_latency = runDramPerfModel(requester, now, address, LOG, &m_dummy_shmem_perf);
    m_log_ends++;
    m_log_buffer = 0;
+
+   fprintf(m_log_file, "%lu\n", m_log_disk_space);
+   
+   if (m_log_disk_space > m_log_max_disk_space)
+   {
+   //    printf("max before: %lu\n", m_log_max_disk_space);
+      m_log_max_disk_space = m_log_disk_space;
+   //    printf("max after: %lu\n", m_log_max_disk_space);
+   }    
+   m_log_disk_space = 0;
 }
 
 void
@@ -195,6 +219,7 @@ NvmCntlr::createLogEntry(IntPtr address, Byte* data_buf)
 {
    // UInt64 eid = EpochManager::getGlobalSystemEID();
    // printf("Creating log entry for epoch: %lu { metadata: %lu, data: %u }\n", eid, address, (unsigned int) *data_buf);
+   m_log_disk_space += getCacheBlockSize();
 }
 
 bool
@@ -223,12 +248,12 @@ NvmCntlr::getLogType()
       return NvmCntlr::LOGGING_DISABLED;
 
    String value = Sim()->getCfg()->getString(param);
-   if (value == "load")
+   if (value == "read")
       return NvmCntlr::LOGGING_ON_LOAD;
-   else if (value == "store")
+   else if (value == "write")
       return NvmCntlr::LOGGING_ON_STORE;
    else if (value == "cmd")
-      return NvmCntlr::LOGGING_ON_COMMAND;
+      return NvmCntlr::LOGGING_FROM_COMMAND;
    
    assert(false);
 }
@@ -245,9 +270,9 @@ const char *NvmCntlr::LogTypeString(NvmCntlr::LogType type)
    switch (type)
    {
       case LOGGING_DISABLED:     return "LOGGING_DISABLED";
-      case LOGGING_ON_LOAD:      return "LOGGING_FROM_LOAD";
-      case LOGGING_ON_STORE:     return "LOGGING_FROM_STORE";
-      case LOGGING_ON_COMMAND:   return "LOGGING_FROM_COMMAND";
+      case LOGGING_ON_LOAD:      return "LOGGING_ON_LOAD";
+      case LOGGING_ON_STORE:     return "LOGGING_ON_STORE";
+      case LOGGING_FROM_COMMAND: return "LOGGING_FROM_COMMAND";
       default:                   return "?";
    }
 }

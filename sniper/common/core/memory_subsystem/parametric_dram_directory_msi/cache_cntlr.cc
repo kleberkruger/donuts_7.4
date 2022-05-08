@@ -1802,6 +1802,7 @@ void CacheCntlr::checkpoint(CheckpointEvent::Type event_type)
                            dirty_blocks.size(), m_master->m_cache->getCapacityFilled() * 100);
 
       persistCheckpointData(EpochManager::getGlobalSystemEID(), dirty_blocks);
+      sendCheckpointToNVM();
       EpochManager::getInstance()->commitCheckpoint(ckpt);
    }
 
@@ -1834,6 +1835,16 @@ void CacheCntlr::checkpoint_old(CheckpointEvent::Type event_type)
    }
    // printf("STARTING [%lu]...\n", EpochManager::getGlobalSystemEID());
    // DonutsUtils::printCache(m_master->m_cache);
+}
+
+void CacheCntlr::sendCheckpointToNVM()
+{
+   Byte data_buf[getCacheBlockSize()];
+   getMemoryManager()->sendMsg(PrL1PrL2DramDirectoryMSI::ShmemMsg::CHECKPOINT_FINISHED,
+                               MemComponent::LAST_LEVEL_CACHE, MemComponent::NVM,
+                               m_core_id_master, 0, /* requester and receiver */
+                               0, data_buf, getCacheBlockSize(),
+                               HitWhere::UNKNOWN, &m_dummy_shmem_perf, ShmemPerfModel::_USER_THREAD);
 }
 
 /**

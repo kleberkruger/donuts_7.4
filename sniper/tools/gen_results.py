@@ -8,6 +8,7 @@ from distutils.command import config
 import pandas as pd
 
 COLUMN_OPTIONS = ['r','b','a','w','l','o','c']
+DEFAULT_RESULTS_PATH = f"{os.environ['DONUTS_ROOT']}/results"
 
 def atoi(text):
   return int(text) if text.isdigit() else text
@@ -31,7 +32,7 @@ class AppData:
   
 def parse_args():
   parser = argparse.ArgumentParser()
-  parser.add_argument('-r', '--root', type=str, default=f"{os.environ['BENCHMARKS_ROOT']}/out", help='<root-path> from results directory')
+  parser.add_argument('-r', '--root', type=str, default=DEFAULT_RESULTS_PATH, help='<root-path> from results directory')
   parser.add_argument('-t', '--test', type=str, help='test name')
   parser.add_argument('-p', '--benchmark', type=str, default='cpu2006', help='benchmark selected')
   parser.add_argument('-a', '--app', '--apps', type=str, nargs='+', default=[], help='applications to extract results')
@@ -128,6 +129,6 @@ def main():
   
 if __name__ == '__main__':
   main()
-  
+
 # ./gen_results.py -t spec2017 -p cpu2017 -a perlbench_r gcc_r bwaves_r mcf_r cactuBSSN_r namd_r povray_r lbm_r omnetpp_r wrf_r xalancbmk_r x264_r blender_r cam4_r deepsjeng_r imagick_r leela_r nab_r exchange2_r fotonik3d_r roms_r xz_r perlbench_s gcc_s bwaves_s mcf_s cactuBSSN_s lbm_s omnetpp_s wrf_s xalancbmk_s x264_s cam4_s pop2_s deepsjeng_s imagick_s leela_s nab_s exchange2_s fotonik3d_s roms_s xz_s
 # ./gen_results.py -t multicore -p cpu2017 -a perlbench_r gcc_r bwaves_r mcf_r cactuBSSN_r namd_r povray_r lbm_r omnetpp_r wrf_r xalancbmk_r x264_r blender_r cam4_r deepsjeng_r imagick_r leela_r nab_r exchange2_r fotonik3d_r roms_r xz_r

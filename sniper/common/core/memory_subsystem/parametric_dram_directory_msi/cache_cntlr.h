@@ -377,6 +377,7 @@ namespace ParametricDramDirectoryMSI
          std::queue<CacheBlockInfo *> selectDirtyBlocks_old();
          void persistCheckpointData(UInt64 eid, std::queue<CacheBlockInfo *> &data);
          void flushCacheBlock(CacheBlockInfo *block_info);
+         void sendCheckpointToNVM();
 
          // NVM Checkpoint Support (Added by Kleber Kruger)
          static SInt64 _timeout(UInt64 arg, UInt64 val) { ((CacheCntlr *)arg)->timeout(); return 0; }

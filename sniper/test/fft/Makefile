@@ -6,6 +6,6 @@ $(TARGET): $(TARGET).o
 
 run_$(TARGET):
 #	../../run-sniper -v -n 1 -c gainestown --roi -- ./fft -p 1
-	../../run-sniper -v -n 1 -c donuts-test -d store --roi -- ./fft -p 1 > out.txt
+	../../run-sniper -v -n 1 -c donuts-test -d store --roi -- ./fft -p 1
 
 CLEAN_EXTRA=viz

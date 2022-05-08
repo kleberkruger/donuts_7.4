@@ -546,6 +546,26 @@ MYLOG("begin");
          }
          break;
 
+      // Added by Kleber Kruger
+      case MemComponent::NVM:
+         LOG_ASSERT_ERROR(m_dram_cntlr_present, "Nvm Cntlr NOT present");
+
+         switch(sender_mem_component)
+         {
+            case MemComponent::LAST_LEVEL_CACHE:
+            {
+               DramCntlrInterface *dram_interface = m_dram_cache ? (DramCntlrInterface *)m_dram_cache : (DramCntlrInterface *)m_dram_cntlr;
+               PrL1PrL2DramDirectoryMSI::NvmCntlr *nvm_cntlr = (PrL1PrL2DramDirectoryMSI::NvmCntlr *)dram_interface;
+               nvm_cntlr->checkpoint();
+               break;
+            }
+
+            default:
+               LOG_PRINT_ERROR("Unrecognized sender component(%u)", sender_mem_component);
+               break;
+         }
+         break;
+
       default:
          LOG_PRINT_ERROR("Unrecognized receiver component(%u)",
                receiver_mem_component);
