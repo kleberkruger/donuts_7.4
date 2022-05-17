@@ -3,11 +3,14 @@
 # Default results path: 
 # BENCHMARKS_ROOT/out/<test-name>/<benchmark-name>/<app-name>/<config>
 
+# TODO: Passar o caminho de um arquivo de entrada e lá terá as configurações do teste a ser executado?
+# Path das configurações com seu label
+# Qual das configurações é a baseline
+
 import argparse, os, subprocess, json, re
-from distutils.command import config
 import pandas as pd
 
-COLUMN_OPTIONS = ['r','b','a','w','l','o','c']
+COLUMN_OPTIONS = ['r','a','w','l','o','b','c']
 DEFAULT_RESULTS_PATH = f"{os.environ['DONUTS_ROOT']}/results"
 
 def atoi(text):
@@ -34,6 +37,7 @@ def parse_args():
   parser = argparse.ArgumentParser()
   parser.add_argument('-r', '--root', type=str, default=DEFAULT_RESULTS_PATH, help='<root-path> from results directory')
   parser.add_argument('-t', '--test', type=str, help='test name')
+  parser.add_argument('-n', '--ncores', type=int, nargs='+', help='select number of cores')
   parser.add_argument('-p', '--benchmark', type=str, default='cpu2006', help='benchmark selected')
   parser.add_argument('-a', '--app', '--apps', type=str, nargs='+', default=[], help='applications to extract results')
   parser.add_argument('-c', '--config', '--configs', type=str, nargs='+', default=[], help='configurations to extract results')
@@ -63,37 +67,35 @@ def get_args(args):
   app_names = args.app if args.app else list(filter(lambda f: 
     os.path.isdir(f"{root_dir}/{f}"), sorted(os.listdir(root_dir), key=natural_keys)))
   configs = args.config if args.config else find_configs(root_dir, app_names)
-  out_file = f"results_{args.benchmark}.xlsx"
-  return root_dir, app_names, configs, args.info, out_file, args.err
+  test_name = '_' + args.test.replace('/', '-') if args.test else ''
+  out_file = f"results{test_name}_{args.benchmark}.xlsx"
+  cores = args.ncores # TODO: use this parameter
+  return root_dir, args.benchmark, app_names, cores, configs, args.info, out_file, args.err
 
 
 def get_execution_data(path):
   return json.loads(subprocess.check_output(["./get_exec_data.py", path], universal_newlines=True))
 
 
-def get_dataframe(apps, configs, attr, title = None, in_percent = False):
+def get_dataframe(apps, configs, attr, title = None, in_percent = False, style=None):
   title = attr if title is None else title
-  data = dict([(c, [a.data[c][attr] / (100.0 if in_percent else 1) for a in apps]) for c in configs])
+  data = dict([(c, [a.data[c][attr] / 100.0 if in_percent else a.data[c][attr] for a in apps]) for c in configs])
   df = pd.DataFrame(data, index = [ a.name for a in apps ])
+  if style is not None: # TODO: Fazer isto funcionar no excel
+    df.style.set_properties(**style)
   return pd.concat({title: df}, axis=1)
-
-
-def get_error_dataframe(apps, configs):
-  data = dict([(c, [a.data[c]['error'] if a.data[c]['error'] else '' for a in apps]) for c in configs])
-  df = pd.DataFrame(data, index = [ a.name for a in apps ])
-  return pd.concat({'Error': df}, axis=1)
 
 
 def generate_results_dataframe(apps, configs, infos):
   all_dataframes = {
     'r': get_dataframe(apps, configs, 'runtime', 'Runtime'),
-    'b': get_dataframe(apps, configs, 'avg_bandwidth_usage', 'Average Bandwidth Usage', in_percent=True),
     'a': get_dataframe(apps, configs, 'num_mem_access', 'Memory Access'),
     'w': get_dataframe(apps, configs, 'num_mem_writes', 'Memory Writes'),
     'l': get_dataframe(apps, configs, 'num_mem_logs', 'Memory Logs'),
     'o': get_dataframe(apps, configs, 'num_buffer_overflow', 'Memory Buffer Overflow'),
+    'b': get_dataframe(apps, configs, 'avg_bandwidth_usage', 'Average Bandwidth Usage', in_percent=True),
     'c': get_dataframe(apps, configs, 'num_checkpoints', 'Number of Checkpoints'),
-    'e': get_error_dataframe(apps, configs),
+    'e': get_dataframe(apps, configs, 'error', 'Error', style={'color': 'red'})
   }
   df = pd.concat([all_dataframes[i] for i in infos], axis=1, names=['Application'])
   df.index.name = 'Application'
@@ -101,14 +103,16 @@ def generate_results_dataframe(apps, configs, infos):
   return df
 
 
-def generate_sheet(df, out_file):
+def generate_sheet(out_file, df_sheets):
   with pd.ExcelWriter(out_file, engine='xlsxwriter') as writer:
-    df.to_excel(writer, sheet_name='SPEC CPU2006')
+    for sheet_name, df in df_sheets.items():
+      df.to_excel(writer, sheet_name=sheet_name)
 
 
 def main():
   args = parse_args()
-  root_dir, app_names, configs, infos, out_file, err_file = get_args(args)
+  root_dir, benchmark, app_names, cores, configs, infos, out_file, err_file = get_args(args)
+  
   apps = []
   error = False
   for app_name in app_names:
@@ -124,9 +128,9 @@ def main():
     infos.append('e')
   
   df = generate_results_dataframe(apps, configs, infos)
-  generate_sheet(df, out_file)
+  generate_sheet(out_file, {benchmark: df})
 
-  
+
 if __name__ == '__main__':
   main()
 

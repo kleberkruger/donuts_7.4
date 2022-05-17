@@ -30,19 +30,19 @@ class Application:
 
 
 PARSEC_APPS = [
-  Application(0, 'blackscholes', '', 2),
+  # Application(0, 'blackscholes', '', 2),
   Application(0, 'bodytrack', '', 3),
-  Application(0, 'facesim', '', 1),
-  Application(0, 'ferret', '', 6),
-  Application(0, 'fluidanimate', '', 2),
-  Application(0, 'freqmine', '', 1),
-  Application(0, 'raytrace', '', 2),
-  Application(0, 'swaptions', '', 2),
-  Application(0, 'vips', '', 3),
-  Application(0, 'x264', '', 1),
+  # Application(0, 'facesim', '', 1),
+  # Application(0, 'ferret', '', 6),
+  # Application(0, 'fluidanimate', '', 2),
+  # Application(0, 'freqmine', '', 1),
+  # Application(0, 'raytrace', '', 2),
+  # Application(0, 'swaptions', '', 2),
+  # Application(0, 'vips', '', 3),
+  # Application(0, 'x264', '', 1),
   Application(0, 'canneal', '', 2),
-  Application(0, 'dedup', '', 4),
-  Application(0, 'streamcluster', '', 2),
+  # Application(0, 'dedup', '', 4),
+  # Application(0, 'streamcluster', '', 2),
 ]
 
 
@@ -177,7 +177,7 @@ def get_spec_cmds(path):
   return cmds
 
 
-def add_app_to_spooler(benchmark, app, input, num_cores, config, out_dir, num_instr, debug=False):  
+def add_app_to_spooler(benchmark, app, input, num_cores, config, out_dir, num_instr, debug=False):
   if (not debug):
     os.system(f"tsp mkdir -p {out_dir}")
   
@@ -202,10 +202,10 @@ def main(debug=False):
   
   num_slots = 6
   test_name = 'multicore'
-  benchmark = 'splash2'
-  app_list = SPLASH2_APPS
+  benchmark = 'parsec'
+  app_list = PARSEC_APPS
   input = 'large'
-  num_cores = 8
+  num_cores = 16
   config = 'donuts-low'
   out_dir_base = f"{HOME_DONUTS}/results/{test_name}/{num_cores}/{benchmark}"
   num_instr = 1000000000
@@ -217,4 +217,4 @@ def main(debug=False):
 
 
 if __name__ == "__main__":
-  main()
+  main(True)
