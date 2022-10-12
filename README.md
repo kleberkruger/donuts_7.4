@@ -6,4 +6,4 @@ DONUTS Implementation for Sniper Simulator
 - Intel Pin : 3.21
 
 Results of the published articles are stored in results folder
-- hhttps://github.com/kleberkruger/donuts/tree/main/results
+- https://github.com/kleberkruger/donuts/tree/main/results
