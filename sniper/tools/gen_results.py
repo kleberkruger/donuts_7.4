@@ -10,7 +10,7 @@
 import argparse, os, subprocess, json, re
 import pandas as pd
 
-COLUMN_OPTIONS = ['r','a','w','l','o','b','c']
+COLUMN_OPTIONS = ['r','a','w','l','o','b','m','c']
 DEFAULT_RESULTS_PATH = f"{os.environ['DONUTS_ROOT']}/results"
 
 def atoi(text):
@@ -74,7 +74,7 @@ def get_args(args):
 
 
 def get_execution_data(path):
-  return json.loads(subprocess.check_output(["./get_exec_data.py", path], universal_newlines=True))
+  return json.loads(subprocess.check_output(['./get_exec_data.py', '--all', path], universal_newlines=True))
 
 
 def get_dataframe(apps, configs, attr, title = None, in_percent = False, style=None):
@@ -95,6 +95,7 @@ def generate_results_dataframe(apps, configs, infos):
     'o': get_dataframe(apps, configs, 'num_buffer_overflow', 'Memory Buffer Overflow'),
     'b': get_dataframe(apps, configs, 'avg_bandwidth_usage', 'Average Bandwidth Usage', in_percent=True),
     'c': get_dataframe(apps, configs, 'num_checkpoints', 'Number of Checkpoints'),
+    'm': get_dataframe(apps, configs, 'max_ckpt_size', 'Max Checkpoint Size'),
     'e': get_dataframe(apps, configs, 'error', 'Error', style={'color': 'red'})
   }
   df = pd.concat([all_dataframes[i] for i in infos], axis=1, names=['Application'])
@@ -121,6 +122,7 @@ def main():
     app_data = dict()
     for c in configs:
       app_data[c] = get_execution_data(f"{app_dir}/{c}")
+      # print(app_data[c])
       if app_data[c]['error']:
         error = True
     apps.append(AppData(app_name, app_data))
@@ -136,3 +138,4 @@ if __name__ == '__main__':
 
 # ./gen_results.py -t spec2017 -p cpu2017 -a perlbench_r gcc_r bwaves_r mcf_r cactuBSSN_r namd_r povray_r lbm_r omnetpp_r wrf_r xalancbmk_r x264_r blender_r cam4_r deepsjeng_r imagick_r leela_r nab_r exchange2_r fotonik3d_r roms_r xz_r perlbench_s gcc_s bwaves_s mcf_s cactuBSSN_s lbm_s omnetpp_s wrf_s xalancbmk_s x264_s cam4_s pop2_s deepsjeng_s imagick_s leela_s nab_s exchange2_s fotonik3d_s roms_s xz_s
 # ./gen_results.py -t multicore -p cpu2017 -a perlbench_r gcc_r bwaves_r mcf_r cactuBSSN_r namd_r povray_r lbm_r omnetpp_r wrf_r xalancbmk_r x264_r blender_r cam4_r deepsjeng_r imagick_r leela_r nab_r exchange2_r fotonik3d_r roms_r xz_r
+# ./gen_results.py -t multicore/2 -p parsec -c donuts

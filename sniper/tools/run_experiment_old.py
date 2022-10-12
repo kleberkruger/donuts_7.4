@@ -206,7 +206,7 @@ def main(debug=False):
   app_list = PARSEC_APPS
   input = 'large'
   num_cores = 16
-  config = 'donuts-low'
+  config = 'picl'
   out_dir_base = f"{HOME_DONUTS}/results/{test_name}/{num_cores}/{benchmark}"
   num_instr = 1000000000
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import argparse, os, csv, sys
+import argparse, os
 import numpy as np
 import pandas as pd
 import matplotlib

@@ -1,6 +1,16 @@
 #!/usr/bin/env python
 
-import sys, json, sniper_lib
+import sys, os, argparse, json, sniper_lib
+
+
+# COLUMN_OPTIONS = ['r','a','w','l','o','b','c']
+
+def parse_args():
+  parser = argparse.ArgumentParser()
+  parser.add_argument('path', type=str, help='path to sniper output')
+  parser.add_argument('--all', action='store_true', help='get checkpoint info')
+  # parser.add_argument('-i', '--info', type=str, nargs='+', choices=COLUMN_OPTIONS, default=COLUMN_OPTIONS, help='informations')
+  return parser.parse_args()
 
 
 def is_donuts(config):
@@ -100,11 +110,28 @@ def get_avg_bandwidth_usage(res):
   return float([100 * r / time0 if time0 else float('inf') for r in results['dram-queue.total-time-used']][0])
 
 
+# def get_checkpoint_data(path):
+#   with open(os.path.join(path, 'sim.logs.csv')) as file:
+#     checkpoints = list(map(int, filter(lambda line: not '|' in line, file)))
+#   return checkpoints
+
+def get_checkpoint_data(ckpt_data):
+  checkpoints = list(map(int, filter(lambda line: line and not '|' in line, ckpt_data)))
+  return checkpoints
+
+
+def get_max_ckpt_size(ckptsizes):
+  return max(ckptsizes) if ckptsizes else 0
+
+
 def main():
-  path = sys.argv[1]
+  args = parse_args()
   error = None
   try:
-    res = sniper_lib.get_results(0, path, None)
+    res = sniper_lib.get_results(0, args.path, None)
+    if args.all:
+      with open(os.path.join(args.path, 'sim.logs.csv')) as file:
+        ckps_data = file.read().splitlines()
   except Exception as e:
     sys.stderr.write('Exception: {}.\n'.format(str(e)))
     error = e
@@ -117,8 +144,11 @@ def main():
       'num_mem_logs': get_num_mem_logs(res) if not error else 0,
       'num_buffer_overflow': get_num_buffer_overflow(res) if not error else 0,
       'num_checkpoints': get_num_checkpoints(res) if not error else 0,
+      'checkpoints': get_checkpoint_data(ckps_data) if args.all and not error else [],
+      'max_ckpt_size': get_max_ckpt_size(get_checkpoint_data(ckps_data)) if args.all and not error else 0,
       'error': str(error) if error else None
     }
+    # data = [data[i] for i in infos]
     # sys.stdout.write(json.dumps(data, sort_keys=True))
     print(json.dumps(data, sort_keys=True))
 

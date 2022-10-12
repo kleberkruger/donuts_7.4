@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 
-from distutils.log import error
-import sys, os, argparse, shutil
+import sys, os, subprocess, shutil, argparse, json
 
 GRAPHITE_ROOT = os.environ['GRAPHITE_ROOT']
 BENCHMARKS_ROOT = os.environ['BENCHMARKS_ROOT']
 
-TASK_SPOOLER_CMD = 'tsp'
-
 DEFAULT_RESULTS_ROOT_PATH = os.path.join(GRAPHITE_ROOT, 'results')
+DEFAULT_BENCHMARK = 'cpu2006'
 
-ALL_BENCHMARKS = sorted(['cpu2006', 'cpu2017'])
+TASK_SPOOLER = 'tsp'
+
+ALL_BENCHMARKS = json.loads(subprocess.check_output(["./benchapps.py", 'get_benchmarks'], universal_newlines=True))
 
 def parse_args():
   parser = argparse.ArgumentParser()
@@ -42,7 +42,7 @@ def parse_args():
 
 
 def get_sniper_cmd(benchmark, app, input, ncores, config, out, ninstr, tsp_usage=True):
-  tsp = f'{TASK_SPOOLER_CMD} ' if tsp_usage else ''
+  tsp = f'{TASK_SPOOLER} ' if tsp_usage else ''
   return f"{tsp}./run-sniper -p {benchmark}-{app} -i {input} -n {ncores} -c {config} -d {out} -s stop-by-icount:{ninstr}"
 
 
@@ -90,12 +90,14 @@ def check_apps(benchmark_apps, apps):
 
 def main():  
   args = parse_args()
-  if not shutil.which(TASK_SPOOLER_CMD) and not args.debug:
-    print(f"task-spooler ({TASK_SPOOLER_CMD}) is not installed. Execute in debug mode (--debug) or install it!\n"
+  if not shutil.which(TASK_SPOOLER) and not args.debug:
+    print(f"task-spooler ({TASK_SPOOLER}) is not installed. Execute in debug mode (--debug) or install it!\n"
            "Example: sudo apt-get install -y task-spooler", file=sys.stderr)
     exit(1)
+    
+  print(ALL_BENCHMARKS)
   
-  benchmark = args.benchmark if args.benchmark else 'cpu2006' if args.apps == ['all'] else detect_benchmark(args.apps)
+  benchmark = args.benchmark if args.benchmark else DEFAULT_BENCHMARK if args.apps == ['all'] else detect_benchmark(args.apps)
   benchmark_apps = load_benchmark_apps(benchmark)
   # apps = extend_apps(benchmark, args.apps)
   apps = args.apps
